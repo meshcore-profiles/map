@@ -85,7 +85,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 				url: domain + lp('/'),
 				applicationCategory: 'UtilitiesApplication',
 				operatingSystem: 'Any',
-				isPartOf: { '@id': `${site.brandUrl}#organization` },
+				isPartOf: { '@id': `${domain}/#website` },
 			},
 			{
 				'@type': 'WebSite',
@@ -106,6 +106,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 	</script>
 </head>
 <body>
+<h1 class="sr-only"><%= t('meta:heading', { brand: _titleBrand }) %></h1>
 <main id="map"></main>
 <div id="loading-overlay" role="status" aria-live="polite" aria-label="<%= t('map:loadingAriaLabel') %>" hidden>
 	<div id="loading-card">

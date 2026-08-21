@@ -1,5 +1,6 @@
 {
 	"title": "{{brand}} Node Map",
+	"heading": "Interactive {{brand}} network map",
 	"description": "An interactive map of MeshCore network nodes in Poland and around the world. Live clients, repeaters, room servers and sensors.",
 	"keywords": "meshcore, meshcore map, meshcore node map, map, mesh, lora, meshcore nodes, meshcore repeater",
 	"ogImageAlt": "{{brand}}: a mesh network community",

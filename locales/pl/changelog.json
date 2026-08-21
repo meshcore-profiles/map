@@ -1,6 +1,14 @@
 {
 	"entries": [
 		{
+			"version": "0.5.1",
+			"date": "21.08.2026",
+			"changes": [
+				"Drobne poprawki w SEO. Nieistotne dla użytkowników.",
+				"Zaktualizowano zależności backendu do najnowszej wersji."
+			]
+		},
+		{
 			"version": "0.5.0",
 			"date": "01.08.2026",
 			"changes": [
