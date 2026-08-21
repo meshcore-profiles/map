@@ -1,6 +1,6 @@
 {
   "name": "meshcoreprofiles",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "homepage": "https://map.meshcoreprofiles.com",
   "bugs": {
@@ -26,15 +26,15 @@
     "express-rate-limit": "^8.6.2",
     "express-timeout-handler": "^2.2.2",
     "helmet": "^8.3.0",
-    "i18next": "^26.3.6",
+    "i18next": "^26.4.0",
     "i18next-http-middleware": "^3.9.8",
     "morgan": "^1.11.0",
     "msgpackr": "^2.0.5",
-    "redis": "^6.2.0"
+    "redis": "^6.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "globals": "^17.9.0"
+    "globals": "^17.11.0"
   },
   "engines": {
     "node": ">=20.19.0"
