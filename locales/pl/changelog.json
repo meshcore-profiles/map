@@ -1,6 +1,16 @@
 {
 	"entries": [
 		{
+			"version": "0.6.0",
+			"date": "23.08.2026",
+			"changes": [
+				"Dodano backendowe API z historycznymi statystykami sieci, z automatycznie zapisywanymi snapshotami dziennymi.",
+				"Zaktualizowano frontendową zależność msgpackr do wersji 2.0.5.",
+				"Zaktualizowano bibliotekę MapLibre GL (warstwa mapy OpenFreeMap) do wersji 6.5.0 wraz z migracją jej ładowania na moduły ES.",
+				"Naprawiono filtr częstotliwości - po przełączeniu na „Wszystkie węzły” niektóre częstotliwości niewystępujące w Polsce błędnie pokazywały się jako odznaczone zamiast domyślnie zaznaczonych."
+			]
+		},
+		{
 			"version": "0.5.1",
 			"date": "21.08.2026",
 			"changes": [

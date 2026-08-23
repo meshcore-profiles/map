@@ -347,6 +347,7 @@ if (Number(urlParams.lat) && Number(urlParams.lon) && Number(urlParams.zoom)) {
 
 const map = window.leafletMap = L.map('map', {
 	minZoom: 2,
+	maxZoom: 20,
 	maxBounds: [
 		[-90, -180],
 		[90, 200],
@@ -385,21 +386,12 @@ let maplibreLoadPromise = null;
 const loadMaplibreGL = () => {
 	if (maplibreLoadPromise) return maplibreLoadPromise;
 
-	const loadScript = src => new Promise((resolve, reject) => {
-		const script = document.createElement('script');
-		script.src = src;
-		script.onload = resolve;
-		script.onerror = () => reject(new Error(`Failed to load ${src}`));
-		document.head.appendChild(script);
-	});
-
 	const stylesheet = document.createElement('link');
 	stylesheet.rel = 'stylesheet';
 	stylesheet.href = '/vendor/maplibre/maplibre-gl.css';
 	document.head.appendChild(stylesheet);
 
-	maplibreLoadPromise = loadScript('/vendor/maplibre/maplibre-gl.js')
-		.then(() => loadScript('/vendor/maplibre/leaflet-maplibre-gl.js'))
+	maplibreLoadPromise = import('/vendor/maplibre/leaflet-maplibre-gl.mjs')
 		.catch(err => {
 			maplibreLoadPromise = null;
 			throw err;
@@ -414,6 +406,7 @@ const getOpenFreeMapLayer = async () => {
 		baseMaps[OPENFREEMAP_NAME] = L.maplibreGL({
 			style: 'https://tiles.openfreemap.org/styles/liberty',
 			attributionControl: false,
+			maxZoom: 20,
 		});
 	}
 	return baseMaps[OPENFREEMAP_NAME];
@@ -431,6 +424,7 @@ const setBaseMap = async name => {
 		if (layer !== targetLayer && map.hasLayer(layer)) map.removeLayer(layer);
 	}
 	if (!map.hasLayer(targetLayer)) map.addLayer(targetLayer);
+	map.setMaxZoom(targetLayer.options.maxZoom);
 
 	if (currentBaseMapAttribution) map.attributionControl.removeAttribution(currentBaseMapAttribution);
 	currentBaseMapAttribution = baseMapAttributions[name];
@@ -881,7 +875,7 @@ const runFilterPass = () => {
 	const fromDate = new Date(state.fromDate);
 	const fromInsertDate = new Date(state.fromInsertDate);
 	const byType = state.nodesByType;
-	const freqSet = new Set(state.freqFilter);
+	const freqSet = new Set(state.freqFilter.length ? state.freqFilter : state.availableFreqs);
 
 	const result = [];
 	for (const type of state.nodeFilter) {
@@ -935,7 +929,7 @@ const onFreqFilterChange = () => {
 };
 
 const renderFreqFilters = () => {
-	if (state.freqFilter.length === 0) state.freqFilter = [...state.availableFreqs];
+	const checkedFreqs = state.freqFilter.length ? state.freqFilter : state.availableFreqs;
 
 	freqFilterGroup.hidden = state.availableFreqs.length === 0 && !state.hasUnknownFreq;
 
@@ -948,7 +942,7 @@ const renderFreqFilters = () => {
 
 	freqFilterList.innerHTML = state.availableFreqs.map(freq => `
 		<label class="checkbox-label">
-			<input type="checkbox" class="freq-checkbox" value="${freq}" ${state.freqFilter.includes(freq) ? 'checked' : ''}>
+			<input type="checkbox" class="freq-checkbox" value="${freq}" ${checkedFreqs.includes(freq) ? 'checked' : ''}>
 			${freq} MHz
 		</label>
 	`).join('') + unknownCheckboxHtml;

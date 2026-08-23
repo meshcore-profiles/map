@@ -13,9 +13,9 @@ const poland = {
 	logo: 'https://meshcorepolska.org/images/brand/logo-1-80.jpg',
 	ogImage: 'https://meshcorepolska.org/images/brand/banner-og.jpg',
 	favicon: 'https://meshcorepolska.org/favicon.ico',
-	icon192: 'https://meshcorepolska.org/images/brand/logo-3-192.png',
-	icon512: 'https://meshcorepolska.org/images/brand/logo-3-512.png',
-	appleIcon: 'https://meshcorepolska.org/images/brand/logo-3-180.png',
+	icon192: 'https://meshcorepolska.org/images/brand/logo-3-192.jpg',
+	icon512: 'https://meshcorepolska.org/images/brand/logo-3-512.jpg',
+	appleIcon: 'https://meshcorepolska.org/images/brand/logo-3-180.jpg',
 	discordUrl: 'https://meshcorepolska.org/discord',
 };
 

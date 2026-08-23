@@ -53,6 +53,8 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<!-- Stylesheets -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="preconnect" href="https://cdn.sefinek.net">
+	<link rel="preconnect" href="https://cdn.sefinek.net" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
 	<link rel="stylesheet" href="/vendor/markercluster/MarkerCluster.css">
@@ -441,6 +443,14 @@ const _titleBrand = site.shortName || site.brandName; %>
 <script>window.MAP_CONFIG = { sefinekApi: <%- JSON.stringify(sefinekApi) %>, languageCode: <%- JSON.stringify(languageCode) %>, defaultRegion: <%- JSON.stringify(site.defaultRegion) %>, defaultView: <%- JSON.stringify(site.defaultView) %>, i18n: <%- JSON.stringify(i18nBundle) %> };</script>
 <script src="/vendor/leaflet/leaflet.js"></script>
 <script src="/vendor/markercluster/leaflet.markercluster.js"></script>
+<script type="importmap">
+{
+	"imports": {
+		"leaflet": "/js/leaflet-esm.js",
+		"maplibre-gl": "/vendor/maplibre/maplibre-gl.mjs"
+	}
+}
+</script>
 <script src="/js/map.js" type="module"></script>
 </body>
 </html>
