@@ -35,12 +35,14 @@ const STALE_AFTER_MS = 5 * DAY_MS;
 const NODE_TYPE_NAMES = new Map([[1, 'client'], [2, 'repeater'], [3, 'roomServer'], [4, 'sensor']]);
 
 const typedRedisClient = RedisClient.withTypeMapping({ [RESP_TYPES.BLOB_STRING]: Buffer });
+const warsawDateFormatter = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Warsaw' });
+const formatWarsawDate = date => warsawDateFormatter.format(date);
 
 // Bufory trzymane w pamięci tego procesu - unika round-tripu do Redisa przy każdym żądaniu do /api/v1/nodes.
 // Redis pozostaje jako trwały cache, z którego korzystamy, dopóki proces nie wykona własnego pierwszego odświeżenia (np. tuż po restarcie)
 const memoryCache = { all: null, pl: null };
 let lastRefreshedAt = null;
-let statsCache = null;
+const statsCache = { all: null, pl: null };
 
 const refreshNodes = async () => {
 	const startedAt = Date.now();
@@ -51,14 +53,15 @@ const refreshNodes = async () => {
 		allBuffer = Buffer.from(data);
 		plBuffer = pack(unpack(allBuffer).filter(isInPoland));
 	} catch (err) {
-		console.error('[nodes] Failed to fetch nodes from upstream:', err.message || err.stack);
+		console.error('[refreshNodes] Failed to fetch nodes from upstream:', err.message || err.stack);
 		return false;
 	}
 
 	memoryCache.all = allBuffer;
 	memoryCache.pl = plBuffer;
 	lastRefreshedAt = new Date();
-	statsCache = null;
+	statsCache.all = null;
+	statsCache.pl = null;
 
 	// Redis to trwały cache współdzielony między restartami procesu - jego awaria nie powinna
 	// windować odświeżania z upstreamu do rytmu RETRY_DELAY_MS, skoro dane w pamięci już są świeże
@@ -68,10 +71,10 @@ const refreshNodes = async () => {
 			RedisClient.set(REDIS_KEYS.pl, plBuffer),
 		]);
 	} catch (err) {
-		console.error('[nodes] Failed to persist cache to Redis:', err.message || err.stack);
+		console.error('[refreshNodes] Failed to persist cache to Redis:', err.message || err.stack);
 	}
 
-	if (process.env.NODE_ENV !== 'production') console.log(`[nodes] Cache refreshed (all: ${allBuffer.byteLength} bytes, pl: ${plBuffer.byteLength} bytes) in ${Date.now() - startedAt}ms`);
+	if (process.env.NODE_ENV !== 'production') console.log(`[refreshNodes] Cache refreshed (all: ${allBuffer.byteLength} bytes, pl: ${plBuffer.byteLength} bytes) in ${Date.now() - startedAt}ms`);
 	return true;
 };
 
@@ -94,13 +97,7 @@ const getNodeStatus = node => {
 	return 'recent';
 };
 
-const getStats = async () => {
-	if (statsCache) return statsCache;
-
-	const buffer = await getCachedNodes('pl');
-	if (!buffer) return null;
-
-	const nodes = unpack(buffer);
+const computeStats = nodes => {
 	const typeCounts = new Map();
 	const statusCounts = new Map();
 
@@ -116,16 +113,24 @@ const getStats = async () => {
 	const types = { client: 0, repeater: 0, roomServer: 0, sensor: 0, ...Object.fromEntries(typeCounts) };
 	const status = { recent: 0, stale: 0, old: 0, extinct: 0, none: 0, ...Object.fromEntries(statusCounts) };
 
-	statsCache = {
-		total: types.repeater,
-		active: status.recent,
-		nodes: nodes.length,
-		types,
-		status,
-		lastRefreshedAt: lastRefreshedAt ? lastRefreshedAt.toISOString() : null,
-	};
+	return { total: types.repeater, active: status.recent, nodes: nodes.length, types, status };
+};
 
-	return statsCache;
+const ensureStatsComputed = async region => {
+	if (statsCache[region]) return statsCache[region];
+
+	const buffer = await getCachedNodes(region);
+	if (!buffer) return null;
+
+	statsCache[region] = computeStats(unpack(buffer));
+	return statsCache[region];
+};
+
+const getStats = async (region = 'pl') => {
+	const computed = await ensureStatsComputed(region);
+	if (!computed) return null;
+
+	return { ...computed, lastRefreshedAt: lastRefreshedAt ? lastRefreshedAt.toISOString() : null };
 };
 
 const startNodesRefreshJob = () => {
@@ -137,4 +142,4 @@ const startNodesRefreshJob = () => {
 	void tick();
 };
 
-module.exports = { refreshNodes, getCachedNodes, getLastRefreshedAt, getStats, startNodesRefreshJob };
+module.exports = { refreshNodes, getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate, startNodesRefreshJob };

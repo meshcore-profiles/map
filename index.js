@@ -17,6 +17,9 @@ const resolveSite = req => {
 const { startNodesRefreshJob } = require('./services/nodes.js');
 startNodesRefreshJob();
 
+require('./database/mongoose.js');
+require('./services/statsHistory.js');
+
 // Middleware imports
 const timeout = require('./middlewares/timeout.js');
 const logger = require('./middlewares/morgan.js');

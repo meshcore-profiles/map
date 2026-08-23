@@ -1,6 +1,6 @@
 {
   "name": "meshcoreprofiles",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "homepage": "https://map.meshcoreprofiles.com",
   "bugs": {
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "axios": "^1.19.0",
+    "cron": "^4.4.0",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.2",
@@ -28,6 +29,7 @@
     "helmet": "^8.3.0",
     "i18next": "^26.4.0",
     "i18next-http-middleware": "^3.9.8",
+    "mongoose": "^9.9.3",
     "morgan": "^1.11.0",
     "msgpackr": "^2.0.5",
     "redis": "^6.2.1"
