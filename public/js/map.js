@@ -16,7 +16,6 @@ const apiUrl = region => `/api/v1/nodes?region=${region}`;
 
 const uint8ArrayToHex = uint8arr => {
 	const hexOctets = new Array(uint8arr.length);
-
 	for (let i = 0; i < uint8arr.length; ++i) {
 		hexOctets[i] = ntools.byteToHex[uint8arr[i]];
 	}
