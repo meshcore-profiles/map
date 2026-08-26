@@ -223,8 +223,8 @@ const _titleBrand = site.shortName || site.brandName; %>
 
 <div class="modal-overlay" id="region-warning-overlay" hidden>
 	<div class="settings-panel" id="region-warning-panel" role="dialog" aria-modal="true" aria-labelledby="region-warning-title">
-		<div id="region-warning-header">
-			<span id="region-warning-icon"><svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#warning"></use></svg></span>
+		<div class="modal-warning-header">
+			<span class="modal-warning-icon"><svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#warning"></use></svg></span>
 			<div class="modal-title" id="region-warning-title"><%= t('map:regionWarningTitle') %></div>
 		</div>
 		<p id="region-warning-text">
@@ -234,6 +234,19 @@ const _titleBrand = site.shortName || site.brandName; %>
 			<button type="button" class="region-warning-btn" id="region-warning-cancel"><%= t('common:cancel') %></button>
 			<button type="button" class="region-warning-btn" id="region-warning-confirm"><%= t('map:downloadAnyway') %></button>
 		</div>
+	</div>
+</div>
+
+<div class="modal-overlay" id="contact-error-overlay" hidden>
+	<div class="settings-panel" id="contact-error-panel" role="dialog" aria-modal="true" aria-labelledby="contact-error-title">
+		<button type="button" class="modal-close-btn" id="contact-error-close-btn" aria-label="<%= t('common:close') %>">
+			<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#close"></use></svg>
+		</button>
+		<div class="modal-warning-header">
+			<span class="modal-warning-icon"><svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#warning"></use></svg></span>
+			<div class="modal-title" id="contact-error-title"><%= t('map:addContactErrorTitle') %></div>
+		</div>
+		<p id="contact-error-text"></p>
 	</div>
 </div>
 
@@ -440,7 +453,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 
 <div id="toast-container" aria-live="polite"></div>
 
-<script>window.MAP_CONFIG = { sefinekApi: <%- JSON.stringify(sefinekApi) %>, languageCode: <%- JSON.stringify(languageCode) %>, defaultRegion: <%- JSON.stringify(site.defaultRegion) %>, defaultView: <%- JSON.stringify(site.defaultView) %>, i18n: <%- JSON.stringify(i18nBundle) %> };</script>
+<script>window.MAP_CONFIG = { sefinekApi: <%- JSON.stringify(sefinekApi) %>, cartoApiKey: <%- JSON.stringify(cartoApiKey) %>, languageCode: <%- JSON.stringify(languageCode) %>, defaultRegion: <%- JSON.stringify(site.defaultRegion) %>, defaultView: <%- JSON.stringify(site.defaultView) %>, i18n: <%- JSON.stringify(i18nBundle) %> };</script>
 <script src="/vendor/leaflet/leaflet.js"></script>
 <script src="/vendor/markercluster/leaflet.markercluster.js"></script>
 <script type="importmap">

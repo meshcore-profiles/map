@@ -1381,7 +1381,7 @@ table.node-info tr td:last-child {
 	}
 }
 
-.copy-link-btn {
+.copy-link-btn, .action-link-btn {
 	padding: 0;
 	border: none;
 	background: none;
@@ -1391,12 +1391,26 @@ table.node-info tr td:last-child {
 	cursor: pointer;
 }
 
-.copy-link-btn:hover {
+.copy-link-btn:hover, .action-link-btn:hover {
 	color: var(--blue-light);
 	text-decoration: underline;
 }
 
-.copy-link-btn:active {
+.copy-link-btn:active, .action-link-btn:active {
+	color: var(--blue-dark);
+	text-decoration: none;
+}
+
+.leaflet-popup-content a.action-link-btn {
+	color: var(--blue-bright);
+}
+
+.leaflet-popup-content a.action-link-btn:hover {
+	color: var(--blue-light);
+	text-decoration: underline;
+}
+
+.leaflet-popup-content a.action-link-btn:active {
 	color: var(--blue-dark);
 	text-decoration: none;
 }

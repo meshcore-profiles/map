@@ -58,6 +58,7 @@ const nodeKeys = {
 
 const nodeTypeKeys = { '1': 'client', '2': 'repeater', '3': 'roomServer', '4': 'sensor' };
 const typeName = type => t(`map:nodeTypes.${nodeTypeKeys[type]}`);
+const contactAddableTypes = [1, 2, 3];
 const statusDesc = status => t(`map:updateStatus.${status}`);
 
 const radioParamDesc = {
@@ -242,6 +243,7 @@ const getNodePopupHTML = node => {
 	const qrValue = `meshcore://contact/add?${contactParams.toString()}`;
 	const statusClass = statusBadgeClass[node.status] || '';
 	const shareUrl = `${location.origin}${location.pathname}?node=${node.public_key}`;
+	const canAddContact = contactAddableTypes.includes(node.type);
 
 	return `
 		<div class="node-header">
@@ -264,6 +266,7 @@ const getNodePopupHTML = node => {
 			<div class="user-actions-left">
 				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}">${t('common:share')}</button>
 				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}">${t('map:copyInfo')}</button>
+				${canAddContact ? `<a class="action-link-btn" href="${escapeHtml(qrValue)}" title="${escapeHtml(t('map:addContactTitle'))}" data-meshcore-link>${t('map:addContact')}</a>` : ''}
 			</div>
 			<div class="user-actions-right">
 				<a href="${getDeletionMailUrl(node)}" target="_blank">${t('map:reportDeletion')}</a>
@@ -299,12 +302,14 @@ const getPresets = async signal => {
 
 const OPENFREEMAP_NAME = 'OpenFreeMap';
 
+const cartoApiKey = window.MAP_CONFIG.cartoApiKey;
+
 const baseMaps = {
-	'CartoDB Dark': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+	'CartoDB Dark': L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`, {
 		maxZoom: 20,
 		subdomains: 'abcd',
 	}),
-	'CartoDB Positron': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+	'CartoDB Positron': L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`, {
 		maxZoom: 20,
 		subdomains: 'abcd',
 	}),
@@ -475,6 +480,8 @@ const regionWarningOverlay = document.getElementById('region-warning-overlay');
 const regionWarningConfirmBtn = document.getElementById('region-warning-confirm');
 const regionWarningCancelBtn = document.getElementById('region-warning-cancel');
 const regionWarningSizeEl = document.getElementById('region-warning-size');
+const contactErrorTextEl = document.getElementById('contact-error-text');
+const contactErrorModal = initModal(null, 'contact-error-overlay', { closeOnOutsideClick: true });
 const statsCounts = document.getElementById('stats-counts');
 const regionToggle = document.getElementById('region-toggle');
 const regionToggleLabel = document.getElementById('region-toggle-label');
@@ -618,6 +625,7 @@ document.getElementById('settings-close-btn').addEventListener('click', () => se
 document.getElementById('legend-close-btn').addEventListener('click', () => legendPanelUi.close());
 document.getElementById('stats-close-btn').addEventListener('click', () => statsModal.close());
 document.getElementById('changelog-close-btn').addEventListener('click', () => changelogModal.dismiss());
+document.getElementById('contact-error-close-btn').addEventListener('click', () => contactErrorModal.close());
 
 const markerToNode = new WeakMap();
 
@@ -1359,6 +1367,49 @@ basemapToggle.addEventListener('click', () => {
 document.addEventListener('click', e => {
 	const copyBtn = e.target.closest('.copy-link-btn, .copy-icon-btn');
 	if (copyBtn) void navigator.clipboard.writeText(copyBtn.dataset.copyValue).then(() => showToast(t('common:copiedToClipboard')));
+});
+
+const showContactError = detail => {
+	contactErrorTextEl.textContent = detail ? `${t('map:addContactErrorText')} (${detail})` : t('map:addContactErrorText');
+	contactErrorModal.open();
+};
+
+document.addEventListener('click', e => {
+	const link = e.target.closest('a[data-meshcore-link]');
+	if (!link) return;
+
+	e.preventDefault();
+
+	try {
+		window.location.href = link.href;
+	} catch (err) {
+		showContactError(err.message);
+		return;
+	}
+
+	const launchingToast = showToast(t('map:addContactLaunching'), { duration: 0, status: 'loading' });
+
+	let left = false;
+	const timer = setTimeout(() => {
+		cleanup();
+		dismissToast(launchingToast);
+		if (!left) showContactError();
+	}, 1000);
+
+	function cleanup() {
+		clearTimeout(timer);
+		window.removeEventListener('blur', onLeave);
+		document.removeEventListener('visibilitychange', onLeave);
+	}
+
+	function onLeave() {
+		left = true;
+		cleanup();
+		dismissToast(launchingToast);
+	}
+
+	window.addEventListener('blur', onLeave);
+	document.addEventListener('visibilitychange', onLeave);
 });
 
 document.addEventListener('click', e => {

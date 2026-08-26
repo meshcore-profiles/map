@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.7.0",
+			"date": "26.08.2026",
+			"changes": [
+				"Zaimplementowano klucz API CARTO wymagany teraz przez ich serwis map rastrowych (dotyczy warstw CartoDB Dark i CartoDB Positron).",
+				"Dodano przycisk „Dodaj kontakt” dla repeaterów, room serwerów i companionów, który dodaje kontakt bezpośrednio w aplikacji MeshCore przez protokół meshcore://.",
+				"Zaktualizowano zależności backendu do najnowszej wersji."
+			]
+		},
+		{
 			"version": "0.6.0",
 			"date": "23.08.2026",
 			"changes": [

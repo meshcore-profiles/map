@@ -58,19 +58,26 @@
 	}
 }
 
-#region-warning-panel {
-	gap: 14px;
+#region-warning-panel, #contact-error-panel {
 	max-width: 460px;
 	padding: 20px;
 }
 
-#region-warning-header {
+#region-warning-panel {
+	gap: 14px;
+}
+
+#contact-error-panel {
+	gap: 8px;
+}
+
+.modal-warning-header {
 	display: flex;
 	align-items: center;
 	gap: 12px;
 }
 
-#region-warning-icon {
+.modal-warning-icon {
 	display: flex;
 	flex-shrink: 0;
 	justify-content: center;
@@ -78,7 +85,7 @@
 	color: var(--red-bright);
 }
 
-#region-warning-icon .icon {
+.modal-warning-icon .icon {
 	width: 24px;
 	height: 24px;
 }
@@ -121,7 +128,7 @@
 	margin: 8px 0 0;
 }
 
-#region-warning-text {
+#region-warning-text, #contact-error-text {
 	margin: 0;
 	color: var(--text-muted);
 	font-size: 15px;
