@@ -206,14 +206,13 @@ if you have multiple nodes to delete, put them into single email, delimited by n
 };
 
 const discordTimestamp = date => `<t:${Math.floor(date.getTime() / 1000)}:R>`;
+const getShareUrl = node => `${location.origin}${location.pathname}?node=${node.public_key}`;
 
 const getNodeInfoText = node => {
-	const lines = [`# ${node.adv_name}`, ''];
+	const lines = [`# [${node.adv_name}](${getShareUrl(node)}) (${typeName(node.type)})`, ''];
 
 	lines.push(`- **${t('map:columns.publicKey')}:** \`${node.public_key}\``);
-	lines.push(`- **${t('map:infoType')}:** ${typeName(node.type)}`);
 	if (node.status) lines.push(`- **${t('map:infoStatus')}:** ${statusDesc(node.status)}`);
-	if (node.link) lines.push(`- **${t('map:columns.link')}:** \`meshcore://${uint8ArrayToHex(node.link)}\``);
 	lines.push(`- **${t('map:columns.insertedDate')}:** ${ntools.formatDateTime(node.insertDate)} (${discordTimestamp(node.insertDate)})`);
 	if (node.updatedDate) lines.push(`- **${t('map:columns.updatedDate')}:** ${ntools.formatDateTime(node.updatedDate)} (${discordTimestamp(node.updatedDate)})`);
 	lines.push(`- **${t('map:columns.coords')}:** \`${node.coords}\` ([${t('common:mapWord')}](https://google.com/maps/place/${node.coords.replace(' ', '')}))`);
@@ -242,7 +241,7 @@ const getNodePopupHTML = node => {
 	});
 	const qrValue = `meshcore://contact/add?${contactParams.toString()}`;
 	const statusClass = statusBadgeClass[node.status] || '';
-	const shareUrl = `${location.origin}${location.pathname}?node=${node.public_key}`;
+	const shareUrl = getShareUrl(node);
 	const canAddContact = contactAddableTypes.includes(node.type);
 
 	return `
@@ -264,12 +263,12 @@ const getNodePopupHTML = node => {
 		${getTable(node)}
 		<div class="user-actions">
 			<div class="user-actions-left">
-				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}">${t('common:share')}</button>
-				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}">${t('map:copyInfo')}</button>
+				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}" title="${escapeHtml(t('map:shareTitle'))}">${t('common:share')}</button>
+				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}" title="${escapeHtml(t('map:copyInfoTitle'))}">${t('map:copyInfo')}</button>
 				${canAddContact ? `<a class="action-link-btn" href="${escapeHtml(qrValue)}" title="${escapeHtml(t('map:addContactTitle'))}" data-meshcore-link>${t('map:addContact')}</a>` : ''}
 			</div>
 			<div class="user-actions-right">
-				<a href="${getDeletionMailUrl(node)}" target="_blank">${t('map:reportDeletion')}</a>
+				<a href="${getDeletionMailUrl(node)}" target="_blank" title="${escapeHtml(t('map:reportDeletionTitle'))}">${t('map:reportDeletion')}</a>
 				${userActionAnchor}
 			</div>
 		</div>`;
