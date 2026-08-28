@@ -7,5 +7,8 @@
 	"elevationSefinek": "Sefinek API - beta (self-hosted)",
 	"elevationOpenElevation": "Open-Elevation (public)",
 	"elevationOpenMeteo": "Open-Meteo (public)",
-	"elevationDesc": "Used by the \"Terrain and range analysis\" tool. Change it only if you actually need to."
+	"elevationDesc": "Used by the \"Terrain and range analysis\" tool. Change it only if you actually need to.",
+	"elevationSefinekDesc": "GEDTM30 terrain model (~30 m, fusion of ICESat-2/GEDI/Copernicus/ALOS) with bilinear interpolation - currently the most accurate source, but it's beta.",
+	"elevationOpenElevationDesc": "SRTM data (~30-90 m). Free public API with no availability guarantee - can be overloaded or temporarily unreachable.",
+	"elevationOpenMeteoDesc": "Copernicus DEM GLO-90 (90 m). Stable and fast, but less precise in varied terrain."
 }

@@ -141,6 +141,7 @@ const HEIGHTS_STORAGE_KEY = 'terrainToolHeights';
 
 export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevationSource }) => {
 	const modal = initModal('terrain-toggle', 'terrain-overlay');
+	const titleEl = document.getElementById('terrain-title');
 	const closeBtn = document.getElementById('terrain-close-btn');
 	const inputA = document.getElementById('terrain-point-a-input');
 	const inputB = document.getElementById('terrain-point-b-input');
@@ -165,6 +166,9 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 			if (!pickingFor) preview.hide();
 		} else {
 			preview.show();
+
+			const source = getElevationSource ? getElevationSource() : 'sefinek';
+			titleEl.textContent = t('terrain:titleWithSource', { source: (ELEVATION_PROVIDERS[source] || ELEVATION_PROVIDERS.sefinek).label });
 		}
 	}).observe(modal.overlay, { attributes: true, attributeFilter: ['hidden'] });
 

@@ -542,6 +542,7 @@ const basemapMenu = document.getElementById('basemap-menu');
 const settingsModal = initModal('settings-toggle', 'settings-overlay');
 const closeFiltersOnApplyCheckbox = document.getElementById('setting-close-filters-on-apply');
 const elevationSourceSelect = document.getElementById('setting-elevation-source');
+const elevationSourceDesc = document.getElementById('setting-elevation-desc');
 const legendPanelUi = initLegendPanel();
 const searchInline = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
@@ -1304,11 +1305,24 @@ closeFiltersOnApplyCheckbox.addEventListener('change', () => {
 	localStorage.setItem('closeFiltersOnApply', closeFiltersOnApplyCheckbox.checked ? '1' : '0');
 });
 
+const ELEVATION_SOURCE_DESC_KEYS = {
+	sefinek: 'settings:elevationSefinekDesc',
+	'open-elevation': 'settings:elevationOpenElevationDesc',
+	'open-meteo': 'settings:elevationOpenMeteoDesc',
+};
+
+const updateElevationSourceDesc = () => {
+	const sourceDescKey = ELEVATION_SOURCE_DESC_KEYS[elevationSource];
+	elevationSourceDesc.textContent = sourceDescKey ? `${t('settings:elevationDesc')}\n${t(sourceDescKey)}` : t('settings:elevationDesc');
+};
+
 elevationSourceSelect.value = elevationSource;
+updateElevationSourceDesc();
 
 elevationSourceSelect.addEventListener('change', () => {
 	elevationSource = elevationSourceSelect.value;
 	localStorage.setItem('elevationSource', elevationSource);
+	updateElevationSourceDesc();
 });
 
 applyFiltersBtn.addEventListener('click', () => {

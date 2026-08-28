@@ -4,16 +4,17 @@
 			"version": "0.7.0",
 			"date": "2026-08-28",
 			"changes": [
+				"Adapted to the upstream data source moving from map.meshcore.dev to map.meshcore.io.",
 				"Implemented the CARTO API key now required by their raster basemap service (applies to the CartoDB Dark and CartoDB Positron layers).",
 				"Added an \"Add contact\" button for repeaters, room servers, and companions that adds the contact directly in the MeshCore app via the meshcore:// protocol.",
 				"Added support for MapTiler maps (hybrid and outdoor), requiring a separate API key.",
+				"Added a description explaining the differences between the available elevation data sources (Sefinek API, Open-Elevation, Open-Meteo) in Settings. Sefinek API now uses the more accurate GEDTM30 terrain model.",
 				"Split the basemap switcher into \"Tiles\" and \"Vector\" categories, and OpenFreeMap is now always shown in the menu - removed the separate setting to enable it.",
 				"Changed the \"Esri Satellite\" map to \"Esri Hybrid\" - satellite imagery with boundaries and place names overlaid.",
+				"Clicking a node on the map now updates the URL to a direct link to it (just like the \"Share\" button), and once its details are closed, the URL reverts to the current map view.",
 				"Added a notice for when a previously saved map is unavailable due to a missing API key - in that case, the default map is selected instead.",
 				"Improved the reliability of falling back to a backup map after a load error.",
-				"Clicking a node on the map now updates the URL to a direct link to it (just like the \"Share\" button), and once its details are closed, the URL reverts to the current map view.",
 				"Updated the frontend msgpackr dependency to version 2.1.0.",
-				"Adapted to the upstream data source moving from map.meshcore.dev to map.meshcore.io.",
 				"Updated backend dependencies to the latest version."
 			]
 		},

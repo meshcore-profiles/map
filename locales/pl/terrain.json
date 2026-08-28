@@ -1,7 +1,8 @@
 {
 	"toggleTitle": "Analiza terenu i zasięgu",
 	"closeAria": "Zamknij analizę terenu",
-	"title": "Analiza terenu i zasięgu (beta)",
+	"title": "Analiza terenu i zasięgu",
+	"titleWithSource": "Analiza terenu i zasięgu (źródło: {{source}})",
 	"desc": "Wybierz dwa punkty (kliknij węzeł na mapie lub wpisz nazwę), aby zobaczyć profil terenu i orientacyjną widoczność optyczną między nimi. Źródło danych wysokościowych możesz zmienić w Ustawieniach.",
 	"nodeNamePlaceholder": "Nazwa węzła",
 	"pickOnMap": "Wskaż na mapie",

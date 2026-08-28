@@ -122,6 +122,7 @@
 
 #setting-item-select .setting-desc {
 	margin: 8px 0 0;
+	white-space: pre-line;
 }
 
 #region-warning-text, #contact-error-text {

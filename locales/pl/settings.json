@@ -7,5 +7,8 @@
 	"elevationSefinek": "Sefinek API - beta (self-hosted)",
 	"elevationOpenElevation": "Open-Elevation (publiczne)",
 	"elevationOpenMeteo": "Open-Meteo (publiczne)",
-	"elevationDesc": "Używane przez narzędzie „Analiza terenu i zasięgu”. Zmień, jeśli faktycznie masz taką potrzebę."
+	"elevationDesc": "Używane przez narzędzie „Analiza terenu i zasięgu”. Zmień, jeśli faktycznie masz taką potrzebę.",
+	"elevationSefinekDesc": "Model terenu GEDTM30 (~30 m, fuzja ICESat-2/GEDI/Copernicus/ALOS) z interpolacją dwuliniową - obecnie najdokładniejsze źródło, ale to wersja beta.",
+	"elevationOpenElevationDesc": "Dane SRTM (~30-90 m). Darmowe API publiczne, bez gwarancji dostępności - bywa przeciążone lub czasowo nieosiągalne.",
+	"elevationOpenMeteoDesc": "Copernicus DEM GLO-90 (90 m). Stabilne i szybkie, ale mniej precyzyjne w urozmaiconym terenie."
 }
