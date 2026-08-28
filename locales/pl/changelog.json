@@ -2,10 +2,17 @@
 	"entries": [
 		{
 			"version": "0.7.0",
-			"date": "26.08.2026",
+			"date": "28.08.2026",
 			"changes": [
 				"Zaimplementowano klucz API CARTO wymagany teraz przez ich serwis map rastrowych (dotyczy warstw CartoDB Dark i CartoDB Positron).",
 				"Dodano przycisk „Dodaj kontakt” dla repeaterów, room serwerów i companionów, który dodaje kontakt bezpośrednio w aplikacji MeshCore przez protokół meshcore://.",
+				"Dodano obsługę map MapTiler (mapa hybrydowa i terenowa), wymagającą osobnego klucza API.",
+				"Przełącznik podkładów mapy podzielono na kategorie „Kafelki” i „Wektorowe”, a OpenFreeMap jest teraz zawsze widoczny w menu - usunięto osobne ustawienie do jego włączania.",
+				"Zmieniono mapę „Esri Satellite” na „Esri Hybrid” - zdjęcia satelitarne z nałożonymi granicami i nazwami miejsc.",
+				"Dodano komunikat informujący, gdy zapisana wcześniej mapa jest niedostępna z powodu brakującego klucza API - w takim przypadku wybierana jest mapa domyślna.",
+				"Poprawiono niezawodność przełączania na zapasową mapę po błędzie wczytania.",
+				"Kliknięcie w węzeł na mapie aktualizuje teraz adres URL na bezpośredni link do niego (tak jak przycisk „Udostępnij”), a po zamknięciu jego szczegółów adres wraca do bieżącego widoku mapy.",
+				"Zaktualizowano frontendową zależność msgpackr do wersji 2.1.0.",
 				"Zaktualizowano zależności backendu do najnowszej wersji."
 			]
 		},

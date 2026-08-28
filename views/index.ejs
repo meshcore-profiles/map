@@ -272,12 +272,6 @@ const _titleBrand = site.shortName || site.brandName; %>
 			<p class="setting-desc" id="setting-elevation-desc"><%= t('settings:elevationDesc') %></p>
 		</div>
 
-		<div class="modal-title" id="settings-subtitle"><%= t('settings:advanced') %></div>
-
-		<div class="setting-item">
-			<label class="checkbox-label"><input type="checkbox" id="setting-show-openfreemap" aria-describedby="setting-openfreemap-desc"> <%= t('settings:openFreeMapLabel') %></label>
-			<p class="setting-desc" id="setting-openfreemap-desc"><%= t('settings:openFreeMapDesc') %></p>
-		</div>
 	</div>
 </div>
 
@@ -453,7 +447,20 @@ const _titleBrand = site.shortName || site.brandName; %>
 
 <div id="toast-container" aria-live="polite"></div>
 
-<script>window.MAP_CONFIG = { sefinekApi: <%- JSON.stringify(sefinekApi) %>, cartoApiKey: <%- JSON.stringify(cartoApiKey) %>, languageCode: <%- JSON.stringify(languageCode) %>, defaultRegion: <%- JSON.stringify(site.defaultRegion) %>, defaultView: <%- JSON.stringify(site.defaultView) %>, i18n: <%- JSON.stringify(i18nBundle) %> };</script>
+<script>
+window.MAP_CONFIG = {
+	defaultRegion: <%- JSON.stringify(site.defaultRegion) %>,
+	defaultView: <%- JSON.stringify(site.defaultView) %>,
+
+	sefinekApi: <%- JSON.stringify(process.env.SEFINEK_API) %>,
+	cartoApiKey: <%- JSON.stringify(process.env.CARTO_API_KEY || null) %>,
+	maptilerApiKey: <%- JSON.stringify(process.env.MAPTILER_API_KEY || null) %>,
+	maptilerHybridMapId: <%- JSON.stringify(site.maptilerHybridMapId) %>,
+
+	languageCode: <%- JSON.stringify(languageCode) %>,
+	i18n: <%- JSON.stringify(i18nBundle) %>,
+};
+</script>
 <script src="/vendor/leaflet/leaflet.js"></script>
 <script src="/vendor/markercluster/leaflet.markercluster.js"></script>
 <script type="importmap">

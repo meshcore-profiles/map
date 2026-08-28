@@ -101,10 +101,6 @@
 	margin: 4px 0 12px;
 }
 
-#settings-subtitle {
-	margin-bottom: 8px;
-}
-
 .setting-item {
 	display: flex;
 	flex-direction: column;

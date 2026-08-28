@@ -37,8 +37,6 @@ if (isProd) app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.locals.domain = `${process.env.DOMAIN}${isProd ? '' : `:${process.env.PORT}`}`;
 app.locals.v = version;
-app.locals.sefinekApi = process.env.SEFINEK_API;
-app.locals.cartoApiKey = process.env.CARTO_API_KEY;
 
 // Use middlewares
 app.use(helmet({ crossOriginResourcePolicy: false, contentSecurityPolicy: false }));

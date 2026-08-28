@@ -31,7 +31,7 @@
     "i18next-http-middleware": "^3.9.8",
     "mongoose": "^9.9.4",
     "morgan": "^1.11.0",
-    "msgpackr": "^2.0.6",
+    "msgpackr": "^2.1.0",
     "redis": "^6.2.1"
   },
   "devDependencies": {

@@ -1014,7 +1014,7 @@ select.date-input {
 	}
 }
 
-#basemap-menu li {
+#basemap-menu li[data-basemap] {
 	padding: 9px 10px;
 	border-radius: var(--radius-sm);
 	color: var(--text);
@@ -1022,13 +1022,28 @@ select.date-input {
 	cursor: pointer;
 }
 
-#basemap-menu li:hover {
+#basemap-menu li[data-basemap]:hover {
 	background: var(--bg-panel-hover);
 }
 
-#basemap-menu li.active {
+#basemap-menu li[data-basemap].active {
 	background: var(--red-glow);
 	color: #fff;
+}
+
+#basemap-menu .basemap-category {
+	margin: 4px 6px 2px;
+	padding: 8px 4px 4px;
+	color: var(--text-muted);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+#basemap-menu .basemap-category:first-child {
+	margin-top: 0;
+	padding-top: 4px;
 }
 
 .leaflet-bottom {

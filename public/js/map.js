@@ -299,29 +299,58 @@ const getPresets = async signal => {
 	return presets;
 };
 
+const MAPTILER_HYBRID_NAME = 'MapTiler Hybrid';
+const MAPTILER_OUTDOOR_NAME = 'MapTiler Outdoor';
+const CARTO_DARK_NAME = 'CartoDB Dark';
+const CARTO_POSITRON_NAME = 'CartoDB Positron';
 const OPENFREEMAP_NAME = 'OpenFreeMap';
+const FALLBACK_BASEMAP_NAME = 'Esri Hybrid';
 
 const cartoApiKey = window.MAP_CONFIG.cartoApiKey;
+const maptilerApiKey = window.MAP_CONFIG.maptilerApiKey;
+const maplibreBaseMapOptions = {
+	...(maptilerApiKey ? {
+		[MAPTILER_HYBRID_NAME]: {
+			style: `https://api.maptiler.com/maps/${window.MAP_CONFIG.maptilerHybridMapId}/style.json?key=${maptilerApiKey}`,
+			maxZoom: 20,
+		},
+	} : {}),
+	[OPENFREEMAP_NAME]: {
+		style: 'https://tiles.openfreemap.org/styles/liberty',
+		maxZoom: 20,
+	},
+};
+const createMapTilerRasterLayer = mapId => L.tileLayer(`https://api.maptiler.com/maps/${mapId}/{z}/{x}/{y}.jpg?key=${maptilerApiKey}`, {
+	tileSize: 512,
+	zoomOffset: -1,
+	minZoom: 1,
+	maxZoom: 20,
+	referrerPolicy: 'strict-origin-when-cross-origin',
+});
 
-const baseMaps = {
-	'CartoDB Dark': L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`, {
-		maxZoom: 20,
-		subdomains: 'abcd',
-	}),
-	'CartoDB Positron': L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`, {
-		maxZoom: 20,
-		subdomains: 'abcd',
-	}),
+const tileBaseMaps = {
+	...(cartoApiKey ? {
+		[CARTO_DARK_NAME]: L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`, {
+			maxZoom: 20,
+			subdomains: 'abcd',
+		}),
+		[CARTO_POSITRON_NAME]: L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`, {
+			maxZoom: 20,
+			subdomains: 'abcd',
+		}),
+	} : {}),
 	'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
 	}),
-	'Esri Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-		maxZoom: 18,
-	}),
+	'Esri Hybrid': L.layerGroup([
+		L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }),
+		L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }),
+	], { maxZoom: 18 }),
 	'OpenTopoMap': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
 		maxZoom: 17,
 		subdomains: 'abc',
 	}),
+	...(maptilerApiKey ? { [MAPTILER_OUTDOOR_NAME]: createMapTilerRasterLayer('outdoor-v4') } : {}),
 	'CyclOSM': L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
 		maxZoom: 20,
 		subdomains: 'abc',
@@ -331,17 +360,33 @@ const baseMaps = {
 		subdomains: 'abc',
 	}),
 };
+const maplibreBaseMaps = {};
 
 const baseMapAttributions = tRaw('map:tilesAttribution');
 const baseMapInfo = tRaw('map:baseMapInfo');
 
-const baseMapOrder = ['CartoDB Dark', 'CartoDB Positron', 'OpenStreetMap', 'Esri Satellite', 'OpenTopoMap', 'CyclOSM', 'Humanitarian OSM'];
+const getBaseMapGroups = () => [
+	{ label: t('map:tileBaseMaps'), names: Object.keys(tileBaseMaps) },
+	{ label: t('map:vectorBaseMaps'), names: Object.keys(maplibreBaseMapOptions) },
+].filter(group => group.names.length);
+const getBaseMapNames = () => getBaseMapGroups().flatMap(group => group.names);
+const defaultBaseMapName = maplibreBaseMapOptions[MAPTILER_HYBRID_NAME]
+	? MAPTILER_HYBRID_NAME
+	: Object.keys(tileBaseMaps)[0];
 
-let showOpenFreeMap = localStorage.getItem('showOpenFreeMap') === '1';
-const getBaseMapOrder = () => showOpenFreeMap ? [...baseMapOrder, OPENFREEMAP_NAME] : baseMapOrder;
+const basemapRequiredApiKeys = {
+	[MAPTILER_HYBRID_NAME]: maptilerApiKey,
+	[MAPTILER_OUTDOOR_NAME]: maptilerApiKey,
+	[CARTO_DARK_NAME]: cartoApiKey,
+	[CARTO_POSITRON_NAME]: cartoApiKey,
+};
 
 const storedBaseMap = localStorage.getItem('baseMapSelected');
-const baseMapSelected = getBaseMapOrder().includes(storedBaseMap) ? storedBaseMap : baseMapOrder[0];
+const baseMapSelected = getBaseMapNames().includes(storedBaseMap) ? storedBaseMap : defaultBaseMapName;
+
+if (storedBaseMap && storedBaseMap !== baseMapSelected && storedBaseMap in basemapRequiredApiKeys && !basemapRequiredApiKeys[storedBaseMap]) {
+	showToast(t('map:basemapMissingApiKey', { name: escapeHtml(storedBaseMap) }), { status: 'info', duration: 5000 });
+}
 
 const urlParams = Object.fromEntries(new URLSearchParams(location.search));
 let initialView = window.MAP_CONFIG.defaultView;
@@ -404,27 +449,28 @@ const loadMaplibreGL = () => {
 	return maplibreLoadPromise;
 };
 
-const getOpenFreeMapLayer = async () => {
-	if (!baseMaps[OPENFREEMAP_NAME]) {
+const getMaplibreBaseMapLayer = async name => {
+	if (!maplibreBaseMaps[name]) {
 		await loadMaplibreGL();
-		baseMaps[OPENFREEMAP_NAME] = L.maplibreGL({
-			style: 'https://tiles.openfreemap.org/styles/liberty',
+		maplibreBaseMaps[name] = L.maplibreGL({
 			attributionControl: false,
-			maxZoom: 20,
+			...maplibreBaseMapOptions[name],
 		});
 	}
-	return baseMaps[OPENFREEMAP_NAME];
+	return maplibreBaseMaps[name];
 };
 
 let baseMapRequestId = 0;
 let currentBaseMapAttribution = null;
 const setBaseMap = async name => {
 	const requestId = ++baseMapRequestId;
-	const targetLayer = name === OPENFREEMAP_NAME ? await getOpenFreeMapLayer() : baseMaps[name];
+	const targetLayer = maplibreBaseMapOptions[name]
+		? await getMaplibreBaseMapLayer(name)
+		: tileBaseMaps[name];
 
 	if (requestId !== baseMapRequestId) return;
 
-	for (const layer of Object.values(baseMaps)) {
+	for (const layer of [...Object.values(tileBaseMaps), ...Object.values(maplibreBaseMaps)]) {
 		if (layer !== targetLayer && map.hasLayer(layer)) map.removeLayer(layer);
 	}
 	if (!map.hasLayer(targetLayer)) map.addLayer(targetLayer);
@@ -434,12 +480,19 @@ const setBaseMap = async name => {
 	currentBaseMapAttribution = baseMapAttributions[name];
 	map.attributionControl.addAttribution(currentBaseMapAttribution);
 
-	localStorage.setItem('baseMapSelected', name);
+	try {
+		localStorage.setItem('baseMapSelected', name);
+	} catch {
+		// ...
+	}
 };
 
 void setBaseMap(baseMapSelected).catch(err => {
 	console.error('Failed to set the base map:', err);
-	void setBaseMap(baseMapOrder[0]);
+	showToast(t('map:basemapLoadFailed'), { status: 'error' });
+
+	const fallbackName = baseMapSelected === FALLBACK_BASEMAP_NAME ? 'OpenStreetMap' : FALLBACK_BASEMAP_NAME;
+	void setBaseMap(fallbackName).catch(fallbackErr => console.error('Failed to set the fallback base map:', fallbackErr));
 });
 
 const nodeTypeIconNames = { 1: 'client', 2: 'repeater', 3: 'room-server', 4: 'sensor' };
@@ -488,7 +541,6 @@ const basemapToggle = document.getElementById('basemap-toggle');
 const basemapMenu = document.getElementById('basemap-menu');
 const settingsModal = initModal('settings-toggle', 'settings-overlay');
 const closeFiltersOnApplyCheckbox = document.getElementById('setting-close-filters-on-apply');
-const showOpenFreeMapCheckbox = document.getElementById('setting-show-openfreemap');
 const elevationSourceSelect = document.getElementById('setting-elevation-source');
 const legendPanelUi = initLegendPanel();
 const searchInline = document.getElementById('search-form');
@@ -636,6 +688,16 @@ let markerClusterGroup = L.markerClusterGroup({
 const MOBILE_NODE_VIEW_BREAKPOINT = 700;
 const isMobileNodeView = () => window.innerWidth <= MOBILE_NODE_VIEW_BREAKPOINT;
 
+const syncUrlParams = () => {
+	const params = {
+		lat: map.getCenter().lat.toFixed(4),
+		lon: map.getCenter().lng.toFixed(4),
+		zoom: map.getZoom(),
+	};
+
+	history.replaceState({}, '', `${location.pathname}?${new URLSearchParams(params)}`);
+};
+
 const ensurePopup = marker => {
 	if (marker._popupBound) return;
 
@@ -646,8 +708,11 @@ const ensurePopup = marker => {
 	}
 };
 
-const nodeModal = initModal(null, 'node-overlay');
-nodeModalCloseBtn.addEventListener('click', () => nodeModal.close());
+const nodeModal = initModal(null, 'node-overlay', { onDismiss: syncUrlParams });
+nodeModalCloseBtn.addEventListener('click', () => {
+	nodeModal.close();
+	syncUrlParams();
+});
 
 const showNodeModal = node => {
 	nodePanelContent.innerHTML = getNodePopupHTML(node);
@@ -663,6 +728,8 @@ const showNodeDetail = node => {
 		ensurePopup(node.marker);
 		node.marker.openPopup();
 	}
+
+	history.replaceState({}, '', getShareUrl(node));
 };
 
 const attachClusterClickHandler = group => {
@@ -677,6 +744,7 @@ const attachClusterClickHandler = group => {
 };
 
 attachClusterClickHandler(markerClusterGroup);
+map.on('popupclose', syncUrlParams);
 
 map.on('click', e => {
 	if (activePicker?.onMap) activePicker.onMap(e.latlng);
@@ -780,16 +848,6 @@ const highlightString = (source, toHighlight) => {
 	const matchIndex = source.toLowerCase().indexOf(toHighlight.toLowerCase());
 	const highlight = matchIndex >= 0 ? source.substring(matchIndex, matchIndex + toHighlight.length) : toHighlight;
 	return escapedSource.replace(escapeHtml(highlight), `<b>${escapeHtml(highlight)}</b>`);
-};
-
-const syncUrlParams = () => {
-	const params = {
-		lat: map.getCenter().lat.toFixed(4),
-		lon: map.getCenter().lng.toFixed(4),
-		zoom: map.getZoom(),
-	};
-
-	history.replaceState({}, '', `${location.pathname}?${new URLSearchParams(params)}`);
 };
 
 const updateRegionToggleUI = () => {
@@ -1246,8 +1304,6 @@ closeFiltersOnApplyCheckbox.addEventListener('change', () => {
 	localStorage.setItem('closeFiltersOnApply', closeFiltersOnApplyCheckbox.checked ? '1' : '0');
 });
 
-showOpenFreeMapCheckbox.checked = showOpenFreeMap;
-
 elevationSourceSelect.value = elevationSource;
 
 elevationSourceSelect.addEventListener('change', () => {
@@ -1316,33 +1372,29 @@ regionToggle?.addEventListener('click', async () => {
 let currentBaseMap = baseMapSelected;
 
 const renderBaseMapToggle = () => {
-	basemapToggle.classList.toggle('active', currentBaseMap !== baseMapOrder[0]);
+	basemapToggle.classList.toggle('active', currentBaseMap !== defaultBaseMapName);
 	[...basemapMenu.children].forEach(li => li.classList.toggle('active', li.dataset.basemap === currentBaseMap));
 };
 
 const renderBasemapMenu = () => {
-	basemapMenu.innerHTML = getBaseMapOrder().map(name => `<li data-basemap="${name}" title="${baseMapInfo[name]}">${name}</li>`).join('');
+	basemapMenu.innerHTML = getBaseMapGroups().map(group => `
+		<li class="basemap-category">${escapeHtml(group.label)}</li>
+		${group.names.map(name => `<li data-basemap="${escapeHtml(name)}" title="${escapeHtml(baseMapInfo[name])}">${escapeHtml(name)}</li>`).join('')}`
+	).join('');
 };
 
 renderBasemapMenu();
 renderBaseMapToggle();
 
-showOpenFreeMapCheckbox.addEventListener('change', () => {
-	showOpenFreeMap = showOpenFreeMapCheckbox.checked;
-	localStorage.setItem('showOpenFreeMap', showOpenFreeMap ? '1' : '0');
-	renderBasemapMenu();
-	renderBaseMapToggle();
-});
-
 basemapMenu.addEventListener('click', e => {
 	const li = e.target.closest('li');
-	if (!li) return;
+	if (!li?.dataset.basemap) return;
 
 	currentBaseMap = li.dataset.basemap;
 	renderBaseMapToggle();
 	basemapMenu.hidden = true;
 
-	const loadingToast = currentBaseMap === OPENFREEMAP_NAME && !baseMaps[OPENFREEMAP_NAME]
+	const loadingToast = maplibreBaseMapOptions[currentBaseMap] && !maplibreBaseMaps[currentBaseMap]
 		? showToast(t('map:loadingBasemap'), { duration: 0, status: 'loading' })
 		: null;
 
