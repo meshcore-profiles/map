@@ -1,4 +1,4 @@
-// Odległość punktu p od odcinka [a, b] (bez projekcji na sferę - wystarczające dla uproszczeń w skali kraju)
+// Distance from point p to segment [a, b] (no projection onto a sphere - good enough for country-scale simplification)
 const perpendicularDistance = ([px, py], [ax, ay], [bx, by]) => {
 	const dx = bx - ax;
 	const dy = by - ay;
@@ -33,9 +33,9 @@ const douglasPeucker = (points, epsilon) => {
 };
 
 /**
- * Upraszcza zamknięty pierścień (GeoJSON LinearRing, pierwszy punkt == ostatni) algorytmem Douglas-Peucker.
- * Pierścień jest dzielony na dwie połówki względem punktu najdalszego od pierwszego wierzchołka,
- * ponieważ zwykły Douglas-Peucker działa na otwartej ścieżce, a nie na pętli.
+ * Simplifies a closed ring (GeoJSON LinearRing, first point == last) using the Douglas-Peucker algorithm.
+ * The ring is split into two halves at the point farthest from the first vertex,
+ * because plain Douglas-Peucker works on an open path, not a loop.
  */
 const simplifyRing = (ring, epsilon) => {
 	const points = ring.slice(0, -1);
@@ -67,7 +67,7 @@ const getBoundingBox = polygon => polygon.reduce((bbox, [lon, lat]) => ({
 	lonMax: Math.max(bbox.lonMax, lon),
 }), { latMin: Infinity, latMax: -Infinity, lonMin: Infinity, lonMax: -Infinity });
 
-// Test punktu w wielokącie metodą ray-casting
+// Point-in-polygon test using the ray-casting method
 const isPointInPolygon = (lat, lon, polygon) => {
 	let inside = false;
 	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {

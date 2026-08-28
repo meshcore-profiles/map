@@ -6,20 +6,20 @@ const axios = require('./axios.js');
 const RedisClient = require('./redis.js');
 const { simplifyRing, getBoundingBox, isPointInPolygon } = require('../utils/geo.js');
 
-const UPSTREAM_URL = 'https://map.meshcore.dev/api/v1/nodes?binary=1&short=1';
+const UPSTREAM_URL = 'https://map.meshcore.io/api/v1/nodes?binary=1&short=1';
 const REDIS_KEYS = { all: 'mmc:nodes:all', pl: 'mmc:nodes:pl' };
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 const RETRY_DELAY_MS = 30 * 1000;
-const BORDER_SIMPLIFY_TOLERANCE_DEG = 0.0002; // ~22 m przy szerokości geograficznej Polski
+const BORDER_SIMPLIFY_TOLERANCE_DEG = 0.0002; // ~22 m at Poland's latitude
 
-// Pełna granica administracyjna Polski [lon, lat] (źródło: https://nominatim.openstreetmap.org/search?country=poland&polygon_geojson=1&format=geojson&polygon_threshold=0)
+// Full administrative border of Poland [lon, lat] (source: https://nominatim.openstreetmap.org/search?country=poland&polygon_geojson=1&format=geojson&polygon_threshold=0)
 const polandBorder = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/poland-border.geojson'), 'utf8'));
 
-// Surowy pierścień ma ~67 tys. punktów - ray-casting po nim dla każdego węzła jest wielokrotnie wolniejszy
-// niż po wersji uproszczonej, a różnica w klasyfikacji dotyczy tylko punktów dosłownie na granicy
+// The raw ring has ~67k points - ray-casting against it for every node is many times slower
+// than against the simplified version, and the classification only differs for points right on the border
 const POLAND_POLYGON = simplifyRing(polandBorder.features[0].geometry.coordinates[0], BORDER_SIMPLIFY_TOLERANCE_DEG);
 
-// Prostokąt otaczający granicę Polski - szybki wstępny filtr, żeby uniknąć drogiego ray-castingu dla węzłów daleko poza Polską
+// Bounding box around Poland's border - a cheap pre-filter to avoid expensive ray-casting for nodes far outside Poland
 const POLAND_BBOX = getBoundingBox(POLAND_POLYGON);
 
 const isInPoland = ({ lat, lon }) => {
@@ -38,8 +38,8 @@ const typedRedisClient = RedisClient.withTypeMapping({ [RESP_TYPES.BLOB_STRING]:
 const warsawDateFormatter = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Warsaw' });
 const formatWarsawDate = date => warsawDateFormatter.format(date);
 
-// Bufory trzymane w pamięci tego procesu - unika round-tripu do Redisa przy każdym żądaniu do /api/v1/nodes.
-// Redis pozostaje jako trwały cache, z którego korzystamy, dopóki proces nie wykona własnego pierwszego odświeżenia (np. tuż po restarcie)
+// Buffers kept in this process's memory - avoids a round trip to Redis on every /api/v1/nodes request.
+// Redis remains as a persistent cache we rely on until the process completes its own first refresh (e.g. right after a restart)
 const memoryCache = { all: null, pl: null };
 let lastRefreshedAt = null;
 const statsCache = { all: null, pl: null };
@@ -63,8 +63,8 @@ const refreshNodes = async () => {
 	statsCache.all = null;
 	statsCache.pl = null;
 
-	// Redis to trwały cache współdzielony między restartami procesu - jego awaria nie powinna
-	// windować odświeżania z upstreamu do rytmu RETRY_DELAY_MS, skoro dane w pamięci już są świeże
+	// Redis is a persistent cache shared across process restarts - its failure shouldn't
+	// throttle upstream refreshes down to RETRY_DELAY_MS pace when the in-memory data is already fresh
 	try {
 		await Promise.all([
 			RedisClient.set(REDIS_KEYS.all, allBuffer),

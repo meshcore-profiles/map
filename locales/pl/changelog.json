@@ -13,6 +13,7 @@
 				"Poprawiono niezawodność przełączania na zapasową mapę po błędzie wczytania.",
 				"Kliknięcie w węzeł na mapie aktualizuje teraz adres URL na bezpośredni link do niego (tak jak przycisk „Udostępnij”), a po zamknięciu jego szczegółów adres wraca do bieżącego widoku mapy.",
 				"Zaktualizowano frontendową zależność msgpackr do wersji 2.1.0.",
+				"Dostosowano się do przeniesienia się upstreamu danych z map.meshcore.dev na map.meshcore.io.",
 				"Zaktualizowano zależności backendu do najnowszej wersji."
 			]
 		},
