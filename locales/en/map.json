@@ -82,7 +82,7 @@
 	"basemapLoadFailed": "Failed to load the map",
 	"basemapMissingApiKey": "The \"{{name}}\" map is unavailable (missing API key). Switched to the default map.",
 	"regionWarningTitle": "Are you sure?",
-	"regionWarningText": "Worldwide data weighs {{size}}, considerably more than just the nodes from Poland. If you have a limited data plan, downloading that much data may eat into it a bit. On older devices the map may also become somewhat less responsive.",
+	"regionWarningText": "Worldwide data weighs {{size}}, considerably more than just the nodes from Poland.  On older devices the map may also become somewhat less responsive.",
 	"downloadAnyway": "Download anyway",
 	"tilesAttribution": {
 		"CartoDB Dark": "Tiles: &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",

@@ -82,7 +82,7 @@
 	"basemapLoadFailed": "Nie udało się wczytać mapy",
 	"basemapMissingApiKey": "Mapa \"{{name}}\" jest niedostępna (brak klucza API). Wybrano domyślną mapę.",
 	"regionWarningTitle": "Jesteś tego pewny?",
-	"regionWarningText": "Dane obejmujące cały świat ważą {{size}}, to znacznie więcej niż same węzły z Polski. Jeśli posiadasz limitowany pakiet internetu u operatora, pobranie tylu danych może minimalnie go nadgryźć. Na starszych urządzeniach mapa może stać się też trochę mniej responsywna.",
+	"regionWarningText": "Dane obejmujące cały świat ważą {{size}}, to znacznie więcej niż same węzły z Polski. Na starszych urządzeniach mapa może stać się też trochę mniej responsywna.",
 	"downloadAnyway": "Pobierz mimo to",
 	"tilesAttribution": {
 		"CartoDB Dark": "Kafelki: &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
