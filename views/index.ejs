@@ -204,6 +204,9 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<button type="button" class="fab fab-secondary" id="terrain-toggle" title="<%= t('terrain:toggleTitle') %>" aria-label="<%= t('terrain:toggleTitle') %>">
 		<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#terrain"></use></svg>
 	</button>
+	<button type="button" class="fab fab-secondary" id="coverage-toggle" title="<%= t('coverage:toggleTitle') %>" aria-label="<%= t('coverage:toggleTitle') %>">
+		<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#coverage"></use></svg>
+	</button>
 	<button type="button" class="fab fab-secondary" id="route-toggle" title="<%= t('route:toggleTitle') %>" aria-label="<%= t('route:toggleTitle') %>">
 		<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#route"></use></svg>
 	</button>
@@ -427,11 +430,11 @@ const _titleBrand = site.shortName || site.brandName; %>
 		<div id="terrain-height-row">
 			<label class="field-group terrain-height-field">
 				<span><%= t('terrain:antennaHeightA') %></span>
-				<input type="number" class="text-input" id="terrain-height-a" value="5" min="0" max="200" step="0.5">
+				<input type="number" class="text-input" id="terrain-height-a" value="7" min="0" max="200" step="0.5">
 			</label>
 			<label class="field-group terrain-height-field">
 				<span><%= t('terrain:antennaHeightB') %></span>
-				<input type="number" class="text-input" id="terrain-height-b" value="5" min="0" max="200" step="0.5">
+				<input type="number" class="text-input" id="terrain-height-b" value="2" min="0" max="200" step="0.5">
 			</label>
 		</div>
 
@@ -445,12 +448,105 @@ const _titleBrand = site.shortName || site.brandName; %>
 	</div>
 </div>
 
+<div class="modal-overlay" id="coverage-overlay" hidden>
+	<div class="settings-panel" id="coverage-panel" role="dialog" aria-modal="true" aria-labelledby="coverage-title">
+		<button type="button" class="modal-close-btn" id="coverage-close-btn" aria-label="<%= t('coverage:closeAria') %>">
+			<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#close"></use></svg>
+		</button>
+		<div class="modal-title" id="coverage-title"><%= t('coverage:title') %></div>
+		<p class="setting-desc tool-modal-desc"><%= t('coverage:desc') %></p>
+
+		<div id="coverage-point-row">
+			<div class="terrain-point" data-point="origin">
+				<span class="terrain-point-label coverage-point-icon" id="coverage-point-icon" hidden>
+					<svg class="coverage-point-icon-svg" aria-hidden="true"><use id="coverage-point-icon-use" href=""></use></svg>
+				</span>
+				<input type="text" class="text-input terrain-point-input" id="coverage-point-input" placeholder="<%= t('coverage:nodeNamePlaceholder') %>" autocomplete="off">
+				<button type="button" class="btn btn-outline terrain-pick-btn" id="coverage-pick-btn"><%= t('coverage:pickOnMap') %></button>
+			</div>
+		</div>
+
+		<div class="coverage-field-row">
+			<label class="field-group">
+				<span><%= t('coverage:txHeight') %></span>
+				<input type="number" class="date-input" id="coverage-tx-height" value="7" min="0" max="200" step="0.5">
+			</label>
+			<label class="field-group">
+				<span><%= t('coverage:rxHeight') %></span>
+				<input type="number" class="date-input" id="coverage-rx-height" value="2" min="0" max="200" step="0.5">
+			</label>
+			<label class="field-group" title="<%= t('coverage:erpDesc') %>">
+				<span><%= t('coverage:erp') %></span>
+				<input type="number" class="date-input" id="coverage-erp" value="27" min="-10" max="40" step="1">
+			</label>
+		</div>
+
+		<div class="coverage-field-row">
+			<label class="field-group">
+				<span><%= t('coverage:maxRange') %></span>
+				<input type="number" class="date-input" id="coverage-max-range" value="20" min="1" max="50" step="1">
+			</label>
+			<label class="field-group">
+				<span><%= t('coverage:resolution') %></span>
+				<select class="date-input" id="coverage-resolution">
+					<option value="fast"><%= t('coverage:resolutionFast') %></option>
+					<option value="standard" selected><%= t('coverage:resolutionStandard') %></option>
+					<option value="high"><%= t('coverage:resolutionHigh') %></option>
+				</select>
+			</label>
+			<label class="field-group" title="<%= t('coverage:terrainMarginDesc') %>">
+				<span><%= t('coverage:terrainMargin') %></span>
+				<input type="number" class="date-input" id="coverage-terrain-margin" value="7" min="0" max="20" step="0.5">
+			</label>
+		</div>
+
+		<div class="coverage-field-row">
+			<label class="field-group">
+				<span><%= t('coverage:preset') %></span>
+				<select class="date-input" id="coverage-preset">
+					<option value=""><%= t('coverage:presetCustom') %></option>
+				</select>
+			</label>
+		</div>
+
+		<div class="coverage-field-row">
+			<label class="field-group">
+				<span><%= t('coverage:frequency') %></span>
+				<input type="number" class="date-input" id="coverage-freq" min="1" max="10000" step="0.001">
+			</label>
+			<label class="field-group">
+				<span><%= t('coverage:bandwidth') %></span>
+				<select class="date-input" id="coverage-bw">
+					<% [7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500].forEach(function(bw) { %>
+						<option value="<%= bw %>"><%= bw %></option>
+					<% }); %>
+				</select>
+			</label>
+			<label class="field-group">
+				<span><%= t('coverage:spreadingFactor') %></span>
+				<input type="number" class="date-input" id="coverage-sf" min="5" max="12" step="1">
+			</label>
+		</div>
+
+		<p class="setting-desc" id="coverage-estimate"></p>
+
+		<div class="filters-actions">
+			<button type="button" class="apply-filters-btn" id="coverage-compute-btn"><%= t('coverage:compute') %></button>
+			<button type="button" class="btn btn-outline" id="coverage-share-btn" hidden><%= t('common:share') %></button>
+			<button type="button" class="clear-filters-btn" id="coverage-clear-btn"><%= t('common:clear') %></button>
+		</div>
+
+		<div id="coverage-result" hidden></div>
+	</div>
+</div>
+
 <div id="toast-container" aria-live="polite"></div>
 
 <script>
 window.MAP_CONFIG = {
 	defaultRegion: <%- JSON.stringify(site.defaultRegion) %>,
 	defaultView: <%- JSON.stringify(site.defaultView) %>,
+	defaultRadio: <%- JSON.stringify(site.defaultRadio) %>,
 
 	sefinekApi: <%- JSON.stringify(process.env.SEFINEK_API) %>,
 	cartoApiKey: <%- JSON.stringify(process.env.CARTO_API_KEY || null) %>,

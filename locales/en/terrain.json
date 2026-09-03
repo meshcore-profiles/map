@@ -4,7 +4,7 @@
 	"title": "Terrain and range analysis",
 	"titleWithSource": "Terrain and range analysis (source: {{source}})",
 	"desc": "Pick two points (click a node on the map or type a name) to see the terrain profile and an approximate line-of-sight visibility between them. You can change the elevation data source in Settings.",
-	"nodeNamePlaceholder": "Node name",
+	"nodeNamePlaceholder": "Node name or lat & lon",
 	"pickOnMap": "Pick on map",
 	"antennaHeightA": "Antenna A height (m)",
 	"antennaHeightB": "Antenna B height (m)",

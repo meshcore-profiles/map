@@ -2,7 +2,7 @@
 	"nodeTypes": {
 		"client": "Klient",
 		"repeater": "Repeater",
-		"roomServer": "Serwer pokoju",
+		"roomServer": "Room server",
 		"sensor": "Czujnik"
 	},
 	"updateStatus": {
@@ -10,7 +10,7 @@
 		"recent": "Zaktualizowano niedawno",
 		"stale": "Zaktualizowano jakiś czas temu",
 		"old": "Nie aktualizowano",
-		"extinct": "Zostanie wkrótce usunięty"
+		"extinct": "Zostanie wkrótce usunięte"
 	},
 	"radioParams": {
 		"bw": "Szerokość pasma",

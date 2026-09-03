@@ -230,6 +230,23 @@ li.tool-panel-empty {
 	background: var(--red);
 }
 
+.coverage-point-icon {
+	width: 26px;
+	height: 26px;
+	background: none;
+	color: var(--text);
+}
+
+.coverage-point-icon[hidden] {
+	display: none;
+}
+
+.coverage-point-icon-svg {
+	width: 22px;
+	height: 22px;
+	fill: currentColor;
+}
+
 .terrain-point-input {
 	flex: 1;
 	min-width: 0;
@@ -238,7 +255,7 @@ li.tool-panel-empty {
 	background: transparent;
 	color: var(--text);
 	font: inherit;
-	font-size: 14px;
+	font-size: 16px;
 }
 
 .terrain-point-input:focus {
@@ -265,8 +282,13 @@ li.tool-panel-empty {
 	flex: 1;
 }
 
-.terrain-height-field input {
+#terrain-panel .terrain-height-field input {
 	padding: 8px 10px;
+	font-size: 14px;
+}
+
+#terrain-panel .terrain-point-input {
+	font-size: 14px;
 }
 
 #terrain-result {
@@ -327,8 +349,102 @@ li.tool-panel-empty {
 	height: auto;
 }
 
+#coverage-panel {
+	max-width: 800px;
+}
+
+#coverage-point-row {
+	margin-bottom: 14px;
+}
+
+.coverage-field-row {
+	display: flex;
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+.coverage-field-row .field-group {
+	flex: 1;
+	min-width: 0;
+}
+
+#coverage-estimate {
+	margin: -6px 0 14px;
+	font-size: 12px;
+	text-align: center;
+}
+
+#coverage-result {
+	margin-top: 14px;
+}
+
+#coverage-result[hidden] {
+	display: none;
+}
+
+.coverage-result-summary {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.coverage-result-group-title {
+	margin-bottom: 6px;
+	font-family: var(--font-mono);
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+.coverage-legend {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	padding: 8px 10px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--bg-panel);
+	color: var(--text);
+	font-size: 12px;
+	line-height: 1.2;
+	box-shadow: var(--shadow-lg);
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+}
+
+.coverage-legend-item {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+}
+
+.coverage-legend-swatch {
+	flex: none;
+	width: 18px;
+	height: 0;
+	border-top: 2px solid transparent;
+}
+
+.coverage-legend-optical {
+	border-top-color: #4dabf7;
+	border-top-style: dashed;
+}
+
+.coverage-legend-fresnel {
+	border-top-color: #2dd881;
+	border-top-width: 3px;
+	border-top-style: solid;
+}
+
+.coverage-legend-budget {
+	border-top-color: #99a1b5;
+	border-top-style: dotted;
+}
+
 @media (max-width: 560px) {
-	#terrain-point-row, #terrain-height-row {
+	#terrain-point-row, #terrain-height-row, .coverage-field-row {
 		flex-direction: column;
 	}
 

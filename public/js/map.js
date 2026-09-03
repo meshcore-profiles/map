@@ -10,6 +10,8 @@ import { initChangelogModal } from './changelog.js';
 import { initMeasureTool } from './measure.js';
 import { initRouteTool } from './route.js';
 import { initTerrainTool } from './terrain.js';
+import { initCoverageTool } from './coverage.js';
+import { escapeHtml } from './pathtools.js';
 import { showToast, updateToast, showActionToast, dismissToast } from './toast.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
@@ -100,8 +102,6 @@ const timeAgo = msec => {
 
 	return t('common:justNow');
 };
-
-const escapeHtml = html => html.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 
 const findPreset = params => presets.find(p =>
 	params.sf === p.params.sf &&
@@ -665,8 +665,9 @@ const measureTool = initMeasureTool({ map, setPicker, escapeHtml, getNodes: () =
 const routeTool = initRouteTool({ map, getNodes: () => state.nodes, escapeHtml });
 let elevationSource = localStorage.getItem('elevationSource') || 'sefinek';
 const terrainTool = initTerrainTool({ map, setPicker, getNodes: () => state.nodes, showToast, getElevationSource: () => elevationSource });
+const coverageTool = initCoverageTool({ map, setPicker, getNodes: () => state.nodes, showToast, getElevationSource: () => elevationSource, getPresets });
 
-const closableTools = [settingsModal, legendPanelUi, statsModal, changelogModal, measureTool, routeTool, terrainTool];
+const closableTools = [settingsModal, legendPanelUi, statsModal, changelogModal, measureTool, routeTool, terrainTool, coverageTool];
 for (const a of closableTools) {
 	for (const b of closableTools) {
 		if (a !== b) a.toggle.addEventListener('click', () => b.close());
@@ -1517,6 +1518,18 @@ downloadNodes(state.region).then(() => {
 
 		if (Number.isFinite(latA) && Number.isFinite(lngA) && Number.isFinite(latB) && Number.isFinite(lngB)) {
 			terrainTool.loadFromUrlState({ lat: latA, lng: lngA }, { lat: latB, lng: lngB }, heightA, heightB);
+		}
+	}
+
+	if (urlParams.coverage) {
+		const [lat, lng, txHeight, rxHeight, freq, maxRange, resolution, terrainMargin, erp, sf, bw] = urlParams.coverage.split(',');
+		const parsedLat = Number(lat), parsedLng = Number(lng);
+
+		if (Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
+			coverageTool.loadFromUrlState(
+				parsedLat, parsedLng, Number(txHeight), Number(rxHeight), Number(freq), Number(maxRange),
+				resolution, Number(terrainMargin), Number(erp), Number(sf), Number(bw)
+			);
 		}
 	}
 });

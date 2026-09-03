@@ -3,6 +3,8 @@ import { t } from './i18n.js';
 
 export const formatDistance = meters => meters >= 1000 ? `${(meters / 1000).toFixed(2)} km` : `${Math.round(meters)} m`;
 
+export const escapeHtml = html => html.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+
 export const loadJson = key => {
 	try {
 		return JSON.parse(localStorage.getItem(key));
@@ -26,13 +28,14 @@ const URL_POINT_MATCH_TOLERANCE = 0.0001;
 export const findNodeNearLatLng = (nodes, lat, lng) =>
 	nodes.find(n => Math.abs(n.lat - lat) < URL_POINT_MATCH_TOLERANCE && Math.abs(n.lon - lng) < URL_POINT_MATCH_TOLERANCE) || null;
 
-let pathPaneReady = false;
-const ensurePathPane = map => {
-	if (pathPaneReady) return;
-	const pane = map.createPane('pathToolsPane');
-	pane.style.zIndex = 650;
-	pathPaneReady = true;
+const readyPanes = new Set();
+export const ensurePane = (map, name, zIndex) => {
+	if (readyPanes.has(name)) return;
+	map.createPane(name).style.zIndex = zIndex;
+	readyPanes.add(name);
 };
+
+const ensurePathPane = map => ensurePane(map, 'pathToolsPane', 650);
 
 export const createPathLayer = ({ map, color = '#4dabf7' }) => {
 	ensurePathPane(map);
@@ -61,7 +64,7 @@ export const createPathLayer = ({ map, color = '#4dabf7' }) => {
 				weight: 3,
 				fillColor: color,
 				fillOpacity: 0.85,
-			}).bindTooltip(pt.label || t('common:pointFallback', { n: i + 1 })).addTo(group);
+			}).bindTooltip(pt.label ? escapeHtml(pt.label) : t('common:pointFallback', { n: i + 1 })).addTo(group);
 		});
 
 		if (points.length < 2) return;

@@ -1,82 +1,9 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { createPathLayer, findNodeNearLatLng, formatDistance, loadJson, resolveNodeByQuery } from './pathtools.js';
+import { curvatureDrop, ELEVATION_PROVIDERS, fetchElevations, haversineDistance, interpolate, parseLatLng } from './elevation.js';
 
 const SAMPLE_COUNT = 48;
-const EARTH_RADIUS = 6371000;
-const EFFECTIVE_EARTH_RADIUS = EARTH_RADIUS * 4 / 3;
-
-const toRad = deg => deg * Math.PI / 180;
-
-const haversineDistance = (a, b) => {
-	const dLat = toRad(b.lat - a.lat);
-	const dLng = toRad(b.lng - a.lng);
-	const lat1 = toRad(a.lat);
-	const lat2 = toRad(b.lat);
-	const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-	return 2 * EARTH_RADIUS * Math.asin(Math.sqrt(h));
-};
-
-const interpolate = (a, b, frac) => ({ lat: a.lat + (b.lat - a.lat) * frac, lng: a.lng + (b.lng - a.lng) * frac });
-
-const curvatureDrop = (d, total) => (d * (total - d)) / (2 * EFFECTIVE_EARTH_RADIUS);
-
-const parseLatLng = text => {
-	const match = text.trim().match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
-	if (!match) return null;
-
-	const lat = Number(match[1]);
-	const lng = Number(match[2]);
-	if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
-
-	return { lat, lng };
-};
-
-const fetchFromLookupApi = (url, points) => fetch(url, {
-	method: 'POST',
-	headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-	body: JSON.stringify({ locations: points.map(p => ({ latitude: p.lat, longitude: p.lng })) }),
-});
-
-const ELEVATION_PROVIDERS = {
-	sefinek: {
-		label: 'Sefinek API',
-		fetch: async points => {
-			const base = window.MAP_CONFIG.sefinekApi;
-			if (!base) throw new Error('Sefinek API address is not configured.');
-
-			const res = await fetchFromLookupApi(`${base}/api/v2/elevation`, points);
-			if (!res.ok) throw new Error(`Sefinek API returned error ${res.status}`);
-
-			const data = await res.json();
-			return data.results.map(r => r.elevation);
-		},
-	},
-	'open-elevation': {
-		label: 'Open-Elevation',
-		fetch: async points => {
-			const res = await fetchFromLookupApi('https://api.open-elevation.com/api/v1/lookup', points);
-			if (!res.ok) throw new Error(`Open-Elevation returned error ${res.status}`);
-
-			const data = await res.json();
-			return data.results.map(r => r.elevation);
-		},
-	},
-	'open-meteo': {
-		label: 'Open-Meteo',
-		fetch: async points => {
-			const lat = points.map(p => p.lat).join(',');
-			const lng = points.map(p => p.lng).join(',');
-			const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`);
-			if (!res.ok) throw new Error(`Open-Meteo returned error ${res.status}`);
-
-			const data = await res.json();
-			return data.elevation;
-		},
-	},
-};
-
-const fetchElevations = (points, source) => (ELEVATION_PROVIDERS[source] || ELEVATION_PROVIDERS.sefinek).fetch(points);
 
 const getCssVar = (name, fallback) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 
@@ -251,8 +178,17 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 		}
 	};
 
-	inputA.addEventListener('change', () => syncFromInput('a'));
-	inputB.addEventListener('change', () => syncFromInput('b'));
+	inputA.addEventListener('input', () => syncFromInput('a'));
+	inputB.addEventListener('input', () => syncFromInput('b'));
+
+	// Once the user is done typing, normalize the field to the matched node's canonical name
+	// instead of leaving whatever partial text they typed to find it.
+	inputA.addEventListener('change', () => {
+		if (points.a?.label) inputA.value = points.a.label;
+	});
+	inputB.addEventListener('change', () => {
+		if (points.b?.label) inputB.value = points.b.label;
+	});
 
 	const saveHeights = () => {
 		localStorage.setItem(HEIGHTS_STORAGE_KEY, JSON.stringify({ heightA: heightAInput.value, heightB: heightBInput.value }));
