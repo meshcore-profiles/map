@@ -4,7 +4,7 @@
 |-----------------|-----------------------|---------|---------------------------------------------------------------------------|
 | `leaflet`       | Leaflet               | 1.9.4   | [Leaflet](https://github.com/Leaflet/Leaflet)                             |
 | `markercluster` | Leaflet.markercluster | 1.5.3   | [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
-| `maplibre`      | MapLibre GL JS        | 6.6.0   | [MapLibre GL JS](https://github.com/maplibre/maplibre-gl-js)              |
+| `maplibre`      | MapLibre GL JS        | 6.7.0   | [MapLibre GL JS](https://github.com/maplibre/maplibre-gl-js)              |
 | `maplibre`      | MapLibre GL Leaflet   | 0.1.4   | [MapLibre GL Leaflet](https://github.com/maplibre/maplibre-gl-leaflet)    |
 | `msgpackr`      | msgpackr              | 2.1.0   | [msgpackr](https://github.com/kriszyp/msgpackr)                           |
 | `qrcode`        | qrcode                | 1.5.4   | [qrcode](https://github.com/soldair/node-qrcode)                          |
@@ -24,15 +24,15 @@
 - [MarkerCluster.css](https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css) - cluster layout and animations.
 - [MarkerCluster.Default.css](https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css) - default cluster appearance.
 
-### MapLibre GL JS 6.6.0
+### MapLibre GL JS 6.7.0
 
-- [maplibre-gl.mjs](https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl.mjs) - main vector map renderer module.
-- [maplibre-gl-shared.mjs](https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl-shared.mjs) - code shared between the main module and the worker.
-- [maplibre-gl-worker.mjs](https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl-worker.mjs) - map data processing off the main thread.
-- [maplibre-gl.css](https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl.css) - MapLibre map and control styles.
-- [maplibre-gl.mjs.map](https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl.mjs.map) - source map for the main module.
-- [maplibre-gl-shared.mjs.map](https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl-shared.mjs.map) - source map for the shared code.
-- [maplibre-gl-worker.mjs.map](https://cdn.jsdelivr.net/npm/maplibre-gl@6.6.0/dist/maplibre-gl-worker.mjs.map) - source map for the worker.
+- [maplibre-gl.mjs](https://cdn.jsdelivr.net/npm/maplibre-gl@6.7.0/dist/maplibre-gl.mjs) - main vector map renderer module.
+- [maplibre-gl-shared.mjs](https://cdn.jsdelivr.net/npm/maplibre-gl@6.7.0/dist/maplibre-gl-shared.mjs) - code shared between the main module and the worker.
+- [maplibre-gl-worker.mjs](https://cdn.jsdelivr.net/npm/maplibre-gl@6.7.0/dist/maplibre-gl-worker.mjs) - map data processing off the main thread.
+- [maplibre-gl.css](https://cdn.jsdelivr.net/npm/maplibre-gl@6.7.0/dist/maplibre-gl.css) - MapLibre map and control styles.
+- [maplibre-gl.mjs.map](https://cdn.jsdelivr.net/npm/maplibre-gl@6.7.0/dist/maplibre-gl.mjs.map) - source map for the main module.
+- [maplibre-gl-shared.mjs.map](https://cdn.jsdelivr.net/npm/maplibre-gl@6.7.0/dist/maplibre-gl-shared.mjs.map) - source map for the shared code.
+- [maplibre-gl-worker.mjs.map](https://cdn.jsdelivr.net/npm/maplibre-gl@6.7.0/dist/maplibre-gl-worker.mjs.map) - source map for the worker.
 
 ### MapLibre GL Leaflet 0.1.4
 

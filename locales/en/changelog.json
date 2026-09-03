@@ -5,6 +5,7 @@
 			"date": "2026-09-03",
 			"changes": [
 				"Added a new \"Coverage layer\" tool - estimates a node's theoretical radio range in every direction, based on terrain (optical line-of-sight and 60% Fresnel zone) and a simplified link budget (ERP power, free-space path loss, receiver sensitivity depending on SF and bandwidth).",
+				"Updated the frontend MapLibre GL dependency to version 6.7.0.",
 				"Minor fixes."
 			]
 		},

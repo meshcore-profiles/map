@@ -5,6 +5,7 @@
 			"date": "03.09.2026",
 			"changes": [
 				"Dodano nowe narzędzie „Warstwa zasięgu” - oblicza teoretyczny zasięg radiowy węzła we wszystkich kierunkach na podstawie ukształtowania terenu (widoczność optyczna i strefa Fresnela 60%) oraz uproszczonego bilansu łącza (moc ERP, tłumienie w wolnej przestrzeni, czułość odbiornika zależna od SF i szerokości pasma).",
+				"Zaktualizowano frontendową zależność MapLibre GL do wersji 6.7.0.",
 				"Drobne poprawki."
 			]
 		},
