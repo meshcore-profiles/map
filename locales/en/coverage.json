@@ -1,8 +1,8 @@
 {
 	"toggleTitle": "Coverage layer",
 	"closeAria": "Close coverage layer",
-	"title": "Coverage layer",
-	"titleWithSource": "Coverage layer (source: {{source}})",
+	"title": "Coverage layer (beta)",
+	"titleWithSource": "Coverage layer (beta, source: {{source}})",
 	"desc": "Pick a point (click a node on the map or type a name) to compute radio coverage in every direction based on terrain shape and a simplified link budget (ERP, free-space path loss, receiver sensitivity). Still a simplified model - it does not account for diffraction or attenuation from forest or buildings.",
 	"nodeNamePlaceholder": "Node name or lat & lon",
 	"pickOnMap": "Pick on map",

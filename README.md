@@ -1,39 +1,37 @@
-# Mapa MeshCore 🗺️
-Interaktywna mapa węzłów sieci MeshCore. Jeden kod obsługuje dwie publiczne witryny, w zależności od domeny, pod którą działa (patrz [config/sites.js](config/sites.js)):
+# MeshCore Map 🗺️
+Interactive map of MeshCore network nodes. A single codebase serves two public sites, chosen by the domain it runs under (see [config/sites.js](config/sites.js)):
 
-- **mapa.meshcorepolska.org** - wersja polska, domyślnie pokazuje wyłącznie węzły z Polski.
-- **map.meshcoreprofiles.com** - wersja globalna (MeshCore Map), domyślnie pokazuje węzły z całego świata, interfejs domyślnie po angielsku.
+- **mapa.meshcorepolska.org** - Polish version, shows only nodes from Poland by default.
+- **map.meshcoreprofiles.com** - global version (MeshCore Map), shows nodes from the whole world by default, interface defaults to English.
 
-Projekt składa się z frontendu (HTML, CSS, ESM) oraz backendu (Node.js CJS).
-Backend pobiera dane o węzłach z publicznego API `map.meshcore.io` i przechowuje je w pamięci procesu oraz w Redis, a codzienne migawki statystyk sieci zapisuje w MongoDB.
+The project consists of a frontend (HTML, CSS, ESM) and a backend (Node.js CJS).
+The backend fetches node data from the public `map.meshcore.io` API and keeps it in the process memory and in Redis, while daily network stats snapshots are stored in MongoDB.
 
-## Czym się wyróżnia?
-- Zaimplementowane i18n (dostępny język polski oraz angielski)
-- Możliwość przełączania między węzłami z Polski i całego świata.
-- Udostępnianie wybranego węzła lub kontaktu za pomocą bezpośredniego linku.
-- Kopiowanie danych węzłów i kontaktów do schowka.
-- Domyślny region i język zależą od witryny, pod jaką działa strona - polska (`pl`/`pl`) albo globalna (`all`/`en`).
-- Dane przesyłane w kompaktowym formacie MessagePack; przy domyślnym widoku dla wersji polskiej pobierane są tylko węzły z Polski.
-- Wyszukiwanie węzłów po nazwie i kluczu publicznym, z przyjemną obsługą klawiatury.
-- Możliwość dodania kontaktu bezpośrednio z mapy do aplikacji MeshCore
-- Wybór wielu podkładów mapy, w tym wektorowych (MapTiler Hybrid, OpenFreeMap) i rastrowych (OpenStreetMap, Esri Hybrid, CartoDB, OpenTopoMap, itd.).
+## Highlights
+- i18n implemented (currently available in Polish and English).
+- Sharing a selected node or contact via a direct link, and copying their data (name, public key) to the clipboard.
+- Instantly adding a client, repeater, or room server as a contact in the MeshCore app.
+- Searching nodes by name and public key, with keyboard support.
+- Data transferred in a compact MessagePack format; the default view for the Polish version only fetches nodes from Poland.
+- A choice of multiple basemaps - raster (OpenStreetMap, Esri Hybrid, OpenTopoMap, CyclOSM, Humanitarian OSM) and vector (OpenFreeMap), plus MapTiler and CartoDB when the relevant API keys are configured.
+- Analytical tools: distance measurement, drawing a route between nodes by name or key, terrain analysis (elevation profile and optical line of sight between two points), and a layer showing a node's theoretical radio coverage in every direction.
 
-## Plany
-Serwis `meshcoreprofiles.com` obsługuje już globalną mapę węzłów pod adresem `map.meshcoreprofiles.com`. W planach pozostaje integracja z profilami użytkowników:
+## Roadmap
+The `meshcoreprofiles.com` service already serves the global node map at `map.meshcoreprofiles.com`. Planned next is integration with user profiles:
 
-- Użytkownicy, którzy wprowadzą dane o companionie lub RPT, otrzymają własny profil.
-- Wybrane informacje z profili będą widoczne bezpośrednio na mapie, dzięki czemu będzie można łatwo sprawdzić, do kogo należy dany węzeł.
-- Właściciele repeaterów będą mogli przesyłać ich zdjęcia, które następnie zostaną publicznie wyświetlone w serwisie.
+- Users who submit data about their companion or repeater will get their own profile.
+- Selected profile information will be shown directly on the map, making it easy to see who owns a given node.
+- Repeater owners will be able to upload photos of their devices, which will then be publicly displayed on the site.
 
-Testowa wersja konfiguratora jest obecnie dostępna wyłącznie dla użytkowników serwera [Discord MeshCore Polska](https://meshcorepolska.org/discord) (komenda `/konfigurator` od `Sefi#6347`). [Zobacz przykładowy profil](https://beta.sefinek.net/meshcore-pl/kontakty/6a43efd454feb8be5679e0a6).
+A test version of the configurator is currently available only to members of the [MeshCore Polska Discord](https://meshcorepolska.org/discord) server (the `/konfigurator` command by `Sefi#6347`). [See an example profile](https://beta.sefinek.net/meshcore-pl/kontakty/6a43efd454feb8be5679e0a6).
 
-## Wymagania
+## Requirements
 - Node.js >=20.19.0
 - MongoDB
 - Redis
-- Dostęp do internetu w celu pobierania danych źródłowych
+- Internet access to fetch source data
 
-## Instalacja
+## Installation
 ```bash
 git clone https://github.com/meshcore-profiles/map.git mapa.meshcorepolska.org
 cd mapa.meshcorepolska.org
@@ -41,31 +39,31 @@ npm install
 cp .env.example .env
 ```
 
-Następnie uzupełnij dane dostępowe do MongoDB (`MONGODB_URL`) oraz Redis (`REDIS_HOST`, `REDIS_PASSWD`) w utworzonym pliku `.env`.
-Zmienna `SITE_MODE` pozwala wymusić wersję polską (`poland`) lub globalną (`global`) niezależnie od domeny - domyślnie (`auto`) wybierana jest na podstawie hosta żądania.
+Then fill in the MongoDB (`MONGODB_URL`) and Redis (`REDIS_HOST`, `REDIS_PASSWD`) credentials in the created `.env` file.
+The `SITE_MODE` variable lets you force the Polish (`poland`) or global (`global`) version regardless of the domain - by default (`auto`) it's chosen based on the request host.
 
-Uruchom serwer poleceniem:
+Start the server with:
 ```bash
 node .
 ```
 
-Mapa będzie dostępna domyślnie pod adresem `http://127.0.0.1:8080`.
+The map will be available by default at `http://127.0.0.1:8080`.
 
 ## API
-Backend udostępnia dane w formacie MessagePack pod adresem:
+The backend exposes node data in MessagePack format at:
 
 ```text
 GET /api/v1/nodes
 ```
 
-Domyślnie zwracane są węzły znajdujące się w Polsce. Parametr `region=all` pozwala pobrać wszystkie dostępne węzły:
+By default, only nodes located in Poland are returned. The `region=all` parameter fetches all available nodes:
 
 ```text
 GET /api/v1/nodes?region=all
 ```
 
-## Uznania
-Projekt powstał na bazie [map.meshcore.io](https://github.com/meshcore-dev/map.meshcore.io) autorstwa [recrof](https://github.com/recrof) (Rastislav Vysoký).
+## Credits
+This project is built on top of [map.meshcore.io](https://github.com/meshcore-dev/map.meshcore.io) by [recrof](https://github.com/recrof) (Rastislav Vysoký).
 
-## Licencja
-Z uwagi na to, że [meshcore-dev/map.meshcore.io](https://github.com/meshcore-dev/map.meshcore.io) jest na licencji MIT, także ten projekt jest dostępny na tej samej licencji. Szczegóły znajdują się w pliku [LICENSE](LICENSE).
+## License
+Since [map.meshcore.io](https://github.com/meshcore-dev/map.meshcore.io) is MIT licensed, this project is available under the same license. See the [LICENSE](LICENSE) file for details.

@@ -1,8 +1,8 @@
 {
 	"toggleTitle": "Warstwa zasięgu",
 	"closeAria": "Zamknij warstwę zasięgu",
-	"title": "Warstwa zasięgu",
-	"titleWithSource": "Warstwa zasięgu (źródło: {{source}})",
+	"title": "Warstwa zasięgu (beta)",
+	"titleWithSource": "Warstwa zasięgu (beta, źródło: {{source}})",
 	"desc": "Wybierz punkt (węzeł na mapie lub wpisz nazwę), aby policzyć zasięg radiowy we wszystkich kierunkach na podstawie ukształtowania terenu i uproszczonego bilansu łącza (moc ERP, tłumienie w wolnej przestrzeni, czułość odbiornika). To wciąż uproszczony model - nie uwzględnia dyfrakcji ani tłumienia przez las czy zabudowę.",
 	"nodeNamePlaceholder": "Nazwa węzła lub lat & lon",
 	"pickOnMap": "Wskaż na mapie",

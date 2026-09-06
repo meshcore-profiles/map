@@ -1,7 +1,7 @@
 {
 	"toggleTitle": "Route by names or hashes",
 	"closeAria": "Close route window",
-	"title": "Route by names or hashes (beta)",
+	"title": "Route by names or hashes",
 	"desc": "Enter repeater names, the start of their public keys (first 2, 4 or 6 characters), or full keys - in the order matching the route. Separate values with commas, a \">\" character, or new lines.",
 	"inputPlaceholder": "e.g. RPT_Warsaw > 3dae > bf83e1",
 	"draw": "Draw route",
