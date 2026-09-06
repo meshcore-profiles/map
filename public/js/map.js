@@ -161,7 +161,7 @@ const columns = {
 		value: val => `<span class="param-chips">${paramOrder.filter(key => key in val).map(key => {
 			const paramKey = radioParamDesc[key];
 			const text = `${paramKey.short}${val[key]}${paramKey.unit}`;
-			return `<span class="param-chip" title="${escapeHtml(radioParamLabel(key))}">${escapeHtml(text)}</span>`;
+			return `<span class="param-chip" title="${radioParamLabel(key)}">${escapeHtml(text)}</span>`;
 		}).join('')}</span>`,
 	},
 	link: {
@@ -263,12 +263,12 @@ const getNodePopupHTML = node => {
 		${getTable(node)}
 		<div class="user-actions">
 			<div class="user-actions-left">
-				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}" title="${escapeHtml(t('map:shareTitle'))}">${t('common:share')}</button>
-				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}" title="${escapeHtml(t('map:copyInfoTitle'))}">${t('map:copyInfo')}</button>
-				${canAddContact ? `<a class="action-link-btn" href="${escapeHtml(qrValue)}" title="${escapeHtml(t('map:addContactTitle'))}" data-meshcore-link>${t('map:addContact')}</a>` : ''}
+				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}" title="${t('map:shareTitle')}">${t('common:share')}</button>
+				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}" title="${t('map:copyInfoTitle')}">${t('map:copyInfo')}</button>
+				${canAddContact ? `<a class="action-link-btn" href="${escapeHtml(qrValue)}" title="${t('map:addContactTitle')}" data-meshcore-link>${t('map:addContact')}</a>` : ''}
 			</div>
 			<div class="user-actions-right">
-				<a href="${getDeletionMailUrl(node)}" target="_blank" title="${escapeHtml(t('map:reportDeletionTitle'))}">${t('map:reportDeletion')}</a>
+				<a href="${getDeletionMailUrl(node)}" target="_blank" title="${t('map:reportDeletionTitle')}">${t('map:reportDeletion')}</a>
 				${userActionAnchor}
 			</div>
 		</div>`;
@@ -308,8 +308,16 @@ const FALLBACK_BASEMAP_NAME = 'Esri Hybrid';
 
 const cartoApiKey = window.MAP_CONFIG.cartoApiKey;
 const maptilerApiKey = window.MAP_CONFIG.maptilerApiKey;
+const maptilerAvailable = false;
+
+const basemapFallbackChain = [FALLBACK_BASEMAP_NAME, ...(cartoApiKey ? [CARTO_DARK_NAME] : []), 'OpenStreetMap'];
+const getNextFallbackBaseMap = failedName => {
+	const index = basemapFallbackChain.indexOf(failedName);
+	return index === -1 ? basemapFallbackChain[0] : basemapFallbackChain[index + 1];
+};
+
 const maplibreBaseMapOptions = {
-	...(maptilerApiKey ? {
+	...(maptilerAvailable ? {
 		[MAPTILER_HYBRID_NAME]: {
 			style: `https://api.maptiler.com/maps/${window.MAP_CONFIG.maptilerHybridMapId}/style.json?key=${maptilerApiKey}`,
 			maxZoom: 20,
@@ -350,7 +358,7 @@ const tileBaseMaps = {
 		maxZoom: 17,
 		subdomains: 'abc',
 	}),
-	...(maptilerApiKey ? { [MAPTILER_OUTDOOR_NAME]: createMapTilerRasterLayer('outdoor-v4') } : {}),
+	...(maptilerAvailable ? { [MAPTILER_OUTDOOR_NAME]: createMapTilerRasterLayer('outdoor-v4') } : {}),
 	'CyclOSM': L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
 		maxZoom: 20,
 		subdomains: 'abc',
@@ -370,13 +378,11 @@ const getBaseMapGroups = () => [
 	{ label: t('map:vectorBaseMaps'), names: Object.keys(maplibreBaseMapOptions) },
 ].filter(group => group.names.length);
 const getBaseMapNames = () => getBaseMapGroups().flatMap(group => group.names);
-const defaultBaseMapName = maplibreBaseMapOptions[MAPTILER_HYBRID_NAME]
-	? MAPTILER_HYBRID_NAME
-	: Object.keys(tileBaseMaps)[0];
+const defaultBaseMapName = FALLBACK_BASEMAP_NAME;
 
 const basemapRequiredApiKeys = {
-	[MAPTILER_HYBRID_NAME]: maptilerApiKey,
-	[MAPTILER_OUTDOOR_NAME]: maptilerApiKey,
+	[MAPTILER_HYBRID_NAME]: maptilerAvailable,
+	[MAPTILER_OUTDOOR_NAME]: maptilerAvailable,
 	[CARTO_DARK_NAME]: cartoApiKey,
 	[CARTO_POSITRON_NAME]: cartoApiKey,
 };
@@ -385,7 +391,7 @@ const storedBaseMap = localStorage.getItem('baseMapSelected');
 const baseMapSelected = getBaseMapNames().includes(storedBaseMap) ? storedBaseMap : defaultBaseMapName;
 
 if (storedBaseMap && storedBaseMap !== baseMapSelected && storedBaseMap in basemapRequiredApiKeys && !basemapRequiredApiKeys[storedBaseMap]) {
-	showToast(t('map:basemapMissingApiKey', { name: escapeHtml(storedBaseMap) }), { status: 'info', duration: 5000 });
+	showToast(t('map:basemapMissingApiKey', { name: storedBaseMap }), { status: 'info', duration: 5000 });
 }
 
 const urlParams = Object.fromEntries(new URLSearchParams(location.search));
@@ -462,6 +468,36 @@ const getMaplibreBaseMapLayer = async name => {
 
 let baseMapRequestId = 0;
 let currentBaseMapAttribution = null;
+let activateBaseMapFallback = null;
+
+const waitForBaseMapLoad = (targetLayer, name) => new Promise((resolve, reject) => {
+	if (maplibreBaseMapOptions[name]) {
+		const glMap = targetLayer.getMaplibreMap();
+		if (!glMap || glMap.loaded()) {
+			resolve();
+			return;
+		}
+		glMap.once('load', resolve);
+		glMap.once('error', () => reject(new Error(`Base map "${name}" failed to load`)));
+		return;
+	}
+
+	const tileLayers = targetLayer.getLayers ? targetLayer.getLayers() : [targetLayer];
+	let pending = tileLayers.length;
+	if (pending === 0) {
+		resolve();
+		return;
+	}
+
+	tileLayers.forEach(layer => {
+		layer.once('tileerror', () => reject(new Error(`Base map "${name}" failed to load`)));
+		layer.once('load', () => {
+			pending -= 1;
+			if (pending === 0) resolve();
+		});
+	});
+});
+
 const setBaseMap = async name => {
 	const requestId = ++baseMapRequestId;
 	const targetLayer = maplibreBaseMapOptions[name]
@@ -473,7 +509,8 @@ const setBaseMap = async name => {
 	for (const layer of [...Object.values(tileBaseMaps), ...Object.values(maplibreBaseMaps)]) {
 		if (layer !== targetLayer && map.hasLayer(layer)) map.removeLayer(layer);
 	}
-	if (!map.hasLayer(targetLayer)) map.addLayer(targetLayer);
+	const wasOnMap = map.hasLayer(targetLayer);
+	if (!wasOnMap) map.addLayer(targetLayer);
 	map.setMaxZoom(targetLayer.options.maxZoom);
 
 	if (currentBaseMapAttribution) map.attributionControl.removeAttribution(currentBaseMapAttribution);
@@ -485,14 +522,19 @@ const setBaseMap = async name => {
 	} catch {
 		// ...
 	}
+
+	if (wasOnMap) return;
+
+	try {
+		await waitForBaseMapLoad(targetLayer, name);
+	} catch (err) {
+		if (requestId === baseMapRequestId) throw err;
+	}
 };
 
 void setBaseMap(baseMapSelected).catch(err => {
 	console.error('Failed to set the base map:', err);
-	showToast(t('map:basemapLoadFailed'), { status: 'error' });
-
-	const fallbackName = baseMapSelected === FALLBACK_BASEMAP_NAME ? 'OpenStreetMap' : FALLBACK_BASEMAP_NAME;
-	void setBaseMap(fallbackName).catch(fallbackErr => console.error('Failed to set the fallback base map:', fallbackErr));
+	activateBaseMapFallback?.(baseMapSelected);
 });
 
 const nodeTypeIconNames = { 1: 'client', 2: 'repeater', 3: 'room-server', 4: 'sensor' };
@@ -660,7 +702,7 @@ const statsModal = initStatsModal({
 	onShowOnMap: nodes => showNodesHighlight(nodes),
 });
 
-const changelogModal = initChangelogModal({ escapeHtml, onDismiss: () => legendPanelUi.open() });
+const changelogModal = initChangelogModal({ onDismiss: () => legendPanelUi.open() });
 const measureTool = initMeasureTool({ map, setPicker, escapeHtml, getNodes: () => state.nodes, showToast });
 const routeTool = initRouteTool({ map, getNodes: () => state.nodes, escapeHtml });
 let elevationSource = localStorage.getItem('elevationSource') || 'sefinek';
@@ -1391,10 +1433,25 @@ const renderBaseMapToggle = () => {
 	[...basemapMenu.children].forEach(li => li.classList.toggle('active', li.dataset.basemap === currentBaseMap));
 };
 
+activateBaseMapFallback = (failedName, toastHandle) => {
+	if (failedName !== currentBaseMap) return;
+
+	const nextName = getNextFallbackBaseMap(failedName);
+	if (!nextName) return;
+
+	console.error(`Base map "${failedName}" failed to load, falling back to "${nextName}".`);
+	updateToast(toastHandle, t('map:basemapFallback', { failed: failedName, fallback: nextName }), { status: 'error' });
+
+	currentBaseMap = nextName;
+	renderBaseMapToggle();
+
+	setBaseMap(nextName).catch(() => activateBaseMapFallback(nextName, toastHandle));
+};
+
 const renderBasemapMenu = () => {
 	basemapMenu.innerHTML = getBaseMapGroups().map(group => `
-		<li class="basemap-category">${escapeHtml(group.label)}</li>
-		${group.names.map(name => `<li data-basemap="${escapeHtml(name)}" title="${escapeHtml(baseMapInfo[name])}">${escapeHtml(name)}</li>`).join('')}`
+		<li class="basemap-category">${group.label}</li>
+		${group.names.map(name => `<li data-basemap="${name}" title="${baseMapInfo[name]}">${name}</li>`).join('')}`
 	).join('');
 };
 
@@ -1405,22 +1462,23 @@ basemapMenu.addEventListener('click', e => {
 	const li = e.target.closest('li');
 	if (!li?.dataset.basemap) return;
 
-	currentBaseMap = li.dataset.basemap;
+	const selectedName = li.dataset.basemap;
+	currentBaseMap = selectedName;
 	renderBaseMapToggle();
 	basemapMenu.hidden = true;
 
-	const loadingToast = maplibreBaseMapOptions[currentBaseMap] && !maplibreBaseMaps[currentBaseMap]
+	const loadingToast = maplibreBaseMapOptions[selectedName] && !maplibreBaseMaps[selectedName]
 		? showToast(t('map:loadingBasemap'), { duration: 0, status: 'loading' })
 		: null;
 
-	setBaseMap(currentBaseMap)
+	setBaseMap(selectedName)
 		.then(() => {
+			if (selectedName !== currentBaseMap) return;
 			if (loadingToast) updateToast(loadingToast, t('map:basemapLoaded'), { duration: 1000, status: 'success' });
 		})
 		.catch(err => {
 			console.error('Failed to set the base map:', err);
-			if (loadingToast) updateToast(loadingToast, t('map:basemapLoadFailed'), { status: 'error' });
-			else showToast(t('map:basemapLoadFailed'), { status: 'error' });
+			activateBaseMapFallback(selectedName, loadingToast);
 		});
 });
 

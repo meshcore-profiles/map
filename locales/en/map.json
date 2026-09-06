@@ -79,7 +79,7 @@
 	"vectorBaseMaps": "Vector",
 	"loadingBasemap": "Loading map...",
 	"basemapLoaded": "Map loaded",
-	"basemapLoadFailed": "Failed to load the map",
+	"basemapFallback": "Failed to load the \"{{failed}}\" map. Switched to \"{{fallback}}\"",
 	"basemapMissingApiKey": "The \"{{name}}\" map is unavailable (missing API key). Switched to the default map.",
 	"regionWarningTitle": "Are you sure?",
 	"regionWarningText": "Worldwide data weighs {{size}}, considerably more than just the nodes from Poland.  On older devices the map may also become somewhat less responsive.",

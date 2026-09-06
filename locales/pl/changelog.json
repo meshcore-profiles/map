@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.8.1",
+			"date": "06.09.2026",
+			"changes": [
+				"Tymczasowo wyłączono mapy MapTiler (Hybrid, Outdoor) - klucz API unieważniony do 26.09.2026. Domyślną mapą jest teraz Esri Hybrid.",
+				"Dodano automatyczny fallback na inną mapę bazową, gdy aktywna nie wczyta się poprawnie (Esri Hybrid -> CartoDB Dark -> OpenStreetMap).",
+				"Inne, drobne poprawki."
+			]
+		},
+		{
 			"version": "0.8.0",
 			"date": "03.09.2026",
 			"changes": [

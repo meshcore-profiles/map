@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.8.1",
+			"date": "2026-09-06",
+			"changes": [
+				"Temporarily disabled the MapTiler maps (Hybrid, Outdoor) - the API key is invalidated until 2026-09-26. Esri Hybrid is now the default map.",
+				"Added automatic fallback to another base map when the active one fails to load (Esri Hybrid -> CartoDB Dark -> OpenStreetMap).",
+				"Other minor fixes."
+			]
+		},
+		{
 			"version": "0.8.0",
 			"date": "2026-09-03",
 			"changes": [
