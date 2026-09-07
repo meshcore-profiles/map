@@ -1,6 +1,6 @@
 {
   "name": "meshcoreprofiles",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "private": true,
   "homepage": "https://map.meshcoreprofiles.com",
   "bugs": {
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "axios": "^1.20.0",
+    "cors": "^2.8.6",
     "cron": "^4.4.0",
     "ejs": "^6.0.1",
     "express": "^5.2.1",

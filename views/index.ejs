@@ -68,7 +68,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<link rel="stylesheet" href="/css/tools.css">
 
 	<!-- schema.org -->
-	<script type="application/ld+json">
+	<script type="application/ld+json" nonce="<%= cspNonce %>">
 	<%- JSON.stringify({
 		'@context': 'https://schema.org',
 		'@graph': [
@@ -490,8 +490,8 @@ const _titleBrand = site.shortName || site.brandName; %>
 				<span><%= t('coverage:resolution') %></span>
 				<select class="date-input" id="coverage-resolution">
 					<option value="fast"><%= t('coverage:resolutionFast') %></option>
-					<option value="standard" selected><%= t('coverage:resolutionStandard') %></option>
-					<option value="high"><%= t('coverage:resolutionHigh') %></option>
+					<option value="standard"><%= t('coverage:resolutionStandard') %></option>
+					<option value="high" selected><%= t('coverage:resolutionHigh') %></option>
 				</select>
 			</label>
 			<label class="field-group" title="<%= t('coverage:terrainMarginDesc') %>">
@@ -542,7 +542,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 
 <div id="toast-container" aria-live="polite"></div>
 
-<script>
+<script nonce="<%= cspNonce %>">
 window.MAP_CONFIG = {
 	defaultRegion: <%- JSON.stringify(site.defaultRegion) %>,
 	defaultView: <%- JSON.stringify(site.defaultView) %>,
@@ -559,7 +559,7 @@ window.MAP_CONFIG = {
 </script>
 <script src="/vendor/leaflet/leaflet.js"></script>
 <script src="/vendor/markercluster/leaflet.markercluster.js"></script>
-<script type="importmap">
+<script type="importmap" nonce="<%= cspNonce %>">
 {
 	"imports": {
 		"leaflet": "/js/leaflet-esm.js",

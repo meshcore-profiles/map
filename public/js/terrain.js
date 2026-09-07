@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { createPathLayer, findNodeNearLatLng, formatDistance, loadJson, resolveNodeByQuery } from './pathtools.js';
-import { curvatureDrop, ELEVATION_PROVIDERS, fetchElevations, haversineDistance, interpolate, parseLatLng } from './elevation.js';
+import { curvatureDrop, ELEVATION_PROVIDERS, fetchElevations, haversineDistance, interpolate, parseLatLng, requireSefinekElevationSource } from './elevation.js';
 
 const SAMPLE_COUNT = 48;
 
@@ -92,10 +92,13 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 		if (modal.overlay.hidden) {
 			if (!pickingFor) preview.hide();
 		} else {
-			preview.show();
+			if (!requireSefinekElevationSource(getElevationSource, showToast)) {
+				modal.close();
+				return;
+			}
 
-			const source = getElevationSource ? getElevationSource() : 'sefinek';
-			titleEl.textContent = t('terrain:titleWithSource', { source: (ELEVATION_PROVIDERS[source] || ELEVATION_PROVIDERS.sefinek).label });
+			preview.show();
+			titleEl.textContent = t('terrain:titleWithSource', { source: ELEVATION_PROVIDERS.sefinek.label });
 		}
 	}).observe(modal.overlay, { attributes: true, attributeFilter: ['hidden'] });
 
@@ -247,6 +250,8 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 			return;
 		}
 
+		if (!requireSefinekElevationSource(getElevationSource, showToast)) return;
+
 		const heightA = Number(heightAInput.value) || 0;
 		const heightB = Number(heightBInput.value) || 0;
 		const total = haversineDistance(points.a, points.b);
@@ -260,8 +265,7 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 
 		try {
 			const samplePoints = new Array(SAMPLE_COUNT).fill(0).map((_, i) => interpolate(points.a, points.b, i / (SAMPLE_COUNT - 1)));
-			const source = getElevationSource ? getElevationSource() : 'sefinek';
-			const elevations = await fetchElevations(samplePoints, source);
+			const elevations = await fetchElevations(samplePoints, 'sefinek');
 			const distances = samplePoints.map(p => haversineDistance(points.a, p));
 
 			const elevA = elevations[0] + heightA;

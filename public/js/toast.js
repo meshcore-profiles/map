@@ -20,7 +20,7 @@ const scheduleDismiss = (el, duration) => {
 	el.dismissTimer = setTimeout(() => dismissToast(el), duration);
 };
 
-export const showToast = (message, { duration = 2200, status = 'success' } = {}) => {
+export const showToast = (message, { duration = 3000, status = 'success' } = {}) => {
 	const el = document.createElement('div');
 	renderToastContent(el, message, status);
 
@@ -31,7 +31,7 @@ export const showToast = (message, { duration = 2200, status = 'success' } = {})
 	return el;
 };
 
-export const updateToast = (el, message, { duration = 2200, status = 'success' } = {}) => {
+export const updateToast = (el, message, { duration = 3000, status = 'success' } = {}) => {
 	if (!el?.isConnected) return showToast(message, { duration, status });
 
 	clearTimeout(el.dismissTimer);

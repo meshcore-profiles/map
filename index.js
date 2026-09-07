@@ -1,6 +1,8 @@
 process.loadEnvFile();
 const express = require('express');
 const helmet = require('helmet');
+const cors = require('cors');
+const crypto = require('node:crypto');
 const { version } = require('./package.json');
 const { DOMAIN, NODE_ENV, PORT, SITE_MODE } = process.env;
 const isProd = NODE_ENV === 'production';
@@ -38,8 +40,54 @@ app.set('view engine', 'ejs');
 app.locals.domain = `${process.env.DOMAIN}${isProd ? '' : `:${process.env.PORT}`}`;
 app.locals.v = version;
 
+// Safe origins allowed to read this app's resources cross-origin (e.g. the flasher app loading static JS)
+const SAFE_ORIGINS = [
+	'https://flasher.meshcorepolska.org',
+	...(isProd ? [] : ['http://127.0.0.1:8081', 'http://localhost:8081']),
+];
+
+// External hosts the frontend actually loads resources from (tiles, elevation lookups, etc.)
+const TILE_HOSTS = [
+	'https://tile.openstreetmap.org',
+	'https://*.tile.opentopomap.org',
+	'https://*.tile-cyclosm.openstreetmap.fr',
+	'https://*.tile.openstreetmap.fr',
+	'https://server.arcgisonline.com',
+	'https://*.basemaps.cartocdn.com',
+	'https://api.maptiler.com',
+	'https://tiles.openfreemap.org',
+];
+
+// Generate a per-request CSP nonce for the inline <script>/<style> tags in views/*.ejs
+app.use((req, res, next) => {
+	res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+	next();
+});
+
 // Use middlewares
-app.use(helmet({ crossOriginResourcePolicy: false, contentSecurityPolicy: false }));
+app.use(helmet({
+	crossOriginResourcePolicy: false,
+	contentSecurityPolicy: {
+		useDefaults: false,
+		directives: {
+			defaultSrc: ['\'self\''],
+			baseUri: ['\'self\''],
+			objectSrc: ['\'none\''],
+			scriptSrc: ['\'self\'', 'https://cdn.sefinek.net', (req, res) => `'nonce-${res.locals.cspNonce}'`],
+			scriptSrcAttr: ['\'none\''],
+			styleSrc: ['\'self\'', 'https://fonts.googleapis.com', (req, res) => `'nonce-${res.locals.cspNonce}'`],
+			fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
+			imgSrc: ['\'self\'', 'data:', 'blob:', 'https://meshcorepolska.org', ...TILE_HOSTS],
+			connectSrc: ['\'self\'', 'https://meshcorepolska.org', 'https://api.meshcore.nz', 'https://api.open-elevation.com', 'https://api.open-meteo.com', ...(process.env.SEFINEK_API ? [process.env.SEFINEK_API] : []), ...TILE_HOSTS],
+			workerSrc: ['\'self\'', 'blob:'],
+			childSrc: ['\'self\'', 'blob:'],
+			manifestSrc: ['\'self\''],
+			frameAncestors: ['\'self\''],
+			formAction: ['\'self\''],
+		},
+	},
+}));
+app.use(cors({ origin: SAFE_ORIGINS }));
 app.use(express.static('public'));
 app.use((req, res, next) => {
 	req.site = resolveSite(req);

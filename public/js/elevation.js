@@ -1,4 +1,5 @@
 import { pack, unpack } from '../vendor/msgpackr/msgpackr.js';
+import { t } from './i18n.js';
 
 export const EARTH_RADIUS = 6371000;
 const EFFECTIVE_EARTH_RADIUS = EARTH_RADIUS * 4 / 3;
@@ -86,7 +87,7 @@ export const ELEVATION_PROVIDERS = {
 	},
 	'open-meteo': {
 		label: 'Open-Meteo',
-		maxBatchSize: 200,
+		maxBatchSize: 100,
 		fetch: async points => {
 			const lat = points.map(p => p.lat).join(',');
 			const lng = points.map(p => p.lng).join(',');
@@ -100,3 +101,13 @@ export const ELEVATION_PROVIDERS = {
 };
 
 export const fetchElevations = (points, source) => (ELEVATION_PROVIDERS[source] || ELEVATION_PROVIDERS.sefinek).fetch(points);
+
+// terrain.js/coverage.js only actually query the sefinek backend - the other providers are unreliable
+// public APIs (batch limits, rate limits), kept selectable only so a future fix can re-enable them.
+export const requireSefinekElevationSource = (getElevationSource, showToast) => {
+	const source = getElevationSource ? getElevationSource() : 'sefinek';
+	if (source === 'sefinek') return true;
+
+	showToast(t('common:elevationSourceUnsupported'), { status: 'error', duration: 6000 });
+	return false;
+};

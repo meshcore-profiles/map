@@ -2,7 +2,7 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { ensurePane, escapeHtml, formatDistance, findNodeNearLatLng, loadJson, resolveNodeByQuery } from './pathtools.js';
-import { curvatureDrop, destinationPoint, ELEVATION_PROVIDERS, fetchElevations, parseLatLng } from './elevation.js';
+import { curvatureDrop, destinationPoint, ELEVATION_PROVIDERS, fetchElevations, parseLatLng, requireSefinekElevationSource } from './elevation.js';
 import { truncateKey } from './node-utils.js';
 import { updateToast } from './toast.js';
 
@@ -130,8 +130,12 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 	new MutationObserver(() => {
 		if (!modal.overlay.hidden) {
-			const source = getElevationSource ? getElevationSource() : 'sefinek';
-			titleEl.textContent = t('coverage:titleWithSource', { source: (ELEVATION_PROVIDERS[source] || ELEVATION_PROVIDERS.sefinek).label });
+			if (!requireSefinekElevationSource(getElevationSource, showToast)) {
+				modal.close();
+				return;
+			}
+
+			titleEl.textContent = t('coverage:titleWithSource', { source: ELEVATION_PROVIDERS.sefinek.label });
 			populatePresets();
 		}
 	}).observe(modal.overlay, { attributes: true, attributeFilter: ['hidden'] });
@@ -287,7 +291,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 	});
 
 	const updateEstimate = () => {
-		const bearings = RESOLUTIONS[resolutionSelect.value] || RESOLUTIONS.standard;
+		const bearings = RESOLUTIONS[resolutionSelect.value] || RESOLUTIONS.high;
 		const maxRangeM = (Number(maxRangeInput.value) || 0) * 1000;
 		const samples = computeSamplesPerRay(maxRangeM, bearings);
 		const totalPoints = bearings * samples + 1;
@@ -465,6 +469,8 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			return;
 		}
 
+		if (!requireSefinekElevationSource(getElevationSource, showToast)) return;
+
 		const freqMHz = Number(freqInput.value);
 		if (!freqMHz || freqMHz <= 0) {
 			showToast(t('coverage:invalidFrequency'), { status: 'error' });
@@ -485,7 +491,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		const bwKHz = Number(bwInput.value) || 250;
 		const linkBudgetRangeM = computeLinkBudgetRangeM(erpDbm, freqMHz, sf, bwKHz);
 
-		const bearings = RESOLUTIONS[resolutionSelect.value] || RESOLUTIONS.standard;
+		const bearings = RESOLUTIONS[resolutionSelect.value] || RESOLUTIONS.high;
 		const samplesPerRay = computeSamplesPerRay(maxRangeM, bearings);
 		const bearingStep = 360 / bearings;
 
@@ -503,15 +509,14 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 			const allPoints = [origin, ...rayPoints];
 			const elevations = new Array(allPoints.length);
-			const source = getElevationSource ? getElevationSource() : 'sefinek';
-			const chunkSize = (ELEVATION_PROVIDERS[source] || ELEVATION_PROVIDERS.sefinek).maxBatchSize || DEFAULT_CHUNK_SIZE;
+			const chunkSize = ELEVATION_PROVIDERS.sefinek.maxBatchSize || DEFAULT_CHUNK_SIZE;
 			const chunkCount = Math.ceil(allPoints.length / chunkSize);
 
 			for (let c = 0; c < chunkCount; c++) {
 				const start = c * chunkSize;
 				const end = Math.min(start + chunkSize, allPoints.length);
 				if (chunkCount > 1) updateToast(loadingToast, t('coverage:fetchingElevationProgress', { current: c + 1, total: chunkCount }), { duration: 0, status: 'loading' });
-				const chunkElevations = await fetchElevations(allPoints.slice(start, end), source);
+				const chunkElevations = await fetchElevations(allPoints.slice(start, end), 'sefinek');
 				for (let k = 0; k < chunkElevations.length; k++) elevations[start + k] = chunkElevations[k];
 			}
 

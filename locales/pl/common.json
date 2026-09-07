@@ -17,5 +17,6 @@
 		"second": ["sekunda", "sekundy", "sekund"]
 	},
 	"timeAgo": "{{count}} {{unit}} temu",
-	"justNow": "przed chwilą"
+	"justNow": "przed chwilą",
+	"elevationSourceUnsupported": "To narzędzie działa obecnie tylko z Sefinek API. Zmień źródło danych wysokościowych w Ustawieniach."
 }
