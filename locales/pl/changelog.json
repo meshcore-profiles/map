@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.8.2",
+			"date": "07.09.2026",
+			"changes": [
+				"Wzmocniono bezpieczeństwo strony: doprecyzowano politykę CORS oraz dodano nagłówek Content-Security-Policy chroniący przed atakami XSS.",
+				"Narzędzia „Analiza terenu i zasięgu” oraz „Warstwa zasięgu” działają teraz wyłącznie z Sefinek API - wybranie innego źródła w Ustawieniach pokaże odpowiedni komunikat zamiast błędu.",
+				"Domyślną rozdzielczość kierunków w warstwie zasięgu zmieniono na „Wysoka” (144 kierunki) dla dokładniejszych wyników."
+			]
+		},
+		{
 			"version": "0.8.1",
 			"date": "06.09.2026",
 			"changes": [

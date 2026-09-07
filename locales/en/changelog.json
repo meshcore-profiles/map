@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.8.2",
+			"date": "2026-09-07",
+			"changes": [
+				"Hardened site security: tightened the CORS policy and added a Content-Security-Policy header to protect against XSS attacks.",
+				"The \"Terrain and coverage analysis\" and \"Coverage layer\" tools now only work with the Sefinek API - picking another source in Settings now shows a message instead of failing.",
+				"Changed the coverage layer's default direction resolution to \"High\" (144 directions) for more accurate results."
+			]
+		},
+		{
 			"version": "0.8.1",
 			"date": "2026-09-06",
 			"changes": [
