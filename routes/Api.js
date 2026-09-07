@@ -14,7 +14,7 @@ router.get('/nodes', async (req, res) => {
 		res.set('Content-Type', 'application/octet-stream');
 		res.set('Cache-Control', 'no-store');
 
-		const lastRefreshedAt = getLastRefreshedAt();
+		const lastRefreshedAt = await getLastRefreshedAt();
 		if (lastRefreshedAt) res.set('X-Data-Updated', lastRefreshedAt.toISOString());
 
 		res.send(nodes);

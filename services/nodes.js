@@ -1,31 +1,8 @@
-const fs = require('node:fs');
-const path = require('node:path');
 const { RESP_TYPES } = require('redis');
-const { pack, unpack } = require('msgpackr');
-const axios = require('../global/services/axios.js');
+const { unpack } = require('msgpackr');
 const RedisClient = require('../global/services/redis.js');
-const { simplifyRing, getBoundingBox, isPointInPolygon } = require('../utils/geo.js');
 
-const UPSTREAM_URL = 'https://map.meshcore.io/api/v1/nodes?binary=1&short=1';
-const REDIS_KEYS = { all: 'mmc:nodes:all', pl: 'mmc:nodes:pl' };
-const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
-const RETRY_DELAY_MS = 30 * 1000;
-const BORDER_SIMPLIFY_TOLERANCE_DEG = 0.0002; // ~22 m at Poland's latitude
-
-// Full administrative border of Poland [lon, lat] (source: https://nominatim.openstreetmap.org/search?country=poland&polygon_geojson=1&format=geojson&polygon_threshold=0)
-const polandBorder = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/poland-border.geojson'), 'utf8'));
-
-// The raw ring has ~67k points - ray-casting against it for every node is many times slower
-// than against the simplified version, and the classification only differs for points right on the border
-const POLAND_POLYGON = simplifyRing(polandBorder.features[0].geometry.coordinates[0], BORDER_SIMPLIFY_TOLERANCE_DEG);
-
-// Bounding box around Poland's border - a cheap pre-filter to avoid expensive ray-casting for nodes far outside Poland
-const POLAND_BBOX = getBoundingBox(POLAND_POLYGON);
-
-const isInPoland = ({ lat, lon }) => {
-	if (lat < POLAND_BBOX.latMin || lat > POLAND_BBOX.latMax || lon < POLAND_BBOX.lonMin || lon > POLAND_BBOX.lonMax) return false;
-	return isPointInPolygon(lat, lon, POLAND_POLYGON);
-};
+const REDIS_KEYS = { all: 'nodes:all', pl: 'nodes:pl', updatedAt: 'nodes:updatedAt' };
 
 const REPEATER_TYPE = 2;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -38,54 +15,19 @@ const typedRedisClient = RedisClient.withTypeMapping({ [RESP_TYPES.BLOB_STRING]:
 const warsawDateFormatter = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Warsaw' });
 const formatWarsawDate = date => warsawDateFormatter.format(date);
 
-// Buffers kept in this process's memory - avoids a round trip to Redis on every /api/v1/nodes request.
-// Redis remains as a persistent cache we rely on until the process completes its own first refresh (e.g. right after a restart)
-const memoryCache = { all: null, pl: null };
-let lastRefreshedAt = null;
+// The node data itself is fetched, filtered and cached into Redis by the meshcore-profiles/cronjobs
+// worker (jobs/nodes-refresh.js), on its own schedule - this app only ever reads that cache.
 const statsCache = { all: null, pl: null };
 
-const refreshNodes = async () => {
-	const startedAt = Date.now();
-	let allBuffer, plBuffer;
-
-	try {
-		const { data } = await axios.get(UPSTREAM_URL, { responseType: 'arraybuffer' });
-		allBuffer = Buffer.from(data);
-		plBuffer = pack(unpack(allBuffer).filter(isInPoland));
-	} catch (err) {
-		console.error('[refreshNodes] Failed to fetch nodes from upstream:', err.message || err.stack);
-		return false;
-	}
-
-	memoryCache.all = allBuffer;
-	memoryCache.pl = plBuffer;
-	lastRefreshedAt = new Date();
-	statsCache.all = null;
-	statsCache.pl = null;
-
-	// Redis is a persistent cache shared across process restarts - its failure shouldn't
-	// throttle upstream refreshes down to RETRY_DELAY_MS pace when the in-memory data is already fresh
-	try {
-		await Promise.all([
-			RedisClient.set(REDIS_KEYS.all, allBuffer),
-			RedisClient.set(REDIS_KEYS.pl, plBuffer),
-		]);
-	} catch (err) {
-		console.error('[refreshNodes] Failed to persist cache to Redis:', err.message || err.stack);
-	}
-
-	if (process.env.NODE_ENV !== 'production') console.log(`[refreshNodes] Cache refreshed (all: ${allBuffer.byteLength} bytes, pl: ${plBuffer.byteLength} bytes) in ${Date.now() - startedAt}ms`);
-	return true;
-};
-
-const getCachedNodes = async (region = 'pl') => {
+const getCachedNodes = (region = 'pl') => {
 	const key = REDIS_KEYS[region] ? region : 'pl';
-	if (memoryCache[key]) return memoryCache[key];
-
 	return typedRedisClient.get(REDIS_KEYS[key]);
 };
 
-const getLastRefreshedAt = () => lastRefreshedAt;
+const getLastRefreshedAt = async () => {
+	const value = await RedisClient.get(REDIS_KEYS.updatedAt);
+	return value ? new Date(value) : null;
+};
 
 const getNodeStatus = node => {
 	if (node.s?.[0] !== 'u') return 'none';
@@ -116,30 +58,26 @@ const computeStats = nodes => {
 	return { total: types.repeater, active: status.recent, nodes: nodes.length, types, status };
 };
 
-const ensureStatsComputed = async region => {
-	if (statsCache[region]) return statsCache[region];
+// Memoized per region, invalidated whenever the cronjobs worker's last refresh timestamp moves on -
+// cheaper than recomputing stats from the full node set on every request.
+const ensureStatsComputed = async (region, lastRefreshedAt) => {
+	const cached = statsCache[region];
+	if (cached && cached.refreshedAtMs === (lastRefreshedAt ? lastRefreshedAt.getTime() : null)) return cached.stats;
 
 	const buffer = await getCachedNodes(region);
 	if (!buffer) return null;
 
-	statsCache[region] = computeStats(unpack(buffer));
-	return statsCache[region];
+	const stats = computeStats(unpack(buffer));
+	statsCache[region] = { refreshedAtMs: lastRefreshedAt ? lastRefreshedAt.getTime() : null, stats };
+	return stats;
 };
 
 const getStats = async (region = 'pl') => {
-	const computed = await ensureStatsComputed(region);
+	const lastRefreshedAt = await getLastRefreshedAt();
+	const computed = await ensureStatsComputed(region, lastRefreshedAt);
 	if (!computed) return null;
 
 	return { ...computed, lastRefreshedAt: lastRefreshedAt ? lastRefreshedAt.toISOString() : null };
 };
 
-const startNodesRefreshJob = () => {
-	const tick = async () => {
-		const refreshed = await refreshNodes();
-		setTimeout(tick, refreshed ? REFRESH_INTERVAL_MS : RETRY_DELAY_MS);
-	};
-
-	void tick();
-};
-
-module.exports = { refreshNodes, getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate, startNodesRefreshJob };
+module.exports = { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate };

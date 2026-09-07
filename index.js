@@ -15,10 +15,8 @@ const resolveSite = req => {
 	return SITES.HOSTS[req.hostname] || SITES.default;
 };
 
-// Fetch nodes on boot, then keep the Redis cache warm on an interval
-const { startNodesRefreshJob } = require('./services/nodes.js');
-startNodesRefreshJob();
-
+// Node data itself is fetched/cached into Redis by the meshcore-profiles/cronjobs worker;
+// this app only reads it (see services/nodes.js).
 require('./global/database/mongoose.js');
 
 // Middleware imports
@@ -112,11 +110,9 @@ app.use(timeout());
 // Routes
 const IndexRouter = require('./routes/Index.js');
 const APIRouter = require('./routes/Api.js');
-const InternalRouter = require('./routes/Internal.js');
 
 app.use(IndexRouter);
 app.use('/api/v1', APIRouter);
-app.use('/api/internal', InternalRouter);
 
 
 // Error handling
