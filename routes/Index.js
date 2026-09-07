@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { LANGUAGES, langPath } = require('../utils/languageResolver.js');
+const { LANGUAGES, langPath } = require('../global/utils/languageResolver.js');
 
 router.get('/', (req, res) => res.render('index.ejs'));
 router.get('/test', (req, res) => res.render('test.ejs'));

@@ -27,7 +27,7 @@ const logger = require('./middlewares/morgan.js');
 const globalLimiter = require('./middlewares/ratelimit.js');
 const language = require('./middlewares/language.js');
 const languageNegotiation = require('./middlewares/languageNegotiation.js');
-const { detectLanguagePrefix, isLanguageAgnosticPath } = require('./utils/languageResolver.js');
+const { detectLanguagePrefix, isLanguageAgnosticPath } = require('./global/utils/languageResolver.js');
 const HttpError = require('./utils/httpError.js');
 
 // Create an Express app

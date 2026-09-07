@@ -1,4 +1,4 @@
-const { langPath, negotiatePreferred, getLangCookie, AVAILABLE_LANGUAGES, isLanguageAgnosticPath } = require('../utils/languageResolver.js');
+const { langPath, negotiatePreferred, getLangCookie, AVAILABLE_LANGUAGES, isLanguageAgnosticPath } = require('../global/utils/languageResolver.js');
 
 const isProd = process.env.NODE_ENV === 'production';
 const LANG_COOKIE_OPTIONS = { maxAge: 31536000000, httpOnly: true, sameSite: 'lax', secure: isProd, path: '/' };

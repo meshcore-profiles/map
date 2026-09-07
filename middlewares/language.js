@@ -1,6 +1,6 @@
 const i18nextMiddleware = require('i18next-http-middleware');
-const { i18next, resources } = require('../services/i18n.js');
-const { LANGUAGES, langPath } = require('../utils/languageResolver.js');
+const { i18next, resources } = require('../global/services/i18n.js');
+const { LANGUAGES, langPath } = require('../global/utils/languageResolver.js');
 
 const isProd = process.env.NODE_ENV === 'production';
 
