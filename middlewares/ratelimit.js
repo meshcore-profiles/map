@@ -1,6 +1,6 @@
 const rateLimit = require('express-rate-limit');
 const { RedisStore } = require('rate-limit-redis');
-const RedisClient = require('../services/redis.js');
+const RedisClient = require('../global/services/redis.js');
 const HttpError = require('../utils/httpError.js');
 
 const globalLimiter = rateLimit({

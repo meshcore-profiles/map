@@ -19,8 +19,7 @@ const resolveSite = req => {
 const { startNodesRefreshJob } = require('./services/nodes.js');
 startNodesRefreshJob();
 
-require('./database/mongoose.js');
-require('./services/statsHistory.js');
+require('./global/database/mongoose.js');
 
 // Middleware imports
 const timeout = require('./middlewares/timeout.js');
@@ -113,9 +112,11 @@ app.use(timeout());
 // Routes
 const IndexRouter = require('./routes/Index.js');
 const APIRouter = require('./routes/Api.js');
+const InternalRouter = require('./routes/Internal.js');
 
 app.use(IndexRouter);
 app.use('/api/v1', APIRouter);
+app.use('/api/internal', InternalRouter);
 
 
 // Error handling

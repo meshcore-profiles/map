@@ -2,8 +2,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { RESP_TYPES } = require('redis');
 const { pack, unpack } = require('msgpackr');
-const axios = require('./axios.js');
-const RedisClient = require('./redis.js');
+const axios = require('../global/services/axios.js');
+const RedisClient = require('../global/services/redis.js');
 const { simplifyRing, getBoundingBox, isPointInPolygon } = require('../utils/geo.js');
 
 const UPSTREAM_URL = 'https://map.meshcore.io/api/v1/nodes?binary=1&short=1';

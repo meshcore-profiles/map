@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate } = require('../services/nodes.js');
-const StatsDaily = require('../database/models/statsDaily.model.js');
+const StatsDaily = require('../global/database/models/statsDaily.model.js');
 
 const MAX_HISTORY_DAYS = 365;
 const DEFAULT_HISTORY_DAYS = 90;
@@ -28,7 +28,8 @@ router.get('/repeater-stats', async (req, res) => {
 	res.set('Access-Control-Allow-Origin', '*');
 
 	try {
-		const stats = await getStats();
+		const region = req.query.region === 'all' ? 'all' : 'pl';
+		const stats = await getStats(region);
 		if (!stats) return res.status(503).json({ success: false, status: 503, message: req.t('error:nodesNotAvailable') });
 
 		res.set('Cache-Control', 'public, max-age=60');
