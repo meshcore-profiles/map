@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate } = require('../services/nodes.js');
+const { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate } = require('../global/services/nodeCache.js');
 const StatsDaily = require('../global/database/models/statsDaily.model.js');
 
 const MAX_HISTORY_DAYS = 365;

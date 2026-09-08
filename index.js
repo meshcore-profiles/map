@@ -16,12 +16,12 @@ const resolveSite = req => {
 };
 
 // Node data itself is fetched/cached into Redis by the meshcore-profiles/cronjobs worker;
-// this app only reads it (see services/nodes.js).
+// this app only reads it (see global/services/nodeCache.js).
 require('./global/database/mongoose.js');
 
 // Middleware imports
 const timeout = require('./middlewares/timeout.js');
-const logger = require('./middlewares/morgan.js');
+const logger = require('./global/middlewares/morgan.js');
 const globalLimiter = require('./middlewares/ratelimit.js');
 const language = require('./middlewares/language.js');
 const languageNegotiation = require('./middlewares/languageNegotiation.js');
