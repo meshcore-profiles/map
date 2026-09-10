@@ -20,7 +20,7 @@ UI text and code comments in the **frontend** (`public/`) are in Polish. Code co
 - There are no tests in this repo.
 - `npm run m` - updates dependencies via `ncu -u && npm install && npm update` (maintenance only, not for regular development)
 - Production runs under PM2 as the `mcmap` process (see `ecosystem.config.js`); `npm run update` pulls, does a production install, and restarts via `pm2 restart mcmap`.
-- `global/database/syncIndexes.js` - standalone script, meant to be run manually (`node global/database/syncIndexes.js`) to sync Mongoose indexes against MongoDB. **Currently broken**: it resolves models from `<repo-root>/database/models` (two levels up from its own location inside the submodule), but this repo has no such directory - the actual models (`global/database/models/*.model.js`) live inside the submodule itself (see "Shared `global` submodule" below), so its `fs.readdir` call finds nothing to sync.
+- `global/database/syncIndexes.js` - standalone script run manually (`node global/database/syncIndexes.js`), syncs Mongoose indexes for every model in `global/database/models/` (see "Shared `global` submodule" below) against the actual state in MongoDB.
 - Requires running **MongoDB** and **Redis** instances, plus a `.env` file (copy of `.env.example`): `NODE_ENV`, `DOMAIN`, `PORT`, `SEFINEK_API` (base URL of the elevation API, exposed to the frontend), `SITE_MODE` (`auto`/`poland`/`global` - forces a site regardless of host), `MONGODB_URL`, `REDIS_HOST`, `REDIS_PASSWD`, optionally `MAPTILER_API_KEY` and `CARTO_API_KEY` (unlock extra basemaps).
 
 ## Architecture
@@ -54,8 +54,8 @@ Files this repo actually requires from `global/`:
 - `global/utils/nodeStats.js` - `REDIS_KEYS` plus pure node-stats computation (`getNodeStatus`, `computeStats`; node status `recent`/`stale`/`old`/`extinct` derived from the age of `updated_date` against thresholds of 5/10/20 days, only applying to nodes whose `source` starts with `'u'`) - shared verbatim with `cronjobs` and `meshcorepolska.org`.
 - `global/middlewares/morgan.js` - shared request logger, wired in `index.js` as `logger` (the uptime-monitoring-bot skip by User-Agent is currently commented out/disabled) - shared verbatim with `meshcorepolska.org`.
 - `global/database/mongoose.js` - a single Mongoose connection, connected on import; a connection failure is only logged, it doesn't crash the process.
-- `global/database/models/statsDaily.model.js` - the `StatsDaily` model (unique index on `{ region, date }`) for historical stats. Tracked **inside the shared submodule itself** (`git ls-files` inside `global/` shows it), identical across every consuming repo - not app-specific despite what `global/database/syncIndexes.js`'s own comment claims (see below). This app only reads it (`routes/Api.js`'s `/api/v1/stats/history`); the daily snapshot rows are written by `meshcore-profiles/cronjobs` directly (`jobs/nodes-stats-snapshot.js`).
-- `global/database/syncIndexes.js` - see Commands above for why it's currently non-functional.
+- `global/database/models/statsDaily.model.js` - the `StatsDaily` model (unique index on `{ region, date }`) for historical stats. Tracked **inside the shared submodule itself** (`git ls-files` inside `global/` shows it), identical across every consuming repo. This app only reads it (`routes/Api.js`'s `/api/v1/stats/history`); the daily snapshot rows are written by `meshcore-profiles/cronjobs` directly (`jobs/nodes-stats-snapshot.js`).
+- `global/database/syncIndexes.js` - see Commands above.
 
 ### Multi-site & i18n
 
