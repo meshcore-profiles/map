@@ -16,7 +16,7 @@
   "main": "index.js",
   "scripts": {
     "m": "ncu -u && npm install && npm update",
-    "pull": "git pull origin main",
+    "pull": "git pull origin main && git submodule update --init",
     "update": "npm run pull && npm ci --omit=dev && pm2 restart mcmap"
   },
   "dependencies": {
