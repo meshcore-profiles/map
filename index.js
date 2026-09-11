@@ -40,7 +40,7 @@ app.locals.v = version;
 // Safe origins allowed to read this app's resources cross-origin (e.g. the flasher app loading static JS)
 const SAFE_ORIGINS = [
 	'https://flasher.meshcorepolska.org',
-	...(isProd ? [] : ['http://127.0.0.1:8081', 'http://localhost:8081']),
+	...(isProd ? [] : ['http://127.0.0.1:4101', 'http://localhost:4101']),
 ];
 
 // External hosts the frontend actually loads resources from (tiles, elevation lookups, etc.)
