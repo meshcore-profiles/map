@@ -1,6 +1,14 @@
 {
 	"entries": [
 		{
+			"version": "0.8.3",
+			"date": "2026-09-15",
+			"changes": [
+				"Updated the frontend MapLibre GL dependency to version 6.9.1.",
+				"Updated backend dependencies to their latest versions."
+			]
+		},
+		{
 			"version": "0.8.2",
 			"date": "2026-09-07",
 			"changes": [
