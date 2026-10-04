@@ -153,9 +153,9 @@ const _titleBrand = site.shortName || site.brandName; %>
 		<span id="basemap-toggle-label"><%= t('map:changeMapLabel') %></span>
 	</button>
 	<% if (site.languageSwitcher === 'dropdown') { %>
-	<select id="lang-select" class="region-toggle-btn lang-select" aria-label="<%= t('common:langLabel') %>">
-		<% languages.forEach(l => { %><option value="<%= site.crossLinks?.[l.code] || _switchUrl(l.code) %>" <%= l.code === languageCode ? 'selected' : '' %>><%= l.name %></option><% }); %>
-	</select>
+	<button type="button" id="lang-toggle" class="region-toggle-btn lang-toggle" aria-label="<%= t('common:langLabel') %>" aria-expanded="false" aria-controls="lang-menu">
+		<%= _curMeta.name %>
+	</button>
 	<% } %>
 	<a href="https://github.com/meshcore-profiles/map" id="github-link" title="<%= t('common:githubRepoTitle') %>" aria-label="<%= t('common:githubRepoTitle') %>" target="_blank" rel="noopener">
 		<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#github"></use></svg>
@@ -198,7 +198,12 @@ const _titleBrand = site.shortName || site.brandName; %>
 
 <ul id="search-results" hidden></ul>
 
-<ul id="basemap-menu" hidden></ul>
+<ul id="basemap-menu" class="dropdown-menu" hidden></ul>
+<% if (site.languageSwitcher === 'dropdown') { %>
+<ul id="lang-menu" class="dropdown-menu" aria-label="<%= t('common:langLabel') %>" hidden>
+	<% languages.forEach(l => { %><li><a href="<%= site.crossLinks?.[l.code] || _switchUrl(l.code) %>" lang="<%= l.code %>" <%- l.code === languageCode ? 'class="active" aria-current="true"' : '' %>><%= l.name %></a></li><% }); %>
+</ul>
+<% } %>
 
 <div id="fab-stack">
 	<button type="button" class="fab fab-secondary" id="terrain-toggle" title="<%= t('terrain:toggleTitle') %>" aria-label="<%= t('terrain:toggleTitle') %>">
@@ -545,6 +550,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 <script nonce="<%= cspNonce %>">
 window.MAP_CONFIG = {
 	defaultRegion: <%- JSON.stringify(site.defaultRegion) %>,
+	mapLanguage: <%- JSON.stringify(site.mapLanguage || null) %>,
 	defaultView: <%- JSON.stringify(site.defaultView) %>,
 	defaultRadio: <%- JSON.stringify(site.defaultRadio) %>,
 

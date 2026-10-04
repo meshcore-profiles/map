@@ -7,7 +7,9 @@
 				"Updated MapLibre GL JS to version 6.12.0.",
 				"Restored MapTiler maps.",
 				"Added a \"Default\" option that automatically selects a map based on the available API keys.",
-				"Esri Hybrid now uses an API key and vector layers. Roads appear at higher zoom levels, and place names follow the browser's language preferences.",
+				"Removed the duplicate default map entry from the map selection menu.",
+				"Fixed flickering in the global map's language menu. Matched its appearance to the map selection menu and added an animated arrow.",
+				"Esri Hybrid now uses an API key and vector layers. Roads appear at higher zoom levels. The Polish map displays Polish place names, while the global map uses local names.",
 				"Made the map attribution bar more compact: Esri sources can be expanded with a click, and the Leaflet credit was removed.",
 				"Improved map loading and fixed blocked OpenStreetMap tiles."
 			]

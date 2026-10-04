@@ -306,28 +306,7 @@ const CARTO_POSITRON_NAME = 'CartoDB Positron';
 const OPENFREEMAP_NAME = 'OpenFreeMap';
 const ESRI_HYBRID_NAME = 'Esri Hybrid';
 const ESRI_ROADS_MIN_ZOOM = 12;
-const esriLanguages = new Set('ar bs bg ca hr cs da nl en et fi fr de el he hu id it ja ko lv lt nb pl ro ru sr sk sl es sv th tr uk vi zh-HK zh-CN zh-TW pt-BR pt-PT'.split(' '));
-const getEsriLanguage = () => {
-	for (const preference of navigator.languages?.length ? navigator.languages : [navigator.language]) {
-		if (!preference) continue;
-		let locale;
-		try {
-			locale = new Intl.Locale(preference);
-		} catch {
-			continue;
-		}
-		let language = locale.language;
-		if (language === 'zh') {
-			language = locale.region === 'HK' ? 'zh-HK' : locale.maximize().script === 'Hant' ? 'zh-TW' : 'zh-CN';
-		} else if (language === 'pt') {
-			language = locale.region === 'BR' ? 'pt-BR' : 'pt-PT';
-		} else if (language === 'no' || language === 'nn') {
-			language = 'nb';
-		}
-		if (esriLanguages.has(language)) return language;
-	}
-	return 'local';
-};
+const mapLanguage = window.MAP_CONFIG.mapLanguage || 'local';
 
 const esriApiKey = window.MAP_CONFIG.esriApiKey?.trim();
 const esriToken = encodeURIComponent(esriApiKey || '');
@@ -349,7 +328,7 @@ const getNextFallbackBaseMap = failedName => {
 const maplibreBaseMapOptions = {
 	...(esriApiKey ? {
 		[ESRI_HYBRID_NAME]: {
-			style: `https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/imagery?language=${getEsriLanguage()}&token=${esriToken}`,
+			style: `https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/imagery?language=${encodeURIComponent(mapLanguage)}&token=${esriToken}`,
 			maxZoom: 18,
 		},
 	} : {}),
@@ -516,6 +495,27 @@ const loadEsriStyle = async url => {
 	return style;
 };
 
+const localizeMapStyle = (style, language) => {
+	if (!Array.isArray(style.layers)) throw new Error('Invalid map style');
+	const translate = expression => {
+		if (!Array.isArray(expression) || expression[0] === 'literal') return expression;
+		if (expression[0] === 'get' && /^name(?::[\w-]+|_[\w-]+)?$/.test(expression[1])) {
+			return ['coalesce', ['get', `name:${language}`], ['get', `name_${language}`], expression];
+		}
+		return expression.map(translate);
+	};
+	for (const layer of style.layers) {
+		const field = layer.layout?.['text-field'];
+		if (!field) continue;
+		if (typeof field === 'string' && /\{name(?::[\w-]+|_[\w-]+)?\}/.test(field)) {
+			layer.layout['text-field'] = ['coalesce', ['get', `name:${language}`], ['get', `name_${language}`], ['get', 'name'], ''];
+		} else if (Array.isArray(field)) {
+			layer.layout['text-field'] = translate(field);
+		}
+	}
+	return style;
+};
+
 const getMaplibreBaseMapLayer = async name => {
 	if (maplibreBaseMaps[name]) return maplibreBaseMaps[name];
 	if (!maplibreBaseMapPromises[name]) {
@@ -528,6 +528,10 @@ const getMaplibreBaseMapLayer = async name => {
 				options.esriAttribution = `Powered by <a href="https://www.esri.com/">Esri</a> | ` +
 					`<details class="map-attribution-details"><summary>${escapeHtml(t('map:attributionSources'))}</summary>` +
 					`<div class="map-attribution-sources">${sources.map(escapeHtml).join('<br>')}</div></details>`;
+			} else if (mapLanguage !== 'local') {
+				const response = await fetch(options.style);
+				if (!response.ok) throw new Error(`Map style request failed (${response.status})`);
+				options.style = localizeMapStyle(await response.json(), mapLanguage);
 			}
 			const layer = L.maplibreGL({ attributionControl: false, ...options });
 			maplibreBaseMaps[name] = layer;
@@ -656,8 +660,8 @@ const highlightIcons = Object.fromEntries(Object.keys(nodeTypeIconNames).map(id 
 	iconAnchor: [28, 28],
 })]));
 
-const langSelect = document.getElementById('lang-select');
-langSelect?.addEventListener('change', () => { location.href = langSelect.value; });
+const langToggle = document.getElementById('lang-toggle');
+const langMenu = document.getElementById('lang-menu');
 
 const loadingOverlay = document.getElementById('loading-overlay');
 const loadingStatus = document.getElementById('loading-status');
@@ -1523,8 +1527,9 @@ regionToggle?.addEventListener('click', async () => {
 let currentBaseMap = baseMapSelected;
 
 const renderBaseMapToggle = () => {
-	basemapToggle.classList.toggle('active', currentBaseMap !== DEFAULT_BASEMAP_SELECTION);
-	[...basemapMenu.children].forEach(li => li.classList.toggle('active', li.dataset.basemap === currentBaseMap));
+	const selectedName = resolveBaseMapName(currentBaseMap) === defaultBaseMapName ? DEFAULT_BASEMAP_SELECTION : currentBaseMap;
+	basemapToggle.classList.toggle('active', selectedName !== DEFAULT_BASEMAP_SELECTION);
+	[...basemapMenu.children].forEach(li => li.classList.toggle('active', li.dataset.basemap === selectedName));
 };
 
 activateBaseMapFallback = (failedName, toastHandle) => {
@@ -1544,7 +1549,8 @@ activateBaseMapFallback = (failedName, toastHandle) => {
 };
 
 const renderBasemapMenu = () => {
-	basemapMenu.innerHTML = `<li data-basemap="${DEFAULT_BASEMAP_SELECTION}" title="${defaultBaseMapName}">${escapeHtml(t('map:defaultBasemap'))} (${escapeHtml(defaultBaseMapName)})</li>` + getBaseMapGroups().map(group => `
+	const groups = getBaseMapGroups().map(group => ({ ...group, names: group.names.filter(name => name !== defaultBaseMapName) })).filter(group => group.names.length);
+	basemapMenu.innerHTML = `<li data-basemap="${DEFAULT_BASEMAP_SELECTION}" title="${defaultBaseMapName}">${escapeHtml(t('map:defaultBasemap'))} (${escapeHtml(defaultBaseMapName)})</li>` + groups.map(group => `
 		<li class="basemap-category">${group.label}</li>
 		${group.names.map(name => `<li data-basemap="${name}" title="${baseMapInfo[name]}">${name}</li>`).join('')}`
 	).join('');
@@ -1582,6 +1588,38 @@ basemapToggle.addEventListener('click', () => {
 	const willShow = basemapMenu.hidden;
 	basemapMenu.hidden = !basemapMenu.hidden;
 	if (willShow) positionDropdown(basemapMenu, basemapToggle, { fullWidthOnMobile: false });
+});
+
+const closeLanguageMenu = () => {
+	if (!langMenu) return;
+	langMenu.hidden = true;
+	langToggle.setAttribute('aria-expanded', 'false');
+};
+
+langToggle?.addEventListener('click', () => {
+	langMenu.hidden = !langMenu.hidden;
+	langToggle.setAttribute('aria-expanded', String(!langMenu.hidden));
+	if (!langMenu.hidden) positionDropdown(langMenu, langToggle, { fullWidthOnMobile: false });
+});
+
+langMenu?.addEventListener('keydown', e => {
+	if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+		e.preventDefault();
+		const links = [...langMenu.querySelectorAll('a')];
+		const index = links.indexOf(document.activeElement);
+		links[(index + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length].focus();
+	}
+	if (e.key !== 'Escape') return;
+	closeLanguageMenu();
+	langToggle.focus();
+});
+
+langToggle?.addEventListener('keydown', e => {
+	if (e.key === 'Escape') closeLanguageMenu();
+	if (e.key !== 'ArrowDown') return;
+	e.preventDefault();
+	if (langMenu.hidden) langToggle.click();
+	langMenu.querySelector('a').focus();
 });
 
 document.addEventListener('click', e => {
@@ -1636,12 +1674,18 @@ document.addEventListener('click', e => {
 	if (!filterMenu.hidden && !filterMenu.contains(e.target) && !filterToggle.contains(e.target)) filterMenu.hidden = true;
 	if (!searchResultsEl.hidden && !searchResultsEl.contains(e.target) && !searchInline.contains(e.target)) searchResultsEl.hidden = true;
 	if (!basemapMenu.hidden && !basemapMenu.contains(e.target) && !basemapToggle.contains(e.target)) basemapMenu.hidden = true;
+	if (langMenu && !langMenu.hidden && !langMenu.contains(e.target) && !langToggle.contains(e.target)) closeLanguageMenu();
+});
+
+document.addEventListener('focusin', e => {
+	if (langMenu && !langMenu.hidden && !langMenu.contains(e.target) && !langToggle.contains(e.target)) closeLanguageMenu();
 });
 
 window.addEventListener('resize', () => {
 	if (!filterMenu.hidden) positionDropdown(filterMenu);
 	if (!searchResultsEl.hidden) positionDropdown(searchResultsEl);
 	if (!basemapMenu.hidden) positionDropdown(basemapMenu, basemapToggle, { fullWidthOnMobile: false });
+	if (langMenu && !langMenu.hidden) positionDropdown(langMenu, langToggle, { fullWidthOnMobile: false });
 });
 
 map.on('moveend', syncUrlParams);

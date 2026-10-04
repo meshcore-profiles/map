@@ -1,5 +1,6 @@
 const poland = {
 	defaultLanguage: 'pl',
+	mapLanguage: 'pl',
 	defaultRegion: 'pl',
 	defaultView: { lat: 52.1537, lon: 19.3250, zoom: 7 },
 	defaultRadio: 'EU/UK (Narrow)',
@@ -23,6 +24,7 @@ const poland = {
 
 const global = {
 	defaultLanguage: 'en',
+	mapLanguage: 'local',
 	defaultRegion: 'all',
 	defaultView: { lat: 29.9836, lon: 7.0313, zoom: 3 },
 	defaultRadio: 'USA/Canada (Recommended)',

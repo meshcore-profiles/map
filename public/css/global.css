@@ -464,7 +464,7 @@ a:active {
 	background: var(--bg-panel-hover);
 }
 
-.region-toggle-btn:active {
+button.region-toggle-btn:active {
 	transform: scale(0.95);
 }
 
@@ -478,18 +478,35 @@ a:active {
 	color: var(--red-bright);
 }
 
-.region-toggle-btn.lang-select {
+.region-toggle-btn.lang-toggle {
+	position: relative;
 	padding: 8px 34px 8px 16px;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2399a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-position: right 12px center;
-	background-size: 16px;
-	appearance: none;
-	-webkit-appearance: none;
-	color-scheme: dark;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.region-toggle-btn.lang-select:focus-visible {
+.region-toggle-btn.lang-toggle::after {
+	position: absolute;
+	right: 12px;
+	width: 16px;
+	height: 16px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2399a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-size: contain;
+	content: '';
+	transform: rotate(180deg);
+	transition: transform 0.18s var(--ease);
+	pointer-events: none;
+}
+
+.region-toggle-btn.lang-toggle[aria-expanded="true"]::after {
+	transform: rotate(0deg);
+}
+
+.region-toggle-btn.lang-toggle:active {
+	transform: none;
+}
+
+.region-toggle-btn.lang-toggle:focus-visible {
 	border-color: var(--red);
 	outline: none;
 	box-shadow: 0 0 0 3px var(--red-glow);
@@ -983,7 +1000,7 @@ select.date-input {
 	font-weight: 700;
 }
 
-#basemap-menu {
+.dropdown-menu {
 	position: fixed;
 	z-index: 1001;
 	width: 180px;
@@ -1001,20 +1018,20 @@ select.date-input {
 	transition: opacity 0.18s var(--ease), transform 0.18s var(--ease), display 0.18s allow-discrete;
 }
 
-#basemap-menu[hidden] {
+.dropdown-menu[hidden] {
 	display: none;
 	opacity: 0;
 	transform: translateY(-8px) scale(0.97);
 }
 
 @starting-style {
-	#basemap-menu:not([hidden]) {
+	.dropdown-menu:not([hidden]) {
 		opacity: 0;
 		transform: translateY(-8px) scale(0.97);
 	}
 }
 
-#basemap-menu li[data-basemap] {
+#basemap-menu li[data-basemap], #lang-menu a {
 	padding: 9px 10px;
 	border-radius: var(--radius-sm);
 	color: var(--text);
@@ -1022,11 +1039,16 @@ select.date-input {
 	cursor: pointer;
 }
 
-#basemap-menu li[data-basemap]:hover {
+#lang-menu a {
+	display: block;
+	text-decoration: none;
+}
+
+#basemap-menu li[data-basemap]:hover, #lang-menu a:hover, #lang-menu a:focus-visible {
 	background: var(--bg-panel-hover);
 }
 
-#basemap-menu li[data-basemap].active {
+#basemap-menu li[data-basemap].active, #lang-menu a.active {
 	background: var(--red-glow);
 	color: #fff;
 }

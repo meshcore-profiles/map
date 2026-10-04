@@ -7,7 +7,9 @@
 				"Zaktualizowano MapLibre GL JS do wersji 6.12.0.",
 				"Przywrócono dostępność map MapTiler.",
 				"Dodano opcję „Domyślna”, automatycznie wybierającą mapę na podstawie dostępnych kluczy API.",
-				"Esri Hybrid korzysta teraz z klucza API i warstw wektorowych. Drogi pojawiają się przy większym przybliżeniu, a nazwy miejsc dostosowują się do języka przeglądarki.",
+				"Usunięto powtórzoną pozycję domyślnej mapy z menu wyboru map.",
+				"Naprawiono migotanie menu wyboru języka na globalnej mapie. Ujednolicono jego wygląd z menu wyboru map i dodano animowaną strzałkę.",
+				"Esri Hybrid korzysta teraz z klucza API i warstw wektorowych. Drogi pojawiają się przy większym przybliżeniu. Polska mapa wyświetla polskie nazwy miejsc, a globalna nazwy lokalne.",
 				"Skrócono pasek podpisów mapy: źródła Esri można rozwinąć kliknięciem, a podpis Leaflet usunięto.",
 				"Usprawniono ładowanie map i naprawiono blokowanie kafelków OpenStreetMap."
 			]
