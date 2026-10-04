@@ -49,7 +49,10 @@ const TILE_HOSTS = [
 	'https://*.tile.opentopomap.org',
 	'https://*.tile-cyclosm.openstreetmap.fr',
 	'https://*.tile.openstreetmap.fr',
-	'https://server.arcgisonline.com',
+	'https://ibasemaps-api.arcgis.com',
+	'https://basemapstyles-api.arcgis.com',
+	'https://basemaps-api.arcgis.com',
+	'https://cdn.arcgis.com',
 	'https://*.basemaps.cartocdn.com',
 	'https://api.maptiler.com',
 	'https://tiles.openfreemap.org',
@@ -64,6 +67,7 @@ app.use((req, res, next) => {
 // Use middlewares
 app.use(helmet({
 	crossOriginResourcePolicy: false,
+	referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 	contentSecurityPolicy: {
 		useDefaults: false,
 		directives: {

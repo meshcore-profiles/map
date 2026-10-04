@@ -304,19 +304,55 @@ const MAPTILER_OUTDOOR_NAME = 'MapTiler Outdoor';
 const CARTO_DARK_NAME = 'CartoDB Dark';
 const CARTO_POSITRON_NAME = 'CartoDB Positron';
 const OPENFREEMAP_NAME = 'OpenFreeMap';
-const FALLBACK_BASEMAP_NAME = 'Esri Hybrid';
+const ESRI_HYBRID_NAME = 'Esri Hybrid';
+const ESRI_ROADS_MIN_ZOOM = 12;
+const esriLanguages = new Set('ar bs bg ca hr cs da nl en et fi fr de el he hu id it ja ko lv lt nb pl ro ru sr sk sl es sv th tr uk vi zh-HK zh-CN zh-TW pt-BR pt-PT'.split(' '));
+const getEsriLanguage = () => {
+	for (const preference of navigator.languages?.length ? navigator.languages : [navigator.language]) {
+		if (!preference) continue;
+		let locale;
+		try {
+			locale = new Intl.Locale(preference);
+		} catch {
+			continue;
+		}
+		let language = locale.language;
+		if (language === 'zh') {
+			language = locale.region === 'HK' ? 'zh-HK' : locale.maximize().script === 'Hant' ? 'zh-TW' : 'zh-CN';
+		} else if (language === 'pt') {
+			language = locale.region === 'BR' ? 'pt-BR' : 'pt-PT';
+		} else if (language === 'no' || language === 'nn') {
+			language = 'nb';
+		}
+		if (esriLanguages.has(language)) return language;
+	}
+	return 'local';
+};
 
+const esriApiKey = window.MAP_CONFIG.esriApiKey?.trim();
+const esriToken = encodeURIComponent(esriApiKey || '');
 const cartoApiKey = window.MAP_CONFIG.cartoApiKey;
 const maptilerApiKey = window.MAP_CONFIG.maptilerApiKey;
-const maptilerAvailable = false;
+const maptilerAvailable = Boolean(maptilerApiKey);
 
-const basemapFallbackChain = [FALLBACK_BASEMAP_NAME, ...(cartoApiKey ? [CARTO_DARK_NAME] : []), 'OpenStreetMap'];
+const basemapFallbackChain = [
+	...(esriApiKey ? [ESRI_HYBRID_NAME] : []),
+	...(maptilerAvailable ? [MAPTILER_HYBRID_NAME] : []),
+	...(cartoApiKey ? [CARTO_DARK_NAME] : []),
+	'OpenStreetMap',
+];
 const getNextFallbackBaseMap = failedName => {
 	const index = basemapFallbackChain.indexOf(failedName);
 	return index === -1 ? basemapFallbackChain[0] : basemapFallbackChain[index + 1];
 };
 
 const maplibreBaseMapOptions = {
+	...(esriApiKey ? {
+		[ESRI_HYBRID_NAME]: {
+			style: `https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/imagery?language=${getEsriLanguage()}&token=${esriToken}`,
+			maxZoom: 18,
+		},
+	} : {}),
 	...(maptilerAvailable ? {
 		[MAPTILER_HYBRID_NAME]: {
 			style: `https://api.maptiler.com/maps/${window.MAP_CONFIG.maptilerHybridMapId}/style.json?key=${maptilerApiKey}`,
@@ -349,11 +385,8 @@ const tileBaseMaps = {
 	} : {}),
 	'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
+		referrerPolicy: 'strict-origin-when-cross-origin',
 	}),
-	'Esri Hybrid': L.layerGroup([
-		L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }),
-		L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }),
-	], { maxZoom: 18 }),
 	'OpenTopoMap': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
 		maxZoom: 17,
 		subdomains: 'abc',
@@ -369,6 +402,7 @@ const tileBaseMaps = {
 	}),
 };
 const maplibreBaseMaps = {};
+const maplibreBaseMapPromises = {};
 
 const baseMapAttributions = tRaw('map:tilesAttribution');
 const baseMapInfo = tRaw('map:baseMapInfo');
@@ -378,9 +412,12 @@ const getBaseMapGroups = () => [
 	{ label: t('map:vectorBaseMaps'), names: Object.keys(maplibreBaseMapOptions) },
 ].filter(group => group.names.length);
 const getBaseMapNames = () => getBaseMapGroups().flatMap(group => group.names);
-const defaultBaseMapName = FALLBACK_BASEMAP_NAME;
+const defaultBaseMapName = esriApiKey ? ESRI_HYBRID_NAME : maptilerAvailable ? MAPTILER_HYBRID_NAME : 'OpenStreetMap';
+const DEFAULT_BASEMAP_SELECTION = 'Default';
+const resolveBaseMapName = name => name === DEFAULT_BASEMAP_SELECTION ? defaultBaseMapName : name;
 
 const basemapRequiredApiKeys = {
+	[ESRI_HYBRID_NAME]: esriApiKey,
 	[MAPTILER_HYBRID_NAME]: maptilerAvailable,
 	[MAPTILER_OUTDOOR_NAME]: maptilerAvailable,
 	[CARTO_DARK_NAME]: cartoApiKey,
@@ -388,7 +425,9 @@ const basemapRequiredApiKeys = {
 };
 
 const storedBaseMap = localStorage.getItem('baseMapSelected');
-const baseMapSelected = getBaseMapNames().includes(storedBaseMap) ? storedBaseMap : defaultBaseMapName;
+const baseMapSelected = storedBaseMap === DEFAULT_BASEMAP_SELECTION || getBaseMapNames().includes(storedBaseMap)
+	? storedBaseMap
+	: DEFAULT_BASEMAP_SELECTION;
 
 if (storedBaseMap && storedBaseMap !== baseMapSelected && storedBaseMap in basemapRequiredApiKeys && !basemapRequiredApiKeys[storedBaseMap]) {
 	showToast(t('map:basemapMissingApiKey', { name: storedBaseMap }), { status: 'info', duration: 5000 });
@@ -410,8 +449,9 @@ const map = window.leafletMap = L.map('map', {
 	zoomControl: false,
 }).setView([initialView.lat, initialView.lon], initialView.zoom);
 
-map.attributionControl.setPrefix(`<a href="https://leafletjs.com" title="${t('map:leafletTitle')}">Leaflet</a>`);
+map.attributionControl.setPrefix(false);
 map.attributionControl.setPosition('bottomleft');
+L.DomEvent.disableScrollPropagation(map.attributionControl.getContainer());
 
 map.createPane('highlightPane');
 map.getPane('highlightPane').style.zIndex = 620;
@@ -441,10 +481,13 @@ let maplibreLoadPromise = null;
 const loadMaplibreGL = () => {
 	if (maplibreLoadPromise) return maplibreLoadPromise;
 
-	const stylesheet = document.createElement('link');
-	stylesheet.rel = 'stylesheet';
-	stylesheet.href = '/vendor/maplibre/maplibre-gl.css';
-	document.head.appendChild(stylesheet);
+	if (!document.getElementById('maplibre-stylesheet')) {
+		const stylesheet = document.createElement('link');
+		stylesheet.id = 'maplibre-stylesheet';
+		stylesheet.rel = 'stylesheet';
+		stylesheet.href = '/vendor/maplibre/maplibre-gl.css';
+		document.head.appendChild(stylesheet);
+	}
 
 	maplibreLoadPromise = import('/vendor/maplibre/leaflet-maplibre-gl.mjs')
 		.catch(err => {
@@ -455,15 +498,45 @@ const loadMaplibreGL = () => {
 	return maplibreLoadPromise;
 };
 
+const loadEsriStyle = async url => {
+	const response = await fetch(url);
+	if (!response.ok) throw new Error(`Esri style request failed (${response.status})`);
+	const style = await response.json();
+	if (!Array.isArray(style.layers) || !style.sources) throw new Error('Invalid Esri basemap style');
+
+	for (const layer of style.layers) {
+		if (/^Road(?:[ /]|$)|^Exit$/.test(layer['source-layer'] || '')) {
+			layer.minzoom = Math.max(layer.minzoom || 0, ESRI_ROADS_MIN_ZOOM - 1);
+		}
+	}
+	for (const source of Object.values(style.sources)) {
+		if (source.tiles?.length) delete source.url;
+		delete source.copyrightText;
+	}
+	return style;
+};
+
 const getMaplibreBaseMapLayer = async name => {
-	if (!maplibreBaseMaps[name]) {
-		await loadMaplibreGL();
-		maplibreBaseMaps[name] = L.maplibreGL({
-			attributionControl: false,
-			...maplibreBaseMapOptions[name],
+	if (maplibreBaseMaps[name]) return maplibreBaseMaps[name];
+	if (!maplibreBaseMapPromises[name]) {
+		maplibreBaseMapPromises[name] = (async () => {
+			await loadMaplibreGL();
+			const options = { ...maplibreBaseMapOptions[name] };
+			if (name === ESRI_HYBRID_NAME) {
+				options.style = await loadEsriStyle(options.style);
+				const sources = [...new Set(Object.values(options.style.sources).map(source => source.attribution).filter(Boolean))];
+				options.esriAttribution = `Powered by <a href="https://www.esri.com/">Esri</a> | ` +
+					`<details class="map-attribution-details"><summary>${escapeHtml(t('map:attributionSources'))}</summary>` +
+					`<div class="map-attribution-sources">${sources.map(escapeHtml).join('<br>')}</div></details>`;
+			}
+			const layer = L.maplibreGL({ attributionControl: false, ...options });
+			maplibreBaseMaps[name] = layer;
+			return layer;
+		})().finally(() => {
+			delete maplibreBaseMapPromises[name];
 		});
 	}
-	return maplibreBaseMaps[name];
+	return maplibreBaseMapPromises[name];
 };
 
 let baseMapRequestId = 0;
@@ -471,34 +544,55 @@ let currentBaseMapAttribution = null;
 let activateBaseMapFallback = null;
 
 const waitForBaseMapLoad = (targetLayer, name) => new Promise((resolve, reject) => {
+	const listeners = [];
+	let timer;
+	const finish = error => {
+		clearTimeout(timer);
+		for (const [layer, event, handler] of listeners) layer.off(event, handler);
+		if (error) reject(error);
+		else resolve();
+	};
+	const listen = (layer, event, handler) => {
+		listeners.push([layer, event, handler]);
+		layer.on(event, handler);
+	};
+	const fail = () => finish(new Error(`Base map "${name}" failed to load`));
+	timer = setTimeout(fail, 20000);
+	listen(targetLayer, 'remove', fail);
 	if (maplibreBaseMapOptions[name]) {
 		const glMap = targetLayer.getMaplibreMap();
-		if (!glMap || glMap.loaded()) {
-			resolve();
+		if (!glMap) {
+			fail();
 			return;
 		}
-		glMap.once('load', resolve);
-		glMap.once('error', () => reject(new Error(`Base map "${name}" failed to load`)));
+		if (glMap.loaded()) {
+			finish();
+			return;
+		}
+		listen(glMap, 'load', () => finish());
+		listen(glMap, 'error', fail);
 		return;
 	}
 
 	const tileLayers = targetLayer.getLayers ? targetLayer.getLayers() : [targetLayer];
 	let pending = tileLayers.length;
 	if (pending === 0) {
-		resolve();
+		finish();
 		return;
 	}
 
 	tileLayers.forEach(layer => {
-		layer.once('tileerror', () => reject(new Error(`Base map "${name}" failed to load`)));
-		layer.once('load', () => {
+		listen(layer, 'tileerror', fail);
+		listen(layer, 'load', () => {
 			pending -= 1;
-			if (pending === 0) resolve();
+			if (pending === 0) finish();
 		});
 	});
 });
 
 const setBaseMap = async name => {
+	const selection = name;
+	name = resolveBaseMapName(name);
 	const requestId = ++baseMapRequestId;
 	const targetLayer = maplibreBaseMapOptions[name]
 		? await getMaplibreBaseMapLayer(name)
@@ -514,11 +608,11 @@ const setBaseMap = async name => {
 	map.setMaxZoom(targetLayer.options.maxZoom);
 
 	if (currentBaseMapAttribution) map.attributionControl.removeAttribution(currentBaseMapAttribution);
-	currentBaseMapAttribution = baseMapAttributions[name];
+	currentBaseMapAttribution = targetLayer.options.esriAttribution || baseMapAttributions[name];
 	map.attributionControl.addAttribution(currentBaseMapAttribution);
 
 	try {
-		localStorage.setItem('baseMapSelected', name);
+		localStorage.setItem('baseMapSelected', selection);
 	} catch {
 		// ...
 	}
@@ -1429,18 +1523,19 @@ regionToggle?.addEventListener('click', async () => {
 let currentBaseMap = baseMapSelected;
 
 const renderBaseMapToggle = () => {
-	basemapToggle.classList.toggle('active', currentBaseMap !== defaultBaseMapName);
+	basemapToggle.classList.toggle('active', currentBaseMap !== DEFAULT_BASEMAP_SELECTION);
 	[...basemapMenu.children].forEach(li => li.classList.toggle('active', li.dataset.basemap === currentBaseMap));
 };
 
 activateBaseMapFallback = (failedName, toastHandle) => {
 	if (failedName !== currentBaseMap) return;
 
-	const nextName = getNextFallbackBaseMap(failedName);
+	const resolvedFailedName = resolveBaseMapName(failedName);
+	const nextName = getNextFallbackBaseMap(resolvedFailedName);
 	if (!nextName) return;
 
 	console.error(`Base map "${failedName}" failed to load, falling back to "${nextName}".`);
-	updateToast(toastHandle, t('map:basemapFallback', { failed: failedName, fallback: nextName }), { status: 'error' });
+	updateToast(toastHandle, t('map:basemapFallback', { failed: resolvedFailedName, fallback: nextName }), { status: 'error' });
 
 	currentBaseMap = nextName;
 	renderBaseMapToggle();
@@ -1449,7 +1544,7 @@ activateBaseMapFallback = (failedName, toastHandle) => {
 };
 
 const renderBasemapMenu = () => {
-	basemapMenu.innerHTML = getBaseMapGroups().map(group => `
+	basemapMenu.innerHTML = `<li data-basemap="${DEFAULT_BASEMAP_SELECTION}" title="${defaultBaseMapName}">${escapeHtml(t('map:defaultBasemap'))} (${escapeHtml(defaultBaseMapName)})</li>` + getBaseMapGroups().map(group => `
 		<li class="basemap-category">${group.label}</li>
 		${group.names.map(name => `<li data-basemap="${name}" title="${baseMapInfo[name]}">${name}</li>`).join('')}`
 	).join('');
@@ -1467,7 +1562,8 @@ basemapMenu.addEventListener('click', e => {
 	renderBaseMapToggle();
 	basemapMenu.hidden = true;
 
-	const loadingToast = maplibreBaseMapOptions[selectedName] && !maplibreBaseMaps[selectedName]
+	const resolvedSelectedName = resolveBaseMapName(selectedName);
+	const loadingToast = maplibreBaseMapOptions[resolvedSelectedName] && !maplibreBaseMaps[resolvedSelectedName]
 		? showToast(t('map:loadingBasemap'), { duration: 0, status: 'loading' })
 		: null;
 

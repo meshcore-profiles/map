@@ -549,6 +549,7 @@ window.MAP_CONFIG = {
 	defaultRadio: <%- JSON.stringify(site.defaultRadio) %>,
 
 	sefinekApi: <%- JSON.stringify(process.env.SEFINEK_API) %>,
+	esriApiKey: <%- JSON.stringify(process.env.ESRI_API_KEY?.trim() || null) %>,
 	cartoApiKey: <%- JSON.stringify(process.env.CARTO_API_KEY || null) %>,
 	maptilerApiKey: <%- JSON.stringify(process.env.MAPTILER_API_KEY || null) %>,
 	maptilerHybridMapId: <%- JSON.stringify(site.maptilerHybridMapId) %>,

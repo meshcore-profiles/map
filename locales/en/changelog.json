@@ -1,6 +1,18 @@
 {
 	"entries": [
 		{
+			"version": "0.9.0",
+			"date": "2026-10-04",
+			"changes": [
+				"Updated MapLibre GL JS to version 6.12.0.",
+				"Restored MapTiler maps.",
+				"Added a \"Default\" option that automatically selects a map based on the available API keys.",
+				"Esri Hybrid now uses an API key and vector layers. Roads appear at higher zoom levels, and place names follow the browser's language preferences.",
+				"Made the map attribution bar more compact: Esri sources can be expanded with a click, and the Leaflet credit was removed.",
+				"Improved map loading and fixed blocked OpenStreetMap tiles."
+			]
+		},
+		{
 			"version": "0.8.3",
 			"date": "2026-09-15",
 			"changes": [

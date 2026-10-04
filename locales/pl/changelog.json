@@ -1,6 +1,18 @@
 {
 	"entries": [
 		{
+			"version": "0.9.0",
+			"date": "04.10.2026",
+			"changes": [
+				"Zaktualizowano MapLibre GL JS do wersji 6.12.0.",
+				"Przywrócono dostępność map MapTiler.",
+				"Dodano opcję „Domyślna”, automatycznie wybierającą mapę na podstawie dostępnych kluczy API.",
+				"Esri Hybrid korzysta teraz z klucza API i warstw wektorowych. Drogi pojawiają się przy większym przybliżeniu, a nazwy miejsc dostosowują się do języka przeglądarki.",
+				"Skrócono pasek podpisów mapy: źródła Esri można rozwinąć kliknięciem, a podpis Leaflet usunięto.",
+				"Usprawniono ładowanie map i naprawiono blokowanie kafelków OpenStreetMap."
+			]
+		},
+		{
 			"version": "0.8.3",
 			"date": "15.09.2026",
 			"changes": [

@@ -13,7 +13,7 @@ The backend fetches node data from the public `map.meshcore.io` API and keeps it
 - Instantly adding a client, repeater, or room server as a contact in the MeshCore app.
 - Searching nodes by name and public key, with keyboard support.
 - Data transferred in a compact MessagePack format; the default view for the Polish version only fetches nodes from Poland.
-- A choice of multiple basemaps - raster (OpenStreetMap, Esri Hybrid, OpenTopoMap, CyclOSM, Humanitarian OSM) and vector (OpenFreeMap), plus MapTiler and CartoDB when the relevant API keys are configured.
+- A choice of multiple basemaps - raster (OpenStreetMap, OpenTopoMap, CyclOSM, Humanitarian OSM) and vector (OpenFreeMap), plus Esri Hybrid, MapTiler and CartoDB when the relevant API keys are configured.
 - Analytical tools: distance measurement, drawing a route between nodes by name or key, terrain analysis (elevation profile and optical line of sight between two points), and a layer showing a node's theoretical radio coverage in every direction.
 
 ## Roadmap
@@ -41,6 +41,8 @@ cp .env.example .env
 
 Then fill in the MongoDB (`MONGODB_URL`) and Redis (`REDIS_HOST`, `REDIS_PASSWD`) credentials in the created `.env` file.
 The `SITE_MODE` variable lets you force the Polish (`poland`) or global (`global`) version regardless of the domain - by default (`auto`) it's chosen based on the request host.
+
+Set `ESRI_API_KEY` to an ArcGIS Location Platform API key with the Basemap styles privilege to enable Esri Hybrid (World Imagery with vector labels). Roads and their labels appear from Leaflet zoom 12; borders and place labels retain the provider's zoom ranges. Restrict the key to your site's referrers. The `Default` basemap selects Esri Hybrid when this key is configured, otherwise MapTiler Hybrid when `MAPTILER_API_KEY` is configured, or OpenStreetMap when neither key is configured. A user's explicit basemap selection is preserved.
 
 Start the server with:
 ```bash
