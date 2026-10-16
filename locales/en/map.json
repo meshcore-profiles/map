@@ -87,16 +87,16 @@
 	"defaultBasemap": "Default",
 	"attributionSources": "Sources",
 	"tilesAttribution": {
-		"CartoDB Dark": "Tiles: &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
-		"CartoDB Positron": "Tiles: &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
-		"OpenStreetMap": "Tiles: &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"CartoDB Dark": "Tiles: &copy; <a href=\"https://carto.com/attribution\">CARTO</a> Data: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"CartoDB Positron": "Tiles: &copy; <a href=\"https://carto.com/attribution\">CARTO</a> Data: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"OpenStreetMap": "Tiles: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
 		"Esri Hybrid": "Powered by <a href=\"https://www.esri.com/\">Esri</a> | Sources: Esri, Maxar, Earthstar Geographics, TomTom, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors, and the GIS User Community",
-		"OpenTopoMap": "Tiles: &copy; <a href=\"https://opentopomap.org\">OpenTopoMap</a> (CC-BY-SA)",
-		"MapTiler Outdoor": "Tiles: &copy; <a href=\"https://www.maptiler.com/copyright/\">MapTiler</a> &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-		"MapTiler Hybrid": "Tiles: &copy; <a href=\"https://www.maptiler.com/copyright/\">MapTiler</a> &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-		"CyclOSM": "Tiles: &copy; <a href=\"https://www.cyclosm.org\">CyclOSM</a> &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-		"Humanitarian OSM": "Tiles: &copy; <a href=\"https://www.hotosm.org\">HOT</a> &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-		"OpenFreeMap": "Tiles: &copy; <a href=\"https://openfreemap.org\">OpenFreeMap</a> &copy; <a href=\"https://www.openmaptiles.org\">OpenMapTiles</a> Data: &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+		"OpenTopoMap": "Tiles: &copy; <a href=\"https://opentopomap.org\">OpenTopoMap</a> (<a href=\"https://creativecommons.org/licenses/by-sa/3.0/\">CC-BY-SA</a>) Data: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>, SRTM",
+		"MapTiler Outdoor": "Tiles: &copy; <a href=\"https://www.maptiler.com/copyright\">MapTiler</a> &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"MapTiler Hybrid": "Tiles: &copy; <a href=\"https://www.maptiler.com/copyright\">MapTiler</a> &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"CyclOSM": "Tiles: &copy; <a href=\"https://www.cyclosm.org\">CyclOSM</a> &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"Humanitarian OSM": "Tiles: &copy; <a href=\"https://www.hotosm.org\">HOT</a> &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"OpenFreeMap": "Tiles: &copy; <a href=\"https://openfreemap.org\">OpenFreeMap</a> &copy; <a href=\"https://www.openmaptiles.org\">OpenMapTiles</a> Data: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
 	},
 	"baseMapInfo": {
 		"CartoDB Dark": "Dark street map from CARTO. Free with no stated request limit, but not meant for very heavy traffic.",

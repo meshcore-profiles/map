@@ -87,16 +87,16 @@
 	"defaultBasemap": "Domyślna",
 	"attributionSources": "Źródła",
 	"tilesAttribution": {
-		"CartoDB Dark": "Kafelki: &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
-		"CartoDB Positron": "Kafelki: &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
-		"OpenStreetMap": "Kafelki: &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"CartoDB Dark": "Kafelki: &copy; <a href=\"https://carto.com/attribution\">CARTO</a> Dane: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"CartoDB Positron": "Kafelki: &copy; <a href=\"https://carto.com/attribution\">CARTO</a> Dane: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"OpenStreetMap": "Kafelki: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
 		"Esri Hybrid": "Powered by <a href=\"https://www.esri.com/\">Esri</a> | Sources: Esri, Maxar, Earthstar Geographics, TomTom, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors, and the GIS User Community",
-		"OpenTopoMap": "Kafelki: &copy; <a href=\"https://opentopomap.org\">OpenTopoMap</a> (CC-BY-SA)",
-		"MapTiler Outdoor": "Kafelki: &copy; <a href=\"https://www.maptiler.com/copyright/\">MapTiler</a> &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-		"MapTiler Hybrid": "Kafelki: &copy; <a href=\"https://www.maptiler.com/copyright/\">MapTiler</a> &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-		"CyclOSM": "Kafelki: &copy; <a href=\"https://www.cyclosm.org\">CyclOSM</a> &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-		"Humanitarian OSM": "Kafelki: &copy; <a href=\"https://www.hotosm.org\">HOT</a> &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-		"OpenFreeMap": "Kafelki: &copy; <a href=\"https://openfreemap.org\">OpenFreeMap</a> &copy; <a href=\"https://www.openmaptiles.org\">OpenMapTiles</a> Dane: &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+		"OpenTopoMap": "Kafelki: &copy; <a href=\"https://opentopomap.org\">OpenTopoMap</a> (<a href=\"https://creativecommons.org/licenses/by-sa/3.0/\">CC-BY-SA</a>) Dane: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>, SRTM",
+		"MapTiler Outdoor": "Kafelki: &copy; <a href=\"https://www.maptiler.com/copyright\">MapTiler</a> &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"MapTiler Hybrid": "Kafelki: &copy; <a href=\"https://www.maptiler.com/copyright\">MapTiler</a> &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"CyclOSM": "Kafelki: &copy; <a href=\"https://www.cyclosm.org\">CyclOSM</a> &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"Humanitarian OSM": "Kafelki: &copy; <a href=\"https://www.hotosm.org\">HOT</a> &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+		"OpenFreeMap": "Kafelki: &copy; <a href=\"https://openfreemap.org\">OpenFreeMap</a> &copy; <a href=\"https://www.openmaptiles.org\">OpenMapTiles</a> Dane: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
 	},
 	"baseMapInfo": {
 		"CartoDB Dark": "Ciemna mapa uliczna od CARTO. Bezpłatna i bez deklarowanego limitu zapytań, ale nieprzeznaczona do obsługi bardzo dużego ruchu.",
