@@ -1,51 +1,45 @@
-# Frontend dependencies
+# Third-party libraries
 
-| Directory       | Library               | Version | Project page                                                              |
-|-----------------|-----------------------|---------|---------------------------------------------------------------------------|
-| `leaflet`       | Leaflet               | 1.9.4   | [Leaflet](https://github.com/Leaflet/Leaflet)                             |
-| `markercluster` | Leaflet.markercluster | 1.5.3   | [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
-| `maplibre`      | MapLibre GL JS        | 6.15.0  | [MapLibre GL JS](https://github.com/maplibre/maplibre-gl-js)              |
-| `maplibre`      | MapLibre GL Leaflet   | 0.1.4   | [MapLibre GL Leaflet](https://github.com/maplibre/maplibre-gl-leaflet)    |
-| `msgpackr`      | msgpackr              | 2.1.1   | [msgpackr](https://github.com/kriszyp/msgpackr)                           |
-| `qrcode`        | qrcode                | 1.5.4   | [qrcode](https://github.com/soldair/node-qrcode)                          |
+Vendored as-is. Each directory holds the license text of its library (`LICENSE`, plus `LICENSE.<name>` for bundled or additional libraries).
 
-## Direct file sources
+## Overview
+
+| Directory       | Library               | Version | License      | Project page                                                              |
+|-----------------|-----------------------|---------|--------------|---------------------------------------------------------------------------|
+| `leaflet`       | Leaflet               | 1.9.4   | BSD-2-Clause | [Leaflet](https://github.com/Leaflet/Leaflet)                             |
+| `markercluster` | Leaflet.markercluster | 1.5.3   | MIT          | [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
+| `maplibre`      | MapLibre GL JS        | 6.15.0  | BSD-3-Clause | [MapLibre GL JS](https://github.com/maplibre/maplibre-gl-js)              |
+| `maplibre`      | MapLibre GL Leaflet   | 0.1.4   | ISC          | [MapLibre GL Leaflet](https://github.com/maplibre/maplibre-gl-leaflet)    |
+| `msgpackr`      | msgpackr              | 2.1.1   | MIT          | [msgpackr](https://github.com/kriszyp/msgpackr)                           |
+| `qrcode`        | qrcode                | 1.5.4   | MIT          | [qrcode](https://github.com/soldair/node-qrcode)                          |
+| `qrcode`        | dijkstrajs (bundled)  | 1.0.3   | MIT          | [dijkstrajs](https://github.com/tcort/dijkstrajs)                         |
+
+## Sources and modifications
 
 ### Leaflet 1.9.4
 
-- [leaflet.js](https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js) - the main map library.
-- [leaflet.js.map](https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js.map) - JavaScript source map.
-- [leaflet.css](https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css) - base map and control styles.
+- `leaflet.js`, `leaflet.js.map`, `leaflet.css` - from [jsDelivr](https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/), unmodified.
 
 ### Leaflet.markercluster 1.5.3
 
-- [leaflet.markercluster.js](https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js) - clustering of nearby markers.
-- [leaflet.markercluster.js.map](https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js.map) - JavaScript source map.
-- [MarkerCluster.css](https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css) - cluster layout and animations.
-- [MarkerCluster.Default.css](https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css) - default cluster appearance.
+- `leaflet.markercluster.js`, `leaflet.markercluster.js.map`, `MarkerCluster.css`, `MarkerCluster.Default.css` - from [jsDelivr](https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/), unmodified.
 
 ### MapLibre GL JS 6.15.0
 
-- [maplibre-gl.mjs](https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs) - main vector map renderer module (since 6.15 it bundles the code previously in the separate shared file).
-- [maplibre-gl-worker.mjs](https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl-worker.mjs) - map data processing off the main thread.
-- [maplibre-gl.css](https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.css) - MapLibre map and control styles.
-- [maplibre-gl.mjs.map](https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs.map) - source map for the main module.
-- [maplibre-gl-worker.mjs.map](https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl-worker.mjs.map) - source map for the worker.
+- `maplibre-gl.mjs`, `maplibre-gl-worker.mjs`, `maplibre-gl.css` and their `.map` files - from [jsDelivr](https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/), unmodified. Since 6.15 the main module bundles the code previously in a separate shared file.
 
 ### MapLibre GL Leaflet 0.1.4
 
-The package doesn't publish a ready-made `.min` build, so we rely on jsDelivr's on-the-fly minification (the `.min.mjs` suffix in the URL) - which is why this file also gets its own dynamically generated source map (see the note below).
-
-- [leaflet-maplibre-gl.mjs](https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/dist/leaflet-maplibre-gl.min.mjs) - the layer connecting MapLibre GL with Leaflet.
-- [leaflet-maplibre-gl.mjs.map](https://cdn.jsdelivr.net/sm/b47f7f6211e6c317d3a2f86967d9c2bab414495e930fee0c80ff11dbecd36ce4.map) - source map generated by jsDelivr.
+- `leaflet-maplibre-gl.mjs` - [jsDelivr's on-the-fly minified build](https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/dist/leaflet-maplibre-gl.min.mjs), because the package ships no `.min` file. Its source map is generated by jsDelivr (see "Dynamically generated files").
 
 ### msgpackr 2.1.1
 
-- [msgpackr.js](https://cdn.jsdelivr.net/npm/msgpackr@2.1.1/+esm) - MessagePack decoding in the browser.
-- [msgpackr.js.map](https://cdn.jsdelivr.net/sm/8aac7e9d1cdb4e41cf8524156adee96a3932689ba1d6f7f1d866d67d95ed229a.map) - source map for the generated bundle.
-
-For files generated dynamically like this (the `+esm` bundle, `.min.*` on-the-fly minification), jsDelivr serves the source map under a `/sm/...` hash that can change between releases. After downloading a new version, save the map under the local file's name (e.g. `msgpackr.js.map`, `leaflet-maplibre-gl.mjs.map`) and update the trailing `sourceMappingURL` in the corresponding `.js`/`.mjs` file to that name.
+- `msgpackr.js` - [jsDelivr `+esm` bundle](https://cdn.jsdelivr.net/npm/msgpackr@2.1.1/+esm). Its source map is generated by jsDelivr (see "Dynamically generated files").
 
 ### qrcode 1.5.4
 
-- [qrcode.js](https://esm.sh/qrcode@1.5.4?bundle) - QR code generation on a `canvas` element.
+- `qrcode.js` - [esm.sh bundle](https://esm.sh/qrcode@1.5.4?bundle), including dijkstrajs.
+
+## Dynamically generated files
+
+jsDelivr serves source maps of generated files (the `+esm` bundle, `.min.*` on-the-fly minification) under a `/sm/...` hash that can change between releases. After downloading a new version, save the map under the local file's name (e.g. `msgpackr.js.map`, `leaflet-maplibre-gl.mjs.map`) and update the trailing `sourceMappingURL` in the corresponding `.js`/`.mjs` file to that name.
