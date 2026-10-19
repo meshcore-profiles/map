@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.9.1",
+			"date": "19.10.2026",
+			"changes": [
+				"Zaktualizowano MapLibre GL JS do wersji 6.15.0 oraz msgpackr do wersji 2.1.1.",
+				"Zaktualizowano podpis źródeł kafelków mapy.",
+				"Zaktualizowano zależności backendu do najnowszych wersji."
+			]
+		},
+		{
 			"version": "0.9.0",
 			"date": "04.10.2026",
 			"changes": [

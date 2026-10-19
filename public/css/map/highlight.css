@@ -1,0 +1,44 @@
+.highlight-marker-icon {
+	overflow: visible !important;
+}
+
+.highlight-marker-icon svg {
+	overflow: visible;
+}
+
+.highlight-marker-ring {
+	animation: highlight-pulse 1.4s ease-in-out infinite;
+	fill: none;
+	stroke: var(--red-bright);
+	stroke-width: 3;
+}
+
+.highlight-marker-ping {
+	transform-origin: center;
+	animation: highlight-ping 1.6s ease-out infinite;
+	fill: var(--red-bright);
+	fill-opacity: 0.35;
+	transform-box: fill-box;
+}
+
+@keyframes highlight-pulse {
+	0%, 100% {
+		stroke-opacity: 0.55;
+	}
+
+	50% {
+		stroke-opacity: 1;
+	}
+}
+
+@keyframes highlight-ping {
+	0% {
+		opacity: 0.55;
+		transform: scale(0.7);
+	}
+
+	100% {
+		opacity: 0;
+		transform: scale(2.4);
+	}
+}

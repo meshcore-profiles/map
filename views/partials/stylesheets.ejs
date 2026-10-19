@@ -1,0 +1,10 @@
+<%
+const sheets = [
+	'base', 'components/loading', 'map/header', 'map/toggles', 'map/highlight', 'components/fab', 'map/filters', 'map/search',
+	'components/dropdown', 'map/leaflet', 'map/node-panel', 'map/user-actions', 'map/responsive',
+	'themes/' + theme,
+	'map/legend', 'components/modal', 'map/stats', 'components/toast', 'map/tools',
+];
+-%>
+<% sheets.forEach(sheet => { %><link rel="stylesheet" href="/css/<%= sheet %>.css">
+<% }) %>

@@ -1,0 +1,101 @@
+@media (max-width: 560px) {
+	#node-filter {
+		padding: 12px;
+	}
+
+	#filters-row {
+		overflow-y: auto;
+		flex-direction: column;
+		max-height: 55vh;
+		max-height: 55dvh;
+		overscroll-behavior: contain;
+	}
+
+	#filters-col-main, #freq-filter-group {
+		flex: 0 0 auto;
+	}
+
+	#freq-filter-group {
+		padding-top: 14px;
+		padding-left: 0;
+		border-top: 1px solid var(--border);
+		border-left: none;
+	}
+
+	#freq-filter-list {
+		overflow-y: visible;
+		flex: 0 0 auto;
+	}
+}
+
+@media (max-width: 700px) {
+	#stats-bar {
+		justify-content: center;
+		gap: 8px 10px;
+		padding: 8px 10px;
+	}
+
+	#spacer-1 {
+		order: 6;
+	}
+
+	#spacer-2 {
+		order: 3;
+	}
+
+	#brand, #stats-divider {
+		display: none;
+	}
+
+	.stats-total-label {
+		display: none;
+	}
+
+	#stats-counts {
+		order: 1;
+	}
+
+	#stats-counts .icon {
+		width: 16px;
+		height: 16px;
+		margin-left: 4px;
+	}
+
+	#search-form {
+		flex: 1 1 100%;
+		order: 2;
+	}
+
+	.region-toggle-btn {
+		order: 4;
+		padding: 8px;
+	}
+
+	.region-toggle-btn span {
+		display: none;
+	}
+
+	.region-toggle-btn .icon {
+		width: 17px;
+		height: 17px;
+	}
+
+	#stats-toggle {
+		order: 5;
+		padding: 7px;
+	}
+
+	#stats-toggle .icon {
+		width: 18px;
+		height: 18px;
+	}
+
+	#github-link {
+		order: 7;
+	}
+
+	#github-link .icon {
+		width: 21px;
+		height: 21px;
+	}
+}

@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.9.1",
+			"date": "2026-10-19",
+			"changes": [
+				"Updated MapLibre GL JS to version 6.15.0 and msgpackr to version 2.1.1.",
+				"Updated the attribution text of map tiles.",
+				"Updated backend dependencies to their latest versions."
+			]
+		},
+		{
 			"version": "0.9.0",
 			"date": "2026-10-04",
 			"changes": [

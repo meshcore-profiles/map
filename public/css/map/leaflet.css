@@ -1,0 +1,189 @@
+.leaflet-bottom {
+	position: fixed !important;
+}
+
+.leaflet-bottom.leaflet-left .leaflet-control-attribution {
+	margin: 0 !important;
+}
+
+.leaflet-control-attribution {
+	padding: 3px 10px !important;
+	border-radius: 0 var(--radius-sm) 0 0;
+	background: var(--bg-panel) !important;
+	color: var(--text-muted) !important;
+	font-family: var(--font-body);
+	font-size: 11px;
+	line-height: 1.5;
+	box-shadow: var(--shadow);
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+}
+
+.leaflet-control-attribution a {
+	color: var(--red-bright);
+	text-decoration: none;
+}
+
+.leaflet-control-attribution a:hover, .leaflet-control-attribution a:focus {
+	color: var(--red-light);
+	text-decoration: underline;
+}
+
+.leaflet-attribution-flag {
+	display: none !important;
+}
+
+.map-attribution-details {
+	display: inline-block;
+}
+
+.map-attribution-details summary {
+	display: inline;
+	list-style: none;
+	cursor: pointer;
+	color: var(--red-bright);
+}
+
+.map-attribution-details summary::-webkit-details-marker {
+	display: none;
+}
+
+.map-attribution-details summary:hover,
+.map-attribution-details summary:focus-visible {
+	color: var(--red-light);
+	text-decoration: underline;
+}
+
+.map-attribution-details summary:focus-visible {
+	outline: 2px solid var(--red-bright);
+	outline-offset: 2px;
+}
+
+.map-attribution-sources {
+	position: absolute;
+	bottom: calc(100% + 6px);
+	left: 0;
+	width: min(480px, calc(100vw - 20px));
+	max-height: 30vh;
+	box-sizing: border-box;
+	overflow-y: auto;
+	padding: 10px;
+	border-radius: var(--radius-sm);
+	background: var(--bg-panel);
+	box-shadow: var(--shadow);
+	text-align: left;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.marker-cluster-small {
+	background-color: color-mix(in srgb, var(--red) 25%, transparent);
+}
+
+.marker-cluster-small div {
+	background-color: color-mix(in srgb, var(--red) 65%, transparent);
+}
+
+.marker-cluster-medium {
+	background-color: color-mix(in srgb, var(--red) 32%, transparent);
+}
+
+.marker-cluster-medium div {
+	background-color: color-mix(in srgb, var(--red) 78%, transparent);
+}
+
+.marker-cluster-large {
+	background-color: color-mix(in srgb, var(--red-dark) 40%, transparent);
+}
+
+.marker-cluster-large div {
+	background-color: color-mix(in srgb, var(--red-dark) 90%, transparent);
+}
+
+.marker-cluster span {
+	color: #fff;
+	font-family: var(--font-mono);
+	font-weight: 800;
+}
+
+.leaflet-popup-content-wrapper {
+	border-radius: var(--radius);
+	background: var(--bg-panel);
+	color: var(--text);
+	box-shadow: var(--shadow);
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+}
+
+.leaflet-fade-anim .leaflet-popup {
+	transition: opacity 0.12s var(--ease);
+}
+
+.leaflet-popup-content a {
+	color: var(--red-bright);
+}
+
+.leaflet-popup-content a:hover {
+	color: var(--red-light);
+	text-decoration: underline;
+}
+
+.leaflet-popup-content a:active {
+	color: var(--red-dark);
+	text-decoration: none;
+}
+
+.leaflet-popup-tip {
+	background: var(--bg-panel);
+	box-shadow: none;
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+}
+
+.leaflet-popup-close-button {
+	top: 8px !important;
+	right: 8px !important;
+	color: var(--text-muted) !important;
+	opacity: 0.7;
+	transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s var(--ease);
+}
+
+.leaflet-popup-close-button:hover {
+	color: var(--red-bright) !important;
+	opacity: 1;
+}
+
+.leaflet-popup-close-button:active {
+	transform: scale(0.9);
+}
+
+.leaflet-popup-close-button span {
+	padding: 5px;
+	font-size: 28px;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+	width: auto !important;
+	height: auto !important;
+}
+
+.leaflet-marker-icon.update-recent, .legend-icon.update-recent {
+	filter: saturate(5) hue-rotate(260deg);
+}
+
+.leaflet-marker-icon.update-stale, .legend-icon.update-stale {
+	filter: saturate(28) hue-rotate(228deg);
+}
+
+.leaflet-marker-icon.update-old, .legend-icon.update-old {
+	filter: saturate(5) hue-rotate(165deg);
+}
+
+.leaflet-marker-icon.update-extinct, .legend-icon.update-extinct {
+	filter: grayscale(100);
+}
+
+.svg-node-icon {
+	border: none !important;
+	background: none !important;
+}

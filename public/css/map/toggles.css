@@ -1,0 +1,92 @@
+.region-toggle-btn {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 15px;
+	border: 1px solid var(--border-strong);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--text);
+	font: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s var(--ease);
+	cursor: pointer;
+}
+
+.region-toggle-btn .icon {
+	width: 18px;
+	height: 18px;
+}
+
+.region-toggle-btn:hover {
+	border-color: var(--red-dark);
+	background: var(--bg-panel-hover);
+}
+
+button.region-toggle-btn:active {
+	transform: scale(0.95);
+}
+
+.region-toggle-btn.active {
+	border-color: var(--red);
+	background: var(--red-glow);
+	color: #fff;
+}
+
+.region-toggle-btn.active .icon {
+	color: var(--red-bright);
+}
+
+.region-toggle-btn.lang-toggle {
+	position: relative;
+	padding: 8px 34px 8px 16px;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.region-toggle-btn.lang-toggle::after {
+	position: absolute;
+	right: 12px;
+	width: 16px;
+	height: 16px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2399a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-size: contain;
+	content: '';
+	transform: rotate(180deg);
+	transition: transform 0.18s var(--ease);
+	pointer-events: none;
+}
+
+.region-toggle-btn.lang-toggle[aria-expanded="true"]::after {
+	transform: rotate(0deg);
+}
+
+.region-toggle-btn.lang-toggle:active {
+	transform: none;
+}
+
+.region-toggle-btn.lang-toggle:focus-visible {
+	border-color: var(--red);
+	outline: none;
+	box-shadow: 0 0 0 3px var(--red-glow);
+}
+
+#github-link {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	opacity: 0.75;
+	transition: opacity 0.15s ease;
+}
+
+#github-link:hover {
+	opacity: 1;
+}
+
+#github-link .icon {
+	width: 24px;
+	height: 24px;
+	color: var(--text);
+}

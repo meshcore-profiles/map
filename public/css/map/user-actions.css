@@ -1,0 +1,30 @@
+time {
+	text-decoration: underline;
+	text-decoration-color: var(--text-muted);
+	text-decoration-style: dotted;
+	cursor: help;
+}
+
+.pointer-help {
+	cursor: help;
+}
+
+.user-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px 15px;
+	width: 100%;
+	margin-top: 15px;
+	padding-top: 12px;
+	border-top: 1px solid var(--border);
+	font-size: 14px;
+}
+
+.user-actions-left, .user-actions-right {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 15px;
+}
