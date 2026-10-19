@@ -486,7 +486,7 @@ const loadEsriStyle = async url => {
 	if (!Array.isArray(style.layers) || !style.sources) throw new Error('Invalid Esri basemap style');
 
 	for (const layer of style.layers) {
-		if (/^Road(?:[ /]|$)|^Exit$/.test(layer['source-layer'] || '')) {
+		if ((/^Road(?:[ /]|$)|^Exit$/).test(layer['source-layer'] || '')) {
 			layer.minzoom = Math.max(layer.minzoom || 0, ESRI_ROADS_MIN_ZOOM - 1);
 		}
 	}
@@ -501,7 +501,7 @@ const localizeMapStyle = (style, language) => {
 	if (!Array.isArray(style.layers)) throw new Error('Invalid map style');
 	const translate = expression => {
 		if (!Array.isArray(expression) || expression[0] === 'literal') return expression;
-		if (expression[0] === 'get' && /^name(?::[\w-]+|_[\w-]+)?$/.test(expression[1])) {
+		if (expression[0] === 'get' && (/^name(?::[\w-]+|_[\w-]+)?$/).test(expression[1])) {
 			return ['coalesce', ['get', `name:${language}`], ['get', `name_${language}`], expression];
 		}
 		return expression.map(translate);
@@ -509,7 +509,7 @@ const localizeMapStyle = (style, language) => {
 	for (const layer of style.layers) {
 		const field = layer.layout?.['text-field'];
 		if (!field) continue;
-		if (typeof field === 'string' && /\{name(?::[\w-]+|_[\w-]+)?\}/.test(field)) {
+		if (typeof field === 'string' && (/\{name(?::[\w-]+|_[\w-]+)?\}/).test(field)) {
 			layer.layout['text-field'] = ['coalesce', ['get', `name:${language}`], ['get', `name_${language}`], ['get', 'name'], ''];
 		} else if (Array.isArray(field)) {
 			layer.layout['text-field'] = translate(field);
@@ -527,7 +527,7 @@ const getMaplibreBaseMapLayer = async name => {
 			if (name === ESRI_HYBRID_NAME) {
 				options.style = await loadEsriStyle(options.style);
 				const sources = [...new Set(Object.values(options.style.sources).map(source => source.attribution).filter(Boolean))];
-				options.esriAttribution = `Powered by <a href="https://www.esri.com/">Esri</a> | ` +
+				options.esriAttribution = 'Powered by <a href="https://www.esri.com/">Esri</a> | ' +
 					`<details class="map-attribution-details"><summary>${escapeHtml(t('map:attributionSources'))}</summary>` +
 					`<div class="map-attribution-sources">${sources.map(escapeHtml).join('<br>')}</div></details>`;
 			} else if (mapLanguage !== 'local') {
@@ -551,19 +551,20 @@ let activateBaseMapFallback = null;
 
 const waitForBaseMapLoad = (targetLayer, name) => new Promise((resolve, reject) => {
 	const listeners = [];
-	let timer;
-	const finish = error => {
+	const timer = setTimeout(() => fail(), 20000);
+	function finish(error) {
 		clearTimeout(timer);
 		for (const [layer, event, handler] of listeners) layer.off(event, handler);
 		if (error) reject(error);
 		else resolve();
-	};
+	}
 	const listen = (layer, event, handler) => {
 		listeners.push([layer, event, handler]);
 		layer.on(event, handler);
 	};
-	const fail = () => finish(new Error(`Base map "${name}" failed to load`));
-	timer = setTimeout(fail, 20000);
+	function fail() {
+		finish(new Error(`Base map "${name}" failed to load`));
+	}
 	listen(targetLayer, 'remove', fail);
 	if (maplibreBaseMapOptions[name]) {
 		const glMap = targetLayer.getMaplibreMap();
