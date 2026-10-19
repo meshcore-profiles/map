@@ -30,11 +30,11 @@ ${urls}
 `);
 });
 
-router.get('/manifest.json', (req, res) => {
+router.get('/manifest.webmanifest', (req, res) => {
 	const { site } = res.locals;
 	const shortName = site.shortName || site.brandName;
 
-	res.json({
+	res.type('application/manifest+json').json({
 		name: req.t('meta:title', { brand: shortName }),
 		short_name: shortName,
 		description: req.t('meta:description'),
