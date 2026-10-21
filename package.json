@@ -1,6 +1,6 @@
 {
   "name": "sefin-meshcore-map",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "private": true,
   "homepage": "https://map.meshcoreprofiles.com",
   "bugs": {
@@ -27,11 +27,11 @@
     "express-rate-limit": "^8.7.1",
     "express-timeout-handler": "^2.2.2",
     "helmet": "^8.3.0",
-    "i18next": "^26.5.2",
+    "i18next": "^26.5.4",
     "i18next-http-middleware": "^3.9.9",
     "mongoose": "^9.11.2",
     "morgan": "^1.12.1",
-    "msgpackr": "^2.1.1",
+    "msgpackr": "^2.1.2",
     "rate-limit-redis": "^6.0.1",
     "redis": "^6.3.0"
   },

@@ -28,3 +28,17 @@ time {
 	align-items: center;
 	gap: 8px 15px;
 }
+
+.node-deletion-btn {
+	padding: 0;
+	border: none;
+	background: none;
+	color: var(--red-bright);
+	font: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.node-deletion-btn:hover {
+	color: var(--text);
+}

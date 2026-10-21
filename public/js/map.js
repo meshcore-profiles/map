@@ -4,6 +4,7 @@ import { toCanvas as qrToCanvas } from '../vendor/qrcode/qrcode.js';
 import * as ntools from './node-utils.js';
 import { t, tRaw, plural } from './i18n.js';
 import { initModal } from './modal.js';
+import { initNodeDeletionDialog } from './node-deletion.js';
 import { initLegendPanel } from './legend.js';
 import { initStatsModal } from './stats.js';
 import { initChangelogModal } from './changelog.js';
@@ -191,20 +192,6 @@ const getTable = node => '<table class="node-info"><tbody>' +
 	'<tr>' + columnOrder.flatMap(key => node[key] ? [`<td><b>${columns[key].label}</b></td><td>${columns[key].value ? columns[key].value(node[key]) : node[key]}</td>`] : []).join('</tr><tr>') + '</tr>' +
 '</tbody></table>';
 
-const getDeletionMailUrl = node => {
-	const deletionMailUrl = new URL('mailto:recrof@gmail.com');
-	deletionMailUrl.searchParams.append('subject', 'MeshCore Map node deletion request');
-	deletionMailUrl.searchParams.append('body', `Please delete my node(s) from MeshCore Map database
-MeshCore link(s) or Public key(s):
-
-${node ? node.public_key : ''}
-
-*** IMPORTANT ***
-if you have multiple nodes to delete, put them into single email, delimited by newline. public key is enough, you don't need to add name or screenshot of the node.`);
-
-	return deletionMailUrl.toString().replaceAll('+', '%20').replaceAll('\n', '%0A');
-};
-
 const discordTimestamp = date => `<t:${Math.floor(date.getTime() / 1000)}:R>`;
 const getShareUrl = node => `${location.origin}${location.pathname}?node=${node.public_key}`;
 
@@ -268,7 +255,7 @@ const getNodePopupHTML = node => {
 				${canAddContact ? `<a class="action-link-btn" href="${escapeHtml(qrValue)}" title="${t('map:addContactTitle')}" data-meshcore-link>${t('map:addContact')}</a>` : ''}
 			</div>
 			<div class="user-actions-right">
-				<a href="${getDeletionMailUrl(node)}" target="_blank" title="${t('map:reportDeletionTitle')}">${t('map:reportDeletion')}</a>
+				<button type="button" class="node-deletion-btn" data-delete-node="${escapeHtml(node.public_key)}" data-node-name="${escapeHtml(node.adv_name)}" title="${t('map:reportDeletionTitle')}">${t('map:reportDeletion')}</button>
 				${userActionAnchor}
 			</div>
 		</div>`;
@@ -677,6 +664,7 @@ const regionWarningCancelBtn = document.getElementById('region-warning-cancel');
 const regionWarningSizeEl = document.getElementById('region-warning-size');
 const contactErrorTextEl = document.getElementById('contact-error-text');
 const contactErrorModal = initModal(null, 'contact-error-overlay', { closeOnOutsideClick: true });
+initNodeDeletionDialog();
 const statsCounts = document.getElementById('stats-counts');
 const regionToggle = document.getElementById('region-toggle');
 const regionToggleLabel = document.getElementById('region-toggle-label');

@@ -22,7 +22,7 @@ require('./global/database/mongoose.js');
 // Middleware imports
 const timeout = require('./middlewares/timeout.js');
 const logger = require('./global/middlewares/morgan.js');
-const globalLimiter = require('./middlewares/ratelimit.js');
+const limiter = require('./middlewares/ratelimit.js');
 const language = require('./middlewares/language.js');
 const languageNegotiation = require('./middlewares/languageNegotiation.js');
 const { detectLanguagePrefix, isLanguageAgnosticPath } = require('./global/utils/languageResolver.js');
@@ -74,14 +74,15 @@ app.use(helmet({
 			defaultSrc: ['\'self\''],
 			baseUri: ['\'self\''],
 			objectSrc: ['\'none\''],
-			scriptSrc: ['\'self\'', 'https://cdn.sefinek.net', (req, res) => `'nonce-${res.locals.cspNonce}'`],
+			scriptSrc: ['\'self\'', 'https://cdn.sefinek.net', 'https://challenges.cloudflare.com', (req, res) => `'nonce-${res.locals.cspNonce}'`],
 			scriptSrcAttr: ['\'none\''],
 			styleSrc: ['\'self\'', 'https://fonts.googleapis.com', (req, res) => `'nonce-${res.locals.cspNonce}'`],
 			fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
 			imgSrc: ['\'self\'', 'data:', 'blob:', 'https://meshcorepolska.org', ...TILE_HOSTS],
-			connectSrc: ['\'self\'', 'https://meshcorepolska.org', 'https://api.meshcore.nz', 'https://api.open-elevation.com', 'https://api.open-meteo.com', ...(process.env.SEFINEK_API ? [process.env.SEFINEK_API] : []), ...TILE_HOSTS],
+			connectSrc: ['\'self\'', 'https://challenges.cloudflare.com', 'https://meshcorepolska.org', 'https://api.meshcore.nz', 'https://api.open-elevation.com', 'https://api.open-meteo.com', ...(process.env.SEFINEK_API ? [process.env.SEFINEK_API] : []), ...TILE_HOSTS],
 			workerSrc: ['\'self\'', 'blob:'],
 			childSrc: ['\'self\'', 'blob:'],
+			frameSrc: ['\'self\'', 'blob:', 'https://challenges.cloudflare.com'],
 			manifestSrc: ['\'self\''],
 			frameAncestors: ['\'self\''],
 			formAction: ['\'self\''],
@@ -107,16 +108,18 @@ app.use((req, res, next) => {
 app.use(languageNegotiation);
 app.use(language);
 app.use(logger);
-if (isProd) app.use(globalLimiter);
+if (isProd) app.use(limiter.global);
 app.use(timeout());
 
 
 // Routes
 const IndexRouter = require('./routes/Index.js');
 const APIRouter = require('./routes/Api.js');
+const NodeDeletionRouter = require('./routes/NodeDeletion.js');
 
 app.use(IndexRouter);
 app.use('/api/v1', APIRouter);
+app.use('/api/v1', NodeDeletionRouter);
 
 
 // Error handling

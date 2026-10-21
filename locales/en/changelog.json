@@ -1,6 +1,16 @@
 {
 	"entries": [
 		{
+			"version": "0.10.0",
+			"date": "2026-10-21",
+			"changes": [
+				"Added ownership confirmation and CAPTCHA verification before preparing a node removal request email.",
+				"Expanded the email text and added instructions in the page language.",
+				"Updated frontend msgpackr to version 2.1.2 and backend dependencies.",
+				"TODO: Fix node popup positioning so the top navigation does not obscure their contents."
+			]
+		},
+		{
 			"version": "0.9.1",
 			"date": "2026-10-19",
 			"changes": [

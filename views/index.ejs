@@ -252,6 +252,29 @@ const _titleBrand = site.shortName || site.brandName; %>
 	</div>
 </div>
 
+<div class="modal-overlay" id="node-deletion-overlay" hidden>
+	<div class="settings-panel" id="node-deletion-panel" role="dialog" aria-modal="true" aria-labelledby="node-deletion-title" aria-describedby="node-deletion-text">
+		<button type="button" class="modal-close-btn" id="node-deletion-close" aria-label="<%= t('common:close') %>">
+			<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#close"></use></svg>
+		</button>
+		<div class="modal-title" id="node-deletion-title"><%= t('map:reportDeletion') %></div>
+		<div id="node-deletion-identity">
+			<div id="node-deletion-name"></div>
+			<code id="node-deletion-key"></code>
+		</div>
+		<p id="node-deletion-text"></p>
+		<div id="node-deletion-captcha" hidden></div>
+		<p id="node-deletion-status" role="status" aria-live="polite" hidden></p>
+		<div id="node-deletion-actions">
+			<button type="button" class="region-warning-btn" id="node-deletion-done" hidden><%= t('common:close') %></button>
+			<button type="button" class="region-warning-btn" id="node-deletion-no"><%= t('map:deletion.no') %></button>
+			<button type="button" class="region-warning-btn" id="node-deletion-yes"><%= t('map:deletion.yes') %></button>
+			<button type="button" class="region-warning-btn" id="node-deletion-retry" hidden><%= t('map:deletion.retry') %></button>
+			<a class="region-warning-btn" id="node-deletion-email" hidden><%= t('map:deletion.openEmail') %></a>
+		</div>
+	</div>
+</div>
+
 <div class="modal-overlay" id="settings-overlay" hidden>
 	<div class="settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
 		<button type="button" class="modal-close-btn" id="settings-close-btn" aria-label="<%= t('settings:closeAria') %>">
@@ -549,10 +572,12 @@ window.MAP_CONFIG = {
 	defaultRadio: <%- JSON.stringify(site.defaultRadio) %>,
 
 	sefinekApi: <%- JSON.stringify(process.env.SEFINEK_API) %>,
-	esriApiKey: <%- JSON.stringify(process.env.ESRI_API_KEY?.trim() || null) %>,
+	esriApiKey: <%- JSON.stringify(process.env.ESRI_API_KEY || null) %>,
 	cartoApiKey: <%- JSON.stringify(process.env.CARTO_API_KEY || null) %>,
 	maptilerApiKey: <%- JSON.stringify(process.env.MAPTILER_API_KEY || null) %>,
 	maptilerHybridMapId: <%- JSON.stringify(site.maptilerHybridMapId) %>,
+	turnstileSitekey: <%- JSON.stringify(process.env.TURNSTILE_SECRET ? process.env.TURNSTILE_SITEKEY || null : null) %>,
+	nodeDeletionUrl: <%- JSON.stringify(lp('/api/v1/node-deletion')) %>,
 
 	languageCode: <%- JSON.stringify(languageCode) %>,
 	i18n: <%- JSON.stringify(i18nBundle) %>,

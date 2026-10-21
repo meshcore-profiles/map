@@ -36,7 +36,34 @@
 	"copyInfo": "Copy info",
 	"shareTitle": "Copy a link to this device to the clipboard",
 	"copyInfoTitle": "Copy the device info to the clipboard",
-	"reportDeletionTitle": "Send an email requesting this device be removed from the map",
+	"reportDeletionTitle": "Request removal of your node from the map",
+	"deletion": {
+		"ownerQuestion": "Are you sure you are the owner of this node?",
+		"yes": "Yes, I am the owner",
+		"no": "No",
+		"ownerOnly": "Only the owner can manage this node and request its removal from the map.",
+		"captchaPrompt": "A quick check to confirm you're not a bot.",
+		"loading": "Loading Cloudflare Turnstile...",
+		"waiting": "Waiting for verification...",
+		"verifying": "Verifying CAPTCHA...",
+		"ready": "Open the prepared email, check that its contents are correct, then send it. Each request is reviewed individually. It is also helpful to include the reason for removal.",
+		"openEmail": "Open email message",
+		"retry": "Try again",
+		"mail": {
+			"ownershipConfirmation": "I CONFIRM THAT I OWN ALL NODES LISTED ABOVE AND REQUEST THEIR REMOVAL FROM THE MESHCORE MAP DATABASE. I HAVE CHECKED THE PUBLIC KEYS OR MESHCORE LINKS AND CONFIRM THAT THIS REQUEST COVERS ONLY THE NODES I INTEND TO REMOVE.",
+			"instructionsTitle": "INSTRUCTIONS BEFORE SENDING",
+			"instructions": "Check that the public key above belongs to the node you want to remove. Only request removal of nodes you own. To remove several of your nodes, add their public keys or MeshCore contact links (meshcore://contact/add?...), one per line, and send a single request. Full public keys are sufficient; names and screenshots are not needed. You may add a brief reason for removal in English. Keep the subject, removal request and ownership confirmation in English so the recipient can review your request. Opening the email does not submit the request or remove the node from the map."
+		},
+		"errors": {
+			"unavailable": "Removal requests are temporarily unavailable. Please try again later.",
+			"captcha": "Cloudflare Turnstile verification failed. Please try again.",
+			"expired": "Verification expired. Please try again.",
+			"load": "Could not load Cloudflare Turnstile. Check your connection and content blocking settings, then try again.",
+			"request": "Could not verify the request. Please try again.",
+			"invalidRequest": "Invalid request details. Close this dialog and select the node again.",
+			"rateLimited": "You are making too many attempts. Please try again later."
+		}
+	},
 	"addContact": "Add contact",
 	"addContactTitle": "The official MeshCore app, version 1.47.0 or newer, is required to use this feature",
 	"addContactLaunching": "Launching the MeshCore app...",

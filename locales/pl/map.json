@@ -36,7 +36,34 @@
 	"copyInfo": "Skopiuj",
 	"shareTitle": "Skopiuj link do tego urządzenia do schowka",
 	"copyInfoTitle": "Skopiuj informacje o urządzeniu do schowka",
-	"reportDeletionTitle": "Wyślij e-mail z prośbą o usunięcie tego urządzenia z mapy",
+	"reportDeletionTitle": "Zgłoś usunięcie swojego węzła z mapy",
+	"deletion": {
+		"ownerQuestion": "Czy aby na pewno jesteś właścicielem tego węzła?",
+		"yes": "Tak, jestem właścicielem",
+		"no": "Nie",
+		"ownerOnly": "Tylko właściciel może zarządzać tym węzłem i zgłaszać jego usunięcie z mapy.",
+		"captchaPrompt": "Szybka weryfikacja, aby potwierdzić, że nie jesteś botem.",
+		"loading": "Wczytywanie Cloudflare Turnstile...",
+		"waiting": "Oczekiwanie na weryfikację...",
+		"verifying": "Weryfikowanie CAPTCHA...",
+		"ready": "Otwórz przygotowaną wiadomość e-mail, sprawdź poprawność jej treści, a następnie ją wyślij. Każdy wniosek jest rozpatrywany indywidualnie. Warto również podać powód usunięcia.",
+		"openEmail": "Otwórz wiadomość e-mail",
+		"retry": "Spróbuj ponownie",
+		"mail": {
+			"ownershipConfirmation": "I CONFIRM THAT I OWN ALL NODES LISTED ABOVE AND REQUEST THEIR REMOVAL FROM THE MESHCORE MAP DATABASE. I HAVE CHECKED THE PUBLIC KEYS OR MESHCORE LINKS AND CONFIRM THAT THIS REQUEST COVERS ONLY THE NODES I INTEND TO REMOVE.\nPOTWIERDZAM, ŻE JESTEM WŁAŚCICIELEM WSZYSTKICH WĘZŁÓW WYMIENIONYCH POWYŻEJ I PROSZĘ O ICH USUNIĘCIE Z BAZY MESHCORE MAP. SPRAWDZIŁEM PODANE KLUCZE PUBLICZNE LUB LINKI MESHCORE I POTWIERDZAM, ŻE ZGŁOSZENIE OBEJMUJE WYŁĄCZNIE WĘZŁY, KTÓRE CHCĘ USUNĄĆ.",
+			"instructionsTitle": "INSTRUKCJE PRZED WYSŁANIEM",
+			"instructions": "Sprawdź, czy powyższy klucz publiczny należy do węzła, który chcesz usunąć. Zgłaszaj wyłącznie własne węzły. Jeśli chcesz usunąć kilka swoich węzłów, dopisz ich klucze publiczne lub linki do kontaktów MeshCore (meshcore://contact/add?...), każdy w osobnym wierszu. Wyślij jedno wspólne zgłoszenie. Wystarczą pełne klucze publiczne; nazwy i zrzuty ekranu nie są potrzebne. Możesz dopisać krótki powód usunięcia po angielsku. Pozostaw temat, prośbę o usunięcie i potwierdzenie własności po angielsku, aby odbiorca mógł rozpatrzyć zgłoszenie. Samo otwarcie wiadomości nie wysyła zgłoszenia ani nie usuwa węzła z mapy."
+		},
+		"errors": {
+			"unavailable": "Zgłaszanie usunięcia jest chwilowo niedostępne. Spróbuj ponownie później.",
+			"captcha": "Weryfikacja Cloudflare Turnstile nie powiodła się. Spróbuj ponownie.",
+			"expired": "Weryfikacja wygasła. Spróbuj ponownie.",
+			"load": "Nie udało się wczytać Cloudflare Turnstile. Sprawdź połączenie i ustawienia blokowania treści, a następnie spróbuj ponownie.",
+			"request": "Nie udało się zweryfikować zgłoszenia. Spróbuj ponownie.",
+			"invalidRequest": "Nieprawidłowe dane zgłoszenia. Zamknij dialog i wybierz węzeł ponownie.",
+			"rateLimited": "Dokonujesz zbyt wielu prób. Spróbuj ponownie później."
+		}
+	},
 	"addContact": "Dodaj kontakt",
 	"addContactTitle": "Wymagana jest oficjalna aplikacja MeshCore w wersji 1.47.0 lub nowszej do obsługi ten funkcji",
 	"addContactLaunching": "Uruchamianie aplikacji MeshCore...",
