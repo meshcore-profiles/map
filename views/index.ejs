@@ -578,6 +578,7 @@ window.MAP_CONFIG = {
 	maptilerHybridMapId: <%- JSON.stringify(site.maptilerHybridMapId) %>,
 	turnstileSitekey: <%- JSON.stringify(process.env.TURNSTILE_SECRET ? process.env.TURNSTILE_SITEKEY || null : null) %>,
 	nodeDeletionUrl: <%- JSON.stringify(lp('/api/v1/node-deletion')) %>,
+	nodeDeletionEmail: <%- JSON.stringify(site.deletionEmail) %>,
 
 	languageCode: <%- JSON.stringify(languageCode) %>,
 	i18n: <%- JSON.stringify(i18nBundle) %>,

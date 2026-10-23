@@ -1,10 +1,10 @@
 import { pack, unpack } from '../vendor/msgpackr/msgpackr.js';
 import { t } from './i18n.js';
 
-export const EARTH_RADIUS = 6371000;
+const EARTH_RADIUS = 6371000;
 const EFFECTIVE_EARTH_RADIUS = EARTH_RADIUS * 4 / 3;
 
-export const toRad = deg => deg * Math.PI / 180;
+const toRad = deg => deg * Math.PI / 180;
 const toDeg = rad => rad * 180 / Math.PI;
 
 export const haversineDistance = (a, b) => {

@@ -1,3 +1,5 @@
+const DELETION_EMAIL = 'recrof@gmail.com';
+
 const poland = {
 	defaultLanguage: 'pl',
 	mapLanguage: 'pl',
@@ -10,6 +12,7 @@ const poland = {
 	languageSwitcher: 'none',
 	showRegionToggle: true,
 	domain: 'mapa.meshcorepolska.org',
+	deletionEmail: DELETION_EMAIL,
 	brandName: 'MeshCore Polska',
 	brandNameHtml: 'MeshCore <strong>Polska</strong>',
 	brandUrl: 'https://meshcorepolska.org',
@@ -34,6 +37,7 @@ const global = {
 	languageSwitcher: 'dropdown',
 	showRegionToggle: false,
 	domain: 'map.meshcoreprofiles.com',
+	deletionEmail: DELETION_EMAIL,
 	crossLinks: { pl: 'https://mapa.meshcorepolska.org' },
 	brandName: 'MeshCore Map',
 	brandNameHtml: 'MeshCore Map',
@@ -54,4 +58,4 @@ const HOSTS = {
 	[global.domain]: global,
 };
 
-module.exports = { poland, global, HOSTS, default: poland };
+module.exports = { poland, global, HOSTS, DELETION_EMAIL, default: poland };

@@ -1,3 +1,5 @@
+const { DELETION_EMAIL } = require('../config/sites.js');
+
 module.exports = (publicKey, t, domain) => {
 	const subject = 'MeshCore Map node deletion request';
 	const body = `Please delete my node(s) from MeshCore Map database.
@@ -12,5 +14,5 @@ ${t('map:deletion.mail.instructions')}
 
 // This request was prepared via https://${domain}.`;
 
-	return `mailto:recrof@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+	return `mailto:${DELETION_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };

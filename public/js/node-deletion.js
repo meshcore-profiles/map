@@ -95,7 +95,7 @@ export const initNodeDeletionDialog = () => {
 				showError('request', typeof data.message === 'string' ? data.message : null);
 				return;
 			}
-			if (!data.data?.mailto?.startsWith('mailto:recrof@gmail.com?')) {
+			if (!data.data?.mailto?.startsWith(`mailto:${window.MAP_CONFIG.nodeDeletionEmail}?`)) {
 				showError('request');
 				return;
 			}
