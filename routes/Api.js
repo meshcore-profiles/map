@@ -4,6 +4,7 @@ const StatsDaily = require('../global/database/models/statsDaily.model.js');
 
 const MAX_HISTORY_DAYS = 365;
 const DEFAULT_HISTORY_DAYS = 90;
+const MAX_HISTORY_ROWS = 5000;
 
 router.get('/nodes', async (req, res) => {
 	try {
@@ -55,6 +56,7 @@ router.get('/stats/history', async (req, res) => {
 
 		const history = await StatsDaily.find(query, '-_id -region')
 			.sort({ date: 1 })
+			.limit(MAX_HISTORY_ROWS)
 			.lean();
 
 		res.set('Cache-Control', 'public, max-age=300');

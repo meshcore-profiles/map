@@ -17,7 +17,8 @@ const resolveSite = req => {
 
 // Node data itself is fetched/cached into Redis by the meshcore-profiles/cronjobs worker;
 // this app only reads it (see global/services/nodeCache.js).
-require('./global/database/mongoose.js');
+const MongooseConnection = require('./global/database/mongoose.js');
+const RedisClient = require('./global/services/redis.js');
 
 // Middleware imports
 const timeout = require('./middlewares/timeout.js');
@@ -128,4 +129,23 @@ app.use((err, req, res, _next) => HttpError(res, 500, err));
 
 
 // Start the server
-app.listen(PORT, () => process.send ? process.send('ready') : console.log(`Server running at ${DOMAIN}:${PORT}`));
+const server = app.listen(PORT, () => process.send ? process.send('ready') : console.log(`Server running at ${DOMAIN}:${PORT}`));
+
+// Let in-flight requests finish before closing the database and Redis connections (PM2 sends SIGINT on restart)
+let shuttingDown = false;
+const shutdown = signal => {
+	if (shuttingDown) return;
+	shuttingDown = true;
+	console.log(`${signal} received, shutting down...`);
+
+	setTimeout(() => process.exit(1), 5000).unref();
+
+	server.close(async () => {
+		await Promise.allSettled([MongooseConnection.close(), RedisClient.quit()]);
+		process.exit(0);
+	});
+	server.closeIdleConnections();
+};
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
