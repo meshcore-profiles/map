@@ -424,6 +424,14 @@ L.DomEvent.disableScrollPropagation(map.attributionControl.getContainer());
 map.createPane('highlightPane');
 map.getPane('highlightPane').style.zIndex = 620;
 
+// Popups live outside the map pane (which is its own stacking context) so they can sit above the fixed stats bar; the pane mirrors the map pane's offset
+const popupPane = map.createPane('nodePopupPane', map.getContainer());
+popupPane.style.zIndex = 1001;
+const syncPopupPane = () => L.DomUtil.setPosition(popupPane, L.DomUtil.getPosition(map.getPane('mapPane')));
+map.on('move viewreset zoom', syncPopupPane);
+map.on('zoomanim', () => popupPane.classList.add('leaflet-zoom-anim'));
+map.on('zoomend', () => popupPane.classList.remove('leaflet-zoom-anim'));
+
 const renderQrCode = qrEl => {
 	if (!qrEl) return;
 
@@ -438,10 +446,36 @@ const renderQrCode = qrEl => {
 	}).catch(err => console.error('Failed to generate QR code:', err));
 };
 
+const statsBar = document.getElementById('stats-bar');
+const POPUP_VIEW_PADDING = 10;
+
+// Leaflet's autoPan runs once on open and ignores the fixed stats bar, so the popup is panned into view manually after layout
+const panPopupIntoView = popup => {
+	const el = popup.getElement();
+	if (!el?.isConnected) return;
+
+	const rect = el.getBoundingClientRect();
+	const mapRect = map.getContainer().getBoundingClientRect();
+	const minTop = statsBar.getBoundingClientRect().bottom + POPUP_VIEW_PADDING;
+	const maxBottom = mapRect.bottom - POPUP_VIEW_PADDING;
+	const maxRight = mapRect.right - POPUP_VIEW_PADDING;
+	const minLeft = mapRect.left + POPUP_VIEW_PADDING;
+
+	let dx = 0;
+	let dy = 0;
+	if (rect.right > maxRight) dx = rect.right - maxRight;
+	if (rect.left - dx < minLeft) dx = rect.left - minLeft;
+	if (rect.bottom > maxBottom) dy = rect.bottom - maxBottom;
+	if (rect.top - dy < minTop) dy = rect.top - minTop;
+
+	if (dx || dy) map.panBy([dx, dy]);
+};
+
 map.on('popupopen', e => {
 	requestAnimationFrame(() => {
 		const qrEl = e.popup.getElement()?.querySelector('.node-qr');
 		if (qrEl?.isConnected) renderQrCode(qrEl);
+		panPopupIntoView(e.popup);
 	});
 });
 
@@ -836,7 +870,7 @@ const ensurePopup = marker => {
 
 	const node = markerToNode.get(marker);
 	if (node) {
-		marker.bindPopup(L.popup({ minWidth: 430, maxWidth: 430, content: () => getNodePopupHTML(node) }));
+		marker.bindPopup(L.popup({ minWidth: 430, maxWidth: 430, autoPan: false, pane: 'nodePopupPane', content: () => getNodePopupHTML(node) }));
 		marker._popupBound = true;
 	}
 };

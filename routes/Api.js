@@ -8,13 +8,12 @@ const DEFAULT_HISTORY_DAYS = 90;
 router.get('/nodes', async (req, res) => {
 	try {
 		const region = req.query.region === 'all' ? 'all' : 'pl';
-		const nodes = await getCachedNodes(region);
+		const [nodes, lastRefreshedAt] = await Promise.all([getCachedNodes(region), getLastRefreshedAt()]);
 		if (!nodes) return res.status(503).json({ success: false, status: 503, message: req.t('error:nodesNotAvailable') });
 
 		res.set('Content-Type', 'application/octet-stream');
 		res.set('Cache-Control', 'no-store');
 
-		const lastRefreshedAt = await getLastRefreshedAt();
 		if (lastRefreshedAt) res.set('X-Data-Updated', lastRefreshedAt.toISOString());
 
 		res.send(nodes);
