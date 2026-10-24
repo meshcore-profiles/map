@@ -387,9 +387,9 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 	const renderSummary = (opticalRanges, fresnelRanges, maxRangeM, linkBudgetRangeM) => {
 		const searchCapM = Math.min(maxRangeM, linkBudgetRangeM);
 
-		const group = (label, color, ranges) => `
+		const group = (label, kind, ranges) => `
 			<div class="coverage-result-group">
-				<div class="coverage-result-group-title" style="color:${color}">${label}</div>
+				<div class="coverage-result-group-title coverage-result-group-title-${kind}">${label}</div>
 				<div class="terrain-result-summary">
 					<div class="terrain-result-chip">
 						<span class="terrain-result-chip-label">${t('coverage:maxRangeLabel')}</span>
@@ -414,8 +414,8 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		resultEl.innerHTML = `
 			<p class="setting-desc tool-modal-desc">${t('coverage:linkBudgetRange', { range: formatDistance(linkBudgetRangeM) })}</p>
 			<div class="coverage-result-summary">
-				${group(t('coverage:opticalCriterion'), COLOR_OPTICAL, opticalRanges)}
-				${group(t('coverage:fresnelCriterion'), COLOR_FRESNEL, fresnelRanges)}
+				${group(t('coverage:opticalCriterion'), 'optical', opticalRanges)}
+				${group(t('coverage:fresnelCriterion'), 'fresnel', fresnelRanges)}
 			</div>
 		`;
 		resultEl.hidden = false;

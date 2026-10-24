@@ -24,6 +24,10 @@
 	text-decoration: none;
 }
 
+.leaflet-container path.leaflet-interactive:focus {
+	outline: none;
+}
+
 .leaflet-control-attribution a:hover, .leaflet-control-attribution a:focus {
 	color: var(--red-light);
 	text-decoration: underline;

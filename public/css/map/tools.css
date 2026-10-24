@@ -398,6 +398,14 @@ li.tool-panel-empty {
 	text-transform: uppercase;
 }
 
+.coverage-result-group-title-optical {
+	color: #4dabf7;
+}
+
+.coverage-result-group-title-fresnel {
+	color: #2dd881;
+}
+
 .coverage-legend {
 	display: flex;
 	flex-direction: column;

@@ -71,7 +71,11 @@ export const ELEVATION_PROVIDERS = {
 			if (!res.ok) throw new Error(`Sefinek API returned error ${res.status}`);
 
 			const data = unpack(new Uint8Array(await res.arrayBuffer()));
-			return data.results.map(r => r.elevation);
+			const elevations = data.results.map(r => r.elevation);
+			// The API answers 200 with null for points it could not resolve; treating them as 0 would fake a flat terrain.
+			if (elevations.length !== points.length || !elevations.every(Number.isFinite)) throw new Error('Sefinek API returned incomplete elevation data.');
+
+			return elevations;
 		},
 	},
 	'open-elevation': {
