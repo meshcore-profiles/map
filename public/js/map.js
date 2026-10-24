@@ -708,6 +708,7 @@ const settingsModal = initModal('settings-toggle', 'settings-overlay');
 const closeFiltersOnApplyCheckbox = document.getElementById('setting-close-filters-on-apply');
 const elevationSourceSelect = document.getElementById('setting-elevation-source');
 const elevationSourceDesc = document.getElementById('setting-elevation-desc');
+const coverageStyleSelect = document.getElementById('setting-coverage-style');
 const legendPanelUi = initLegendPanel();
 const searchInline = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
@@ -830,7 +831,10 @@ const measureTool = initMeasureTool({ map, setPicker, escapeHtml, getNodes: () =
 const routeTool = initRouteTool({ map, getNodes: () => state.nodes, escapeHtml });
 let elevationSource = localStorage.getItem('elevationSource') || 'sefinek';
 const terrainTool = initTerrainTool({ map, setPicker, getNodes: () => state.nodes, showToast, getElevationSource: () => elevationSource });
-const coverageTool = initCoverageTool({ map, setPicker, getNodes: () => state.nodes, showToast, getElevationSource: () => elevationSource, getPresets });
+const COVERAGE_STYLES = ['tiles', 'lines'];
+const savedCoverageStyle = localStorage.getItem('coverageStyle');
+let coverageStyle = COVERAGE_STYLES.includes(savedCoverageStyle) ? savedCoverageStyle : 'tiles';
+const coverageTool = initCoverageTool({ map, setPicker, getNodes: () => state.nodes, showToast, getElevationSource: () => elevationSource, getLayerStyle: () => coverageStyle, getPresets });
 
 const closableTools = [settingsModal, legendPanelUi, statsModal, changelogModal, measureTool, routeTool, terrainTool, coverageTool];
 for (const a of closableTools) {
@@ -1491,6 +1495,13 @@ elevationSourceSelect.addEventListener('change', () => {
 	updateElevationSourceDesc();
 });
 
+coverageStyleSelect.value = coverageStyle;
+coverageStyleSelect.addEventListener('change', () => {
+	coverageStyle = coverageStyleSelect.value;
+	localStorage.setItem('coverageStyle', coverageStyle);
+	coverageTool.refreshLayer();
+});
+
 applyFiltersBtn.addEventListener('click', () => {
 	applyFilters();
 	if (closeFiltersOnApplyCheckbox.checked) filterMenu.hidden = true;
@@ -1745,12 +1756,14 @@ downloadNodes(state.region).then(() => {
 	}
 
 	if (urlParams.coverage) {
-		const [lat, lng, txHeight, rxHeight, freq, maxRange, resolution, terrainMargin, erp, sf, bw] = urlParams.coverage.split(',');
+		const parts = urlParams.coverage.split(',');
+		if (parts.length === 11) parts.splice(5, 1); // legacy links carried the removed max-range field
+		const [lat, lng, txHeight, rxHeight, freq, resolution, terrainMargin, erp, sf, bw] = parts;
 		const parsedLat = Number(lat), parsedLng = Number(lng);
 
 		if (Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
 			coverageTool.loadFromUrlState(
-				parsedLat, parsedLng, Number(txHeight), Number(rxHeight), Number(freq), Number(maxRange),
+				parsedLat, parsedLng, Number(txHeight), Number(rxHeight), Number(freq),
 				resolution, Number(terrainMargin), Number(erp), Number(sf), Number(bw)
 			);
 		}

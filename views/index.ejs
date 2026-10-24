@@ -287,14 +287,23 @@ const _titleBrand = site.shortName || site.brandName; %>
 			<p class="setting-desc" id="setting-close-filters-desc"><%= t('settings:closeFiltersDesc') %></p>
 		</div>
 
-		<div class="setting-item" id="setting-item-select">
-			<label for="setting-elevation-source" id="setting-label"><%= t('settings:elevationSourceLabel') %></label>
+		<div class="setting-item setting-item-select">
+			<label for="setting-elevation-source" class="setting-label"><%= t('settings:elevationSourceLabel') %></label>
 			<select class="date-input" id="setting-elevation-source" aria-describedby="setting-elevation-desc">
 				<option value="sefinek" selected><%= t('settings:elevationSefinek') %></option>
 				<option value="open-elevation"><%= t('settings:elevationOpenElevation') %></option>
 				<option value="open-meteo"><%= t('settings:elevationOpenMeteo') %></option>
 			</select>
 			<p class="setting-desc" id="setting-elevation-desc"><%= t('settings:elevationDesc') %></p>
+		</div>
+
+		<div class="setting-item setting-item-select">
+			<label for="setting-coverage-style" class="setting-label"><%= t('settings:coverageStyleLabel') %></label>
+			<select class="date-input" id="setting-coverage-style" aria-describedby="setting-coverage-style-desc">
+				<option value="tiles" selected><%= t('settings:coverageStyleTiles') %></option>
+				<option value="lines"><%= t('settings:coverageStyleLines') %></option>
+			</select>
+			<p class="setting-desc" id="setting-coverage-style-desc"><%= t('settings:coverageStyleDesc') %></p>
 		</div>
 
 	</div>
@@ -504,10 +513,6 @@ const _titleBrand = site.shortName || site.brandName; %>
 		</div>
 
 		<div class="coverage-field-row">
-			<label class="field-group">
-				<span><%= t('coverage:maxRange') %></span>
-				<input type="number" class="date-input" id="coverage-max-range" value="20" min="1" max="50" step="1">
-			</label>
 			<label class="field-group">
 				<span><%= t('coverage:resolution') %></span>
 				<select class="date-input" id="coverage-resolution">

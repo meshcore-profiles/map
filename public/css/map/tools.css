@@ -446,6 +446,18 @@ li.tool-panel-empty {
 	border-top-style: solid;
 }
 
+.coverage-legend-gradient {
+	width: 44px;
+	height: 10px;
+	border-top: 0;
+	border-radius: 2px;
+	background: linear-gradient(90deg, #d4f3b2, #7fd68f, #38ad6f, #0b5f3f);
+}
+
+.coverage-grid {
+	image-rendering: pixelated;
+}
+
 .coverage-legend-budget {
 	border-top-color: #99a1b5;
 	border-top-style: dotted;

@@ -11,10 +11,9 @@
 	"txHeight": "Wysokość anteny nadawczej (m)",
 	"rxHeight": "Wysokość anteny odbiorczej (m)",
 	"frequency": "Częstotliwość (MHz)",
-	"maxRange": "Zasięg maksymalny (km)",
 	"terrainMargin": "Tolerancja szumu terenu (m)",
 	"terrainMarginDesc": "Przeszkoda musi przebijać linię widzenia o więcej niż ta wartość, żeby przerwać promień - pochłania naturalny szum modelu wysokościowego (siatka 30 m), który inaczej fałszywie blokowałby zasięg przy niskich antenach.",
-	"erp": "Moc ERP (dBm)",
+	"erp": "Moc nadawania ERP (dBm)",
 	"erpDesc": "Efektywna moc promieniowana nadajnika (z uwzględnieniem zysku anteny). Ogranicza zasięg niezależnie od terenu - poprzez tłumienie w wolnej przestrzeni i czułość odbiornika, z zapasem 10 dB na zaniki sygnału.",
 	"spreadingFactor": "Spreading Factor (SF)",
 	"bandwidth": "Szerokość pasma (kHz)",
@@ -27,7 +26,6 @@
 	"compute": "Oblicz zasięg",
 	"selectPoint": "Wybierz punkt startowy",
 	"invalidFrequency": "Podaj poprawną częstotliwość (MHz)",
-	"invalidRange": "Podaj poprawny zasięg maksymalny",
 	"fetchingElevation": "Pobieranie danych wysokościowych...",
 	"fetchingElevationProgress": "Pobieranie danych wysokościowych... ({{current}}/{{total}})",
 	"fetchElevationFailed": "Nie udało się pobrać danych wysokościowych. Spróbuj ponownie.",
@@ -40,5 +38,6 @@
 	"originFallback": "Punkt startowy",
 	"linkBudgetCriterion": "Zasięg wg mocy (ERP)",
 	"rayTooltip": "{{bearing}}° - LOS: {{optical}} / Fresnel: {{fresnel}}",
-	"rayTooltipClear": "{{bearing}}° - LOS: {{optical}} / Fresnel: {{fresnel}} (bez przeszkód w zasięgu wyszukiwania)"
+	"rayTooltipClear": "{{bearing}}° - LOS: {{optical}} / Fresnel: {{fresnel}} (bez przeszkód w zasięgu wyszukiwania)",
+	"legendChance": "Szansa odbioru: niska → wysoka"
 }

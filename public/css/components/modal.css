@@ -114,13 +114,13 @@
 	line-height: 1.45;
 }
 
-#setting-label {
+.setting-label {
 	margin-bottom: 8px;
 	color: var(--text);
 	font-size: 16px;
 }
 
-#setting-item-select .setting-desc {
+.setting-item-select .setting-desc {
 	margin: 8px 0 0;
 	white-space: pre-line;
 }

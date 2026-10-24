@@ -14,6 +14,8 @@ const MIN_SAMPLES_PER_RAY = 20;
 const MAX_SAMPLES_PER_RAY = 60;
 const DEFAULT_CHUNK_SIZE = 100;
 
+const MAX_RANGE_M = 30000;
+
 const RESOLUTIONS = { fast: 36, standard: 72, high: 144 };
 const NODE_TYPE_ICON_NAMES = { 1: 'client', 2: 'repeater', 3: 'room-server', 4: 'sensor' };
 
@@ -23,6 +25,15 @@ const COLOR_ORIGIN = '#f2b134';
 const COLOR_BUDGET = '#99a1b5';
 const COLOR_BLOCKED = '#e01230';
 
+// Lightest to darkest - the darker the tile, the higher the chance of reception.
+const GRID_SHADES = ['#d4f3b2', '#a9e6a0', '#7fd68f', '#58c47f', '#38ad6f', '#259460', '#167a50', '#0b5f3f'];
+const GRID_ALPHA_MIN = 0.3;
+const GRID_ALPHA_MAX = 0.85;
+const GRID_CELL_TARGET_M = 90;
+const GRID_MAX_CELLS = 560;
+const GRID_FULL_MARGIN_DB = 60;
+const GRID_MIN_SCORE = 0.06;
+
 // Approximate LoRa (SX127x/SX126x-class) receiver sensitivity at BW=125kHz, from common
 // Semtech datasheet figures. Scaled to other bandwidths via the noise-bandwidth relationship.
 // No confirmed SF5 figure (SX126x-only, not in the SX127x table this is based on, and no
@@ -30,8 +41,8 @@ const COLOR_BLOCKED = '#e01230';
 const SENSITIVITY_125K_DBM = { 6: -118, 7: -123, 8: -126, 9: -129, 10: -132, 11: -133, 12: -136 };
 const LINK_FADE_MARGIN_DB = 10;
 
-const computeSamplesPerRay = (maxRangeM, bearings) => {
-	let samples = Math.min(MAX_SAMPLES_PER_RAY, Math.max(MIN_SAMPLES_PER_RAY, Math.round(maxRangeM / SAMPLE_SPACING_TARGET)));
+const computeSamplesPerRay = (rangeM, bearings) => {
+	let samples = Math.min(MAX_SAMPLES_PER_RAY, Math.max(MIN_SAMPLES_PER_RAY, Math.round(rangeM / SAMPLE_SPACING_TARGET)));
 	if (bearings * samples > MAX_TOTAL_POINTS) samples = Math.max(MIN_SAMPLES_PER_RAY, Math.floor(MAX_TOTAL_POINTS / bearings));
 	return samples;
 };
@@ -51,7 +62,7 @@ const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
 
 const STORAGE_KEY = 'coverageToolState';
 
-export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getElevationSource, getPresets }) => {
+export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getElevationSource, getLayerStyle, getPresets }) => {
 	const modal = initModal('coverage-toggle', 'coverage-overlay');
 	const titleEl = document.getElementById('coverage-title');
 	const closeBtn = document.getElementById('coverage-close-btn');
@@ -63,7 +74,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 	const txHeightInput = document.getElementById('coverage-tx-height');
 	const rxHeightInput = document.getElementById('coverage-rx-height');
 	const freqInput = document.getElementById('coverage-freq');
-	const maxRangeInput = document.getElementById('coverage-max-range');
 	const resolutionSelect = document.getElementById('coverage-resolution');
 	const marginInput = document.getElementById('coverage-terrain-margin');
 	const erpInput = document.getElementById('coverage-erp');
@@ -77,6 +87,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 	let origin = null;
 	let coverageGroup = null;
+	let lastRender = null;
 	let legendControl = null;
 	let clearPicker = null;
 	let picking = false;
@@ -159,9 +170,9 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 	};
 
 	// Rebuilds the legend content on every render (not just once), since whether the ERP
-	// circle item applies depends on the current computation (linkBudgetRangeM vs maxRangeM),
+	// circle item applies depends on the current computation (linkBudgetRangeM vs MAX_RANGE_M),
 	// which can change between one "Oblicz zasięg" click and the next.
-	const ensureLegend = showBudget => {
+	const ensureLegend = (showBudget, tiles) => {
 		if (!legendControl) {
 			legendControl = L.control({ position: 'bottomleft' });
 			legendControl.onAdd = () => {
@@ -173,8 +184,12 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		}
 
 		legendControl.getContainer().innerHTML = `
-			<div class="coverage-legend-item"><span class="coverage-legend-swatch coverage-legend-optical"></span>${t('coverage:opticalCriterion')}</div>
-			<div class="coverage-legend-item"><span class="coverage-legend-swatch coverage-legend-fresnel"></span>${t('coverage:fresnelCriterion')}</div>
+			${tiles ? `
+				<div class="coverage-legend-item"><span class="coverage-legend-swatch coverage-legend-gradient"></span>${t('coverage:legendChance')}</div>
+			` : `
+				<div class="coverage-legend-item"><span class="coverage-legend-swatch coverage-legend-optical"></span>${t('coverage:opticalCriterion')}</div>
+				<div class="coverage-legend-item"><span class="coverage-legend-swatch coverage-legend-fresnel"></span>${t('coverage:fresnelCriterion')}</div>
+			`}
 			${showBudget ? `<div class="coverage-legend-item"><span class="coverage-legend-swatch coverage-legend-budget"></span>${t('coverage:linkBudgetCriterion')}</div>` : ''}
 		`;
 	};
@@ -194,7 +209,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			txHeight: txHeightInput.value,
 			rxHeight: rxHeightInput.value,
 			freq: freqInput.value,
-			maxRange: maxRangeInput.value,
 			resolution: resolutionSelect.value,
 			terrainMargin: marginInput.value,
 			erp: erpInput.value,
@@ -292,17 +306,16 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 	const updateEstimate = () => {
 		const bearings = RESOLUTIONS[resolutionSelect.value] || RESOLUTIONS.high;
-		const maxRangeM = (Number(maxRangeInput.value) || 0) * 1000;
-		const samples = computeSamplesPerRay(maxRangeM, bearings);
+		const budgetM = computeLinkBudgetRangeM(Number(erpInput.value) || 0, Number(freqInput.value) || 869, Number(sfInput.value) || 9, Number(bwInput.value) || 250);
+		const samples = computeSamplesPerRay(Math.min(MAX_RANGE_M, budgetM), bearings);
 		const totalPoints = bearings * samples + 1;
 		estimateEl.textContent = t('coverage:estimate', { points: totalPoints });
 	};
 
-	maxRangeInput.addEventListener('input', updateEstimate);
-	resolutionSelect.addEventListener('change', updateEstimate);
+	[resolutionSelect, freqInput, erpInput, sfInput, bwInput].forEach(el => el.addEventListener('change', updateEstimate));
 	updateEstimate();
 
-	[txHeightInput, rxHeightInput, freqInput, maxRangeInput, marginInput, erpInput, sfInput, bwInput].forEach(el => el.addEventListener('change', saveState));
+	[txHeightInput, rxHeightInput, freqInput, marginInput, erpInput, sfInput, bwInput].forEach(el => el.addEventListener('change', saveState));
 	resolutionSelect.addEventListener('change', saveState);
 
 	presetSelect.addEventListener('change', () => {
@@ -318,13 +331,68 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		presetSelect.value = '';
 	}));
 
-	const renderLayer = (rayResults, maxRangeM, linkBudgetRangeM) => {
-		const group = ensureCoverageLayer();
-		group.clearLayers();
+	// One pixel per cell; the overlay is drawn with pixelated scaling so every cell shows as a square.
+	// Cell ranges are interpolated between the two nearest rays, so tiles between rays are estimates.
+	const buildGridImage = (rayResults, capM, linkBudgetRangeM) => {
+		const bearings = rayResults.length;
+		const bearingStep = 360 / bearings;
+		const cells = Math.min(GRID_MAX_CELLS, Math.ceil((capM * 2) / GRID_CELL_TARGET_M));
+		const cellM = (capM * 2) / cells;
 
+		const canvas = document.createElement('canvas');
+		canvas.width = cells;
+		canvas.height = cells;
+		const ctx = canvas.getContext('2d');
+
+		for (let py = 0; py < cells; py++) {
+			for (let px = 0; px < cells; px++) {
+				const dx = (px + 0.5 - cells / 2) * cellM;
+				const dy = (cells / 2 - py - 0.5) * cellM;
+				const dist = Math.hypot(dx, dy);
+				if (dist > capM) continue;
+
+				const position = (((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360) / bearingStep;
+				const lower = Math.floor(position);
+				const frac = position - lower;
+				const a = rayResults[lower % bearings], b = rayResults[(lower + 1) % bearings];
+				const fresnelRange = a.fresnelRange * (1 - frac) + b.fresnelRange * frac;
+				const opticalRange = a.opticalRange * (1 - frac) + b.opticalRange * frac;
+
+				const terrainFactor = dist <= fresnelRange ? 1 : dist <= opticalRange ? 0.5 : 0;
+				if (!terrainFactor) continue;
+
+				// Link margin left over at this distance (free-space loss only), so the shade fades smoothly with distance.
+				const marginDb = 20 * Math.log10(linkBudgetRangeM / Math.max(dist, 1));
+				const score = Math.max(GRID_MIN_SCORE, terrainFactor * Math.min(1, Math.max(0, marginDb) / GRID_FULL_MARGIN_DB));
+
+				const level = Math.min(GRID_SHADES.length - 1, Math.floor(score * GRID_SHADES.length));
+				ctx.globalAlpha = GRID_ALPHA_MIN + (GRID_ALPHA_MAX - GRID_ALPHA_MIN) * (level / (GRID_SHADES.length - 1));
+				ctx.fillStyle = GRID_SHADES[level];
+				ctx.fillRect(px, py, 1, 1);
+			}
+		}
+
+		return canvas.toDataURL();
+	};
+
+	const drawTiles = (group, rayResults, searchCapM, linkBudgetRangeM) => {
+		const gridBounds = L.latLngBounds(
+			[destinationPoint(origin, 180, searchCapM).lat, destinationPoint(origin, 270, searchCapM).lng],
+			[destinationPoint(origin, 0, searchCapM).lat, destinationPoint(origin, 90, searchCapM).lng]
+		);
+
+		L.imageOverlay(buildGridImage(rayResults, searchCapM, linkBudgetRangeM), gridBounds, {
+			pane: 'coveragePane',
+			interactive: false,
+			className: 'coverage-grid',
+		}).addTo(group);
+
+		return gridBounds;
+	};
+
+	const drawLines = (group, rayResults, searchCapM) => {
 		const opticalPoints = rayResults.map(r => r.opticalPoint);
 		const fresnelPoints = rayResults.map(r => r.fresnelPoint);
-		const searchCapM = Math.min(maxRangeM, linkBudgetRangeM);
 
 		L.polygon(opticalPoints.map(p => [p.lat, p.lng]), {
 			pane: 'coveragePane',
@@ -340,18 +408,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			weight: 2,
 			fillOpacity: 0.22,
 		}).bindTooltip(t('coverage:fresnelCriterion')).addTo(group);
-
-		const budgetLimits = linkBudgetRangeM < maxRangeM;
-		if (budgetLimits) {
-			L.circle([origin.lat, origin.lng], {
-				pane: 'coveragePane',
-				radius: linkBudgetRangeM,
-				color: COLOR_BUDGET,
-				weight: 1.5,
-				dashArray: '2 6',
-				fill: false,
-			}).bindTooltip(t('coverage:linkBudgetRange', { range: formatDistance(linkBudgetRangeM) })).addTo(group);
-		}
 
 		for (const r of rayResults) {
 			const clear = r.opticalRange >= searchCapM - 1;
@@ -371,6 +427,31 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			})).addTo(group);
 		}
 
+		return L.latLngBounds(opticalPoints.map(p => [p.lat, p.lng]));
+	};
+
+	const renderLayer = (rayResults, linkBudgetRangeM, fit = true) => {
+		lastRender = { rayResults, linkBudgetRangeM };
+
+		const group = ensureCoverageLayer();
+		group.clearLayers();
+
+		const searchCapM = Math.min(MAX_RANGE_M, linkBudgetRangeM);
+		const tiles = getLayerStyle() === 'tiles';
+		const bounds = (tiles ? drawTiles : drawLines)(group, rayResults, searchCapM, linkBudgetRangeM);
+
+		const budgetLimits = linkBudgetRangeM < MAX_RANGE_M;
+		if (budgetLimits) {
+			L.circle([origin.lat, origin.lng], {
+				pane: 'coveragePane',
+				radius: linkBudgetRangeM,
+				color: COLOR_BUDGET,
+				weight: 1.5,
+				dashArray: '2 6',
+				fill: false,
+			}).bindTooltip(t('coverage:linkBudgetRange', { range: formatDistance(linkBudgetRangeM) })).addTo(group);
+		}
+
 		L.circleMarker([origin.lat, origin.lng], {
 			pane: 'coveragePane',
 			radius: 7,
@@ -380,12 +461,16 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			fillOpacity: 0.9,
 		}).bindTooltip(origin.label ? escapeHtml(origin.label) : t('coverage:originFallback')).addTo(group);
 
-		ensureLegend(budgetLimits);
-		map.fitBounds(L.latLngBounds(opticalPoints.map(p => [p.lat, p.lng])), { padding: [40, 40] });
+		ensureLegend(budgetLimits, tiles);
+		if (fit) map.fitBounds(bounds, { padding: [40, 40] });
 	};
 
-	const renderSummary = (opticalRanges, fresnelRanges, maxRangeM, linkBudgetRangeM) => {
-		const searchCapM = Math.min(maxRangeM, linkBudgetRangeM);
+	const refreshLayer = () => {
+		if (lastRender) renderLayer(lastRender.rayResults, lastRender.linkBudgetRangeM, false);
+	};
+
+	const renderSummary = (opticalRanges, fresnelRanges, linkBudgetRangeM) => {
+		const searchCapM = Math.min(MAX_RANGE_M, linkBudgetRangeM);
 
 		const group = (label, kind, ranges) => `
 			<div class="coverage-result-group">
@@ -479,12 +564,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 		const txHeight = Number(txHeightInput.value) || 0;
 		const rxHeight = Number(rxHeightInput.value) || 0;
-		const maxRangeM = (Number(maxRangeInput.value) || 0) * 1000;
-		if (maxRangeM < 100) {
-			showToast(t('coverage:invalidRange'), { status: 'error' });
-			return;
-		}
-
 		const margin = Number(marginInput.value) || 0;
 		const erpDbm = Number(erpInput.value) || 0;
 		const sf = Number(sfInput.value) || 9;
@@ -492,7 +571,8 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		const linkBudgetRangeM = computeLinkBudgetRangeM(erpDbm, freqMHz, sf, bwKHz);
 
 		const bearings = RESOLUTIONS[resolutionSelect.value] || RESOLUTIONS.high;
-		const samplesPerRay = computeSamplesPerRay(maxRangeM, bearings);
+		const searchRangeM = Math.min(MAX_RANGE_M, linkBudgetRangeM);
+		const samplesPerRay = computeSamplesPerRay(searchRangeM, bearings);
 		const bearingStep = 360 / bearings;
 
 		computeBtn.disabled = true;
@@ -503,7 +583,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			for (let b = 0; b < bearings; b++) {
 				const bearingDeg = b * bearingStep;
 				for (let i = 1; i <= samplesPerRay; i++) {
-					rayPoints.push(destinationPoint(origin, bearingDeg, (i / samplesPerRay) * maxRangeM));
+					rayPoints.push(destinationPoint(origin, bearingDeg, (i / samplesPerRay) * searchRangeM));
 				}
 			}
 
@@ -524,19 +604,19 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			const lambda = SPEED_OF_LIGHT / (freqMHz * 1e6);
 
 			const distances = new Array(samplesPerRay);
-			for (let i = 0; i < samplesPerRay; i++) distances[i] = ((i + 1) / samplesPerRay) * maxRangeM;
+			for (let i = 0; i < samplesPerRay; i++) distances[i] = ((i + 1) / samplesPerRay) * searchRangeM;
 
 			const opticalRanges = [], fresnelRanges = [];
 			const rayResults = [];
 
 			for (let b = 0; b < bearings; b++) {
-				const bearingDeg = b * bearingStep;
 				const base = 1 + b * samplesPerRay;
 
 				const { opticalRange, fresnelRange } = computeRayRanges(elevations, base, samplesPerRay, distances, elevA, rxHeight, lambda, margin, linkBudgetRangeM);
 
 				opticalRanges.push(opticalRange);
 				fresnelRanges.push(fresnelRange);
+				const bearingDeg = b * bearingStep;
 				rayResults.push({
 					bearingDeg,
 					opticalRange,
@@ -546,8 +626,8 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 				});
 			}
 
-			renderLayer(rayResults, maxRangeM, linkBudgetRangeM);
-			renderSummary(opticalRanges, fresnelRanges, maxRangeM, linkBudgetRangeM);
+			renderLayer(rayResults, linkBudgetRangeM);
+			renderSummary(opticalRanges, fresnelRanges, linkBudgetRangeM);
 			updateShareButton();
 
 			loadingToast.remove();
@@ -566,6 +646,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		pointInput.value = '';
 		updatePointIcon(null);
 		removeLayer();
+		lastRender = null;
 		resultEl.hidden = true;
 		resultEl.innerHTML = '';
 		localStorage.removeItem(STORAGE_KEY);
@@ -588,7 +669,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		const params = [
 			origin.lat.toFixed(5), origin.lng.toFixed(5),
 			txHeightInput.value, rxHeightInput.value, freqInput.value,
-			maxRangeInput.value, resolutionSelect.value, marginInput.value,
+			resolutionSelect.value, marginInput.value,
 			erpInput.value, sfInput.value, bwInput.value,
 		].join(',');
 
@@ -604,7 +685,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		if (saved.txHeight) txHeightInput.value = saved.txHeight;
 		if (saved.rxHeight) rxHeightInput.value = saved.rxHeight;
 		if (saved.freq) freqInput.value = saved.freq;
-		if (saved.maxRange) maxRangeInput.value = saved.maxRange;
 		if (saved.resolution) resolutionSelect.value = saved.resolution;
 		if (saved.terrainMargin) marginInput.value = saved.terrainMargin;
 		if (saved.erp) erpInput.value = saved.erp;
@@ -622,12 +702,11 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		return { lat, lng, label: match ? match.adv_name : null, key: match?.public_key, type: match?.type, freq: match?.params?.freq, sf: match?.params?.sf, bw: match?.params?.bw };
 	};
 
-	const loadFromUrlState = (lat, lng, txHeight, rxHeight, freq, maxRange, resolution, terrainMargin, erp, sf, bw) => {
+	const loadFromUrlState = (lat, lng, txHeight, rxHeight, freq, resolution, terrainMargin, erp, sf, bw) => {
 		setOriginFromPick(resolveUrlPoint(lat, lng));
 		if (Number.isFinite(txHeight)) txHeightInput.value = txHeight;
 		if (Number.isFinite(rxHeight)) rxHeightInput.value = rxHeight;
 		if (Number.isFinite(freq)) freqInput.value = freq;
-		if (Number.isFinite(maxRange)) maxRangeInput.value = maxRange;
 		if (resolution && RESOLUTIONS[resolution]) resolutionSelect.value = resolution;
 		if (Number.isFinite(terrainMargin)) marginInput.value = terrainMargin;
 		if (Number.isFinite(erp)) erpInput.value = erp;
@@ -638,5 +717,5 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		map.setView([lat, lng], 12);
 	};
 
-	return { ...modal, close: closeAndSave, loadFromUrlState };
+	return { ...modal, close: closeAndSave, loadFromUrlState, refreshLayer };
 };

@@ -10,5 +10,9 @@
 	"elevationDesc": "Used by the \"Terrain and range analysis\" tool. Change it only if you actually need to.",
 	"elevationSefinekDesc": "GEDTM30 terrain model (~30 m, fusion of ICESat-2/GEDI/Copernicus/ALOS) with bilinear interpolation - currently the most accurate source, but it's beta.",
 	"elevationOpenElevationDesc": "SRTM data (~30-90 m). Free public API with no availability guarantee - can be overloaded or temporarily unreachable.",
+	"coverageStyleLabel": "Coverage layer style",
+	"coverageStyleTiles": "Tiles",
+	"coverageStyleLines": "Range lines",
+	"coverageStyleDesc": "Tiles: the darker the tile, the higher the chance of reception. Lines show the optical range and Fresnel zone boundaries.",
 	"elevationOpenMeteoDesc": "Copernicus DEM GLO-90 (90 m). Stable and fast, but less precise in varied terrain."
 }

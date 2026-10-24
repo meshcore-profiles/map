@@ -11,10 +11,9 @@
 	"txHeight": "Transmitter antenna height (m)",
 	"rxHeight": "Receiver antenna height (m)",
 	"frequency": "Frequency (MHz)",
-	"maxRange": "Maximum range (km)",
 	"terrainMargin": "Terrain noise tolerance (m)",
 	"terrainMarginDesc": "An obstacle must break the line of sight by more than this to stop the ray - absorbs the elevation model's natural noise (30m grid), which would otherwise falsely block coverage at low antenna heights.",
-	"erp": "ERP power (dBm)",
+	"erp": "Transmit power ERP (dBm)",
 	"erpDesc": "Effective radiated power of the transmitter (including antenna gain). Limits range independently of terrain, via free-space path loss and receiver sensitivity, with a 10 dB fade margin.",
 	"spreadingFactor": "Spreading Factor (SF)",
 	"bandwidth": "Bandwidth (kHz)",
@@ -27,7 +26,6 @@
 	"compute": "Compute coverage",
 	"selectPoint": "Select a starting point",
 	"invalidFrequency": "Enter a valid frequency (MHz)",
-	"invalidRange": "Enter a valid maximum range",
 	"fetchingElevation": "Fetching elevation data...",
 	"fetchingElevationProgress": "Fetching elevation data... ({{current}}/{{total}})",
 	"fetchElevationFailed": "Failed to fetch elevation data. Please try again.",
@@ -40,5 +38,6 @@
 	"originFallback": "Starting point",
 	"linkBudgetCriterion": "Range from power budget (ERP)",
 	"rayTooltip": "{{bearing}}° - LOS: {{optical}} / Fresnel: {{fresnel}}",
-	"rayTooltipClear": "{{bearing}}° - LOS: {{optical}} / Fresnel: {{fresnel}} (clear within search range)"
+	"rayTooltipClear": "{{bearing}}° - LOS: {{optical}} / Fresnel: {{fresnel}} (clear within search range)",
+	"legendChance": "Chance of reception: low → high"
 }
