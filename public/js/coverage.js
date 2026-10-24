@@ -8,7 +8,7 @@ import { updateToast } from './toast.js';
 
 const SPEED_OF_LIGHT = 299792458;
 const FRESNEL_CLEARANCE_FACTOR = 0.6;
-const MAX_TOTAL_POINTS = 6000;
+const MAX_TOTAL_POINTS = 9000;
 const SAMPLE_SPACING_TARGET = 300;
 const MIN_SAMPLES_PER_RAY = 20;
 const MAX_SAMPLES_PER_RAY = 60;

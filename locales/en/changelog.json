@@ -7,7 +7,8 @@
 				"Added ownership confirmation and CAPTCHA verification before preparing a node removal request email.",
 				"Expanded the email text and added instructions in the page language.",
 				"Updated frontend msgpackr to version 2.1.2 and backend dependencies.",
-				"Fixed node popup positioning so the top navigation no longer obscures their contents."
+				"Fixed node popup positioning so the top navigation no longer obscures their contents.",
+				"Raised the elevation point limit in the coverage layer so the \"High\" resolution (144 directions) keeps full sampling along each ray at a 20 km range."
 			]
 		},
 		{

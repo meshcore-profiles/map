@@ -7,7 +7,8 @@
 				"Dodano potwierdzenie własności i weryfikację CAPTCHA przed przygotowaniem maila z prośbą o usunięcie węzła.",
 				"Rozbudowano treść maila i dodano instrukcje w języku strony.",
 				"Zaktualizowano frontendowy msgpackr do wersji 2.1.2 oraz zależności backendu.",
-				"Naprawiono pozycjonowanie popupów węzłów, aby górna nawigacja nie zasłaniała ich treści."
+				"Naprawiono pozycjonowanie popupów węzłów, aby górna nawigacja nie zasłaniała ich treści.",
+				"Zwiększono limit punktów wysokościowych w warstwie zasięgu, aby rozdzielczość „Wysoka” (144 kierunki) zachowywała pełne próbkowanie wzdłuż promienia przy zasięgu 20 km."
 			]
 		},
 		{
