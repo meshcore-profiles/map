@@ -8,7 +8,7 @@ Vendored as-is. Each directory holds the license text of its library (`LICENSE`,
 |-----------------|-----------------------|---------|--------------|---------------------------------------------------------------------------|
 | `leaflet`       | Leaflet               | 1.9.4   | BSD-2-Clause | [Leaflet](https://github.com/Leaflet/Leaflet)                             |
 | `markercluster` | Leaflet.markercluster | 1.5.3   | MIT          | [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
-| `maplibre`      | MapLibre GL JS        | 6.15.0  | BSD-3-Clause | [MapLibre GL JS](https://github.com/maplibre/maplibre-gl-js)              |
+| `maplibre`      | MapLibre GL JS        | 6.16.0  | BSD-3-Clause | [MapLibre GL JS](https://github.com/maplibre/maplibre-gl-js)              |
 | `maplibre`      | MapLibre GL Leaflet   | 0.1.4   | ISC          | [MapLibre GL Leaflet](https://github.com/maplibre/maplibre-gl-leaflet)    |
 | `msgpackr`      | msgpackr              | 2.1.2   | MIT          | [msgpackr](https://github.com/kriszyp/msgpackr)                           |
 | `qrcode`        | qrcode                | 1.5.4   | MIT          | [qrcode](https://github.com/soldair/node-qrcode)                          |
@@ -24,9 +24,9 @@ Vendored as-is. Each directory holds the license text of its library (`LICENSE`,
 
 - `leaflet.markercluster.js`, `leaflet.markercluster.js.map`, `MarkerCluster.css`, `MarkerCluster.Default.css` - from [jsDelivr](https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/), unmodified.
 
-### MapLibre GL JS 6.15.0
+### MapLibre GL JS 6.16.0
 
-- `maplibre-gl.mjs`, `maplibre-gl-worker.mjs`, `maplibre-gl.css` and their `.map` files - from [jsDelivr](https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/), unmodified. Since 6.15 the main module bundles the code previously in a separate shared file.
+- `maplibre-gl.mjs`, `maplibre-gl-worker.mjs`, `maplibre-gl.css` and their `.map` files - from [jsDelivr](https://cdn.jsdelivr.net/npm/maplibre-gl@6.16.0/dist/), unmodified. Since 6.15 the main module bundles the code previously in a separate shared file.
 
 ### MapLibre GL Leaflet 0.1.4
 
