@@ -2,15 +2,13 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { ensurePane, escapeHtml, formatDistance, findNodeNearLatLng, loadJson, resolveNodeByQuery } from './pathtools.js';
-import { curvatureDrop, destinationPoint, ELEVATION_PROVIDERS, fetchElevations, parseLatLng, requireSefinekElevationSource } from './elevation.js';
+import { curvatureDrop, destinationPoint, ELEVATION_PROVIDERS, fetchElevations, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
 import { truncateKey } from './node-utils.js';
 import { updateToast } from './toast.js';
 
 const SPEED_OF_LIGHT = 299792458;
 const FRESNEL_CLEARANCE_FACTOR = 0.6;
 const MAX_TOTAL_POINTS = 9000;
-// Temporarily disabled - set to true to bring the tool back.
-const COVERAGE_ENABLED = false;
 
 const SAMPLE_SPACING_TARGET = 300;
 const MIN_SAMPLES_PER_RAY = 20;
@@ -142,14 +140,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		return populatingPromise;
 	};
 
-	const isAvailable = () => {
-		if (!COVERAGE_ENABLED) {
-			showToast(t('common:coverageUnavailable'), { status: 'error', duration: 6000 });
-			return false;
-		}
-
-		return requireSefinekElevationSource(getElevationSource, showToast);
-	};
+	const isAvailable = () => requireFeature('coverage', showToast) && requireSefinekElevationSource(getElevationSource, showToast);
 
 	new MutationObserver(() => {
 		if (!modal.overlay.hidden) {

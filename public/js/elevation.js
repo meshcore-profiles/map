@@ -115,3 +115,10 @@ export const requireSefinekElevationSource = (getElevationSource, showToast) => 
 	showToast(t('common:elevationSourceUnsupported'), { status: 'error', duration: 6000 });
 	return false;
 };
+
+export const requireFeature = (name, showToast) => {
+	if (window.MAP_CONFIG.features?.[name]) return true;
+
+	showToast(t('common:toolUnavailable'), { status: 'error', duration: 6000 });
+	return false;
+};

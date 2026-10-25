@@ -584,6 +584,7 @@ window.MAP_CONFIG = {
 	turnstileSitekey: <%- JSON.stringify(process.env.TURNSTILE_SECRET ? process.env.TURNSTILE_SITEKEY || null : null) %>,
 	nodeDeletionUrl: <%- JSON.stringify(lp('/api/v1/node-deletion')) %>,
 	nodeDeletionEmail: <%- JSON.stringify(site.deletionEmail) %>,
+	features: <%- JSON.stringify(features) %>,
 
 	languageCode: <%- JSON.stringify(languageCode) %>,
 	i18n: <%- JSON.stringify(i18nBundle) %>,

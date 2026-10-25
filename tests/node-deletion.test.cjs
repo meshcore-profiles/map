@@ -324,6 +324,7 @@ test('Both site templates render in both languages without exposing the Turnstil
 				i18nBundle: resources[code],
 				domain: `https://${site.domain}`,
 				cspNonce: 'test-nonce',
+				features: {},
 				v: 'test',
 			});
 			assert.ok(html.includes('id="node-deletion-overlay" hidden'));

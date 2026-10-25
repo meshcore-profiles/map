@@ -37,6 +37,7 @@ if (isProd) app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.locals.domain = `${process.env.DOMAIN}${isProd ? '' : `:${process.env.PORT}`}`;
 app.locals.v = version;
+app.locals.features = require('./config/features.js');
 
 // Safe origins allowed to read this app's resources cross-origin (e.g. the flasher app loading static JS)
 const SAFE_ORIGINS = [

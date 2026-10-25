@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { createPathLayer, findNodeNearLatLng, formatDistance, loadJson, resolveNodeByQuery } from './pathtools.js';
-import { curvatureDrop, ELEVATION_PROVIDERS, fetchElevations, haversineDistance, interpolate, parseLatLng, requireSefinekElevationSource } from './elevation.js';
+import { curvatureDrop, ELEVATION_PROVIDERS, fetchElevations, haversineDistance, interpolate, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
 
 const SAMPLE_COUNT = 48;
 
@@ -88,11 +88,13 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 	let clearPicker = null;
 	let pickingFor = null;
 
+	const isAvailable = () => requireFeature('terrain', showToast) && requireSefinekElevationSource(getElevationSource, showToast);
+
 	new MutationObserver(() => {
 		if (modal.overlay.hidden) {
 			if (!pickingFor) preview.hide();
 		} else {
-			if (!requireSefinekElevationSource(getElevationSource, showToast)) {
+			if (!isAvailable()) {
 				modal.close();
 				return;
 			}
@@ -250,7 +252,7 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 			return;
 		}
 
-		if (!requireSefinekElevationSource(getElevationSource, showToast)) return;
+		if (!isAvailable()) return;
 
 		const heightA = Number(heightAInput.value) || 0;
 		const heightB = Number(heightBInput.value) || 0;
