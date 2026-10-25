@@ -13,6 +13,7 @@ import { initRouteTool } from './route.js';
 import { initTerrainTool } from './terrain.js';
 import { initCoverageTool } from './coverage.js';
 import { escapeHtml } from './pathtools.js';
+import { SEFINEK_API_ENABLED, DEFAULT_ELEVATION_SOURCE } from './elevation.js';
 import { showToast, updateToast, showActionToast, dismissToast } from './toast.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
@@ -829,7 +830,7 @@ const statsModal = initStatsModal({
 const changelogModal = initChangelogModal({ onDismiss: () => legendPanelUi.open() });
 const measureTool = initMeasureTool({ map, setPicker, escapeHtml, getNodes: () => state.nodes, showToast });
 const routeTool = initRouteTool({ map, getNodes: () => state.nodes, escapeHtml });
-let elevationSource = localStorage.getItem('elevationSource') || 'sefinek';
+let elevationSource = SEFINEK_API_ENABLED ? localStorage.getItem('elevationSource') || DEFAULT_ELEVATION_SOURCE : DEFAULT_ELEVATION_SOURCE;
 const terrainTool = initTerrainTool({ map, setPicker, getNodes: () => state.nodes, showToast, getElevationSource: () => elevationSource });
 const COVERAGE_STYLES = ['tiles', 'lines'];
 const savedCoverageStyle = localStorage.getItem('coverageStyle');
@@ -1486,12 +1487,13 @@ const updateElevationSourceDesc = () => {
 	elevationSourceDesc.textContent = sourceDescKey ? `${t('settings:elevationDesc')}\n${t(sourceDescKey)}` : t('settings:elevationDesc');
 };
 
+if (!SEFINEK_API_ENABLED) elevationSourceSelect.querySelector('option[value="sefinek"]').remove();
 elevationSourceSelect.value = elevationSource;
 updateElevationSourceDesc();
 
 elevationSourceSelect.addEventListener('change', () => {
 	elevationSource = elevationSourceSelect.value;
-	localStorage.setItem('elevationSource', elevationSource);
+	if (SEFINEK_API_ENABLED) localStorage.setItem('elevationSource', elevationSource);
 	updateElevationSourceDesc();
 });
 

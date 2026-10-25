@@ -104,13 +104,21 @@ export const ELEVATION_PROVIDERS = {
 	},
 };
 
-export const fetchElevations = (points, source) => (ELEVATION_PROVIDERS[source] || ELEVATION_PROVIDERS.sefinek).fetch(points);
+// Temporarily switched off - set to true to bring Sefinek API back (it then becomes the default source for everyone).
+export const SEFINEK_API_ENABLED = false;
+export const DEFAULT_ELEVATION_SOURCE = SEFINEK_API_ENABLED ? 'sefinek' : 'open-meteo';
 
-// terrain.js/coverage.js only actually query the sefinek backend - the other providers are unreliable
+export const resolveElevationSource = getElevationSource => {
+	const source = getElevationSource ? getElevationSource() : DEFAULT_ELEVATION_SOURCE;
+	return ELEVATION_PROVIDERS[source] && (SEFINEK_API_ENABLED || source !== 'sefinek') ? source : DEFAULT_ELEVATION_SOURCE;
+};
+
+export const fetchElevations = (points, source) => ELEVATION_PROVIDERS[resolveElevationSource(() => source)].fetch(points);
+
+// With Sefinek API enabled, terrain.js/coverage.js only query that backend - the other providers are unreliable
 // public APIs (batch limits, rate limits), kept selectable only so a future fix can re-enable them.
-export const requireSefinekElevationSource = (getElevationSource, showToast) => {
-	const source = getElevationSource ? getElevationSource() : 'sefinek';
-	if (source === 'sefinek') return true;
+export const requireSupportedElevationSource = (getElevationSource, showToast) => {
+	if (!SEFINEK_API_ENABLED || resolveElevationSource(getElevationSource) === 'sefinek') return true;
 
 	showToast(t('common:elevationSourceUnsupported'), { status: 'error', duration: 6000 });
 	return false;

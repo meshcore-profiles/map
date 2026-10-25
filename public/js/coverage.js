@@ -2,7 +2,7 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { ensurePane, escapeHtml, formatDistance, findNodeNearLatLng, loadJson, resolveNodeByQuery } from './pathtools.js';
-import { curvatureDrop, destinationPoint, ELEVATION_PROVIDERS, fetchElevations, parseLatLng, requireSefinekElevationSource } from './elevation.js';
+import { curvatureDrop, destinationPoint, ELEVATION_PROVIDERS, fetchElevations, resolveElevationSource, parseLatLng, requireSupportedElevationSource } from './elevation.js';
 import { truncateKey } from './node-utils.js';
 import { updateToast } from './toast.js';
 
@@ -141,12 +141,12 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 	new MutationObserver(() => {
 		if (!modal.overlay.hidden) {
-			if (!requireSefinekElevationSource(getElevationSource, showToast)) {
+			if (!requireSupportedElevationSource(getElevationSource, showToast)) {
 				modal.close();
 				return;
 			}
 
-			titleEl.textContent = t('coverage:titleWithSource', { source: ELEVATION_PROVIDERS.sefinek.label });
+			titleEl.textContent = t('coverage:titleWithSource', { source: ELEVATION_PROVIDERS[resolveElevationSource(getElevationSource)].label });
 			populatePresets();
 		}
 	}).observe(modal.overlay, { attributes: true, attributeFilter: ['hidden'] });
@@ -554,7 +554,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			return;
 		}
 
-		if (!requireSefinekElevationSource(getElevationSource, showToast)) return;
+		if (!requireSupportedElevationSource(getElevationSource, showToast)) return;
 
 		const freqMHz = Number(freqInput.value);
 		if (!freqMHz || freqMHz <= 0) {
@@ -589,14 +589,15 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 			const allPoints = [origin, ...rayPoints];
 			const elevations = new Array(allPoints.length);
-			const chunkSize = ELEVATION_PROVIDERS.sefinek.maxBatchSize || DEFAULT_CHUNK_SIZE;
+			const elevationSource = resolveElevationSource(getElevationSource);
+			const chunkSize = ELEVATION_PROVIDERS[elevationSource].maxBatchSize || DEFAULT_CHUNK_SIZE;
 			const chunkCount = Math.ceil(allPoints.length / chunkSize);
 
 			for (let c = 0; c < chunkCount; c++) {
 				const start = c * chunkSize;
 				const end = Math.min(start + chunkSize, allPoints.length);
 				if (chunkCount > 1) updateToast(loadingToast, t('coverage:fetchingElevationProgress', { current: c + 1, total: chunkCount }), { duration: 0, status: 'loading' });
-				const chunkElevations = await fetchElevations(allPoints.slice(start, end), 'sefinek');
+				const chunkElevations = await fetchElevations(allPoints.slice(start, end), elevationSource);
 				for (let k = 0; k < chunkElevations.length; k++) elevations[start + k] = chunkElevations[k];
 			}
 
