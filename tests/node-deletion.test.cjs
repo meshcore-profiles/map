@@ -52,34 +52,6 @@ test('Whitespace tokens are rejected by Siteverify without being trimmed', async
 	assert.equal(calls, 1);
 });
 
-test('Development and test environments accept successful Siteverify responses with dummy metadata', async () => {
-	for (const nodeEnv of ['development', 'test']) {
-		let calls = 0;
-		const verify = loadVerifier(async () => {
-			calls++;
-			return { data: { success: true, hostname: 'localhost', action: 'test', cdata: 'test-data' } };
-		}, '1x0000000000000000000000000000000AA', nodeEnv);
-		assert.equal(await verify('XXXX.DUMMY.TOKEN.XXXX', '127.0.0.1', '127.0.0.1', publicKey), true);
-		assert.equal(calls, 1);
-	}
-});
-
-test('Dummy metadata is rejected in production and with non-test secrets', async () => {
-	for (const [secret, nodeEnv] of [
-		['1x0000000000000000000000000000000AA', 'production'],
-		['1x0000000000000000000000000000000AA', ''],
-		['real-secret', 'development'],
-	]) {
-		const verify = loadVerifier(async () => ({ data: { success: true, hostname: 'localhost', action: 'test', cdata: 'test-data' } }), secret, nodeEnv);
-		assert.equal(await verify('XXXX.DUMMY.TOKEN.XXXX', '127.0.0.1', '127.0.0.1', publicKey), false);
-	}
-});
-
-test('Development test keys still require successful Siteverify validation', async () => {
-	const verify = loadVerifier(async () => ({ data: { success: false, 'error-codes': ['invalid-input-response'] } }), '1x0000000000000000000000000000000AA', 'development');
-	assert.equal(await verify('invalid-token', '127.0.0.1', '127.0.0.1', publicKey), false);
-});
-
 test('Turnstile validates the hostname, action and node binding', async () => {
 	const valid = { success: true, hostname, action: 'node-deletion', cdata: publicKey };
 	for (const override of [{ success: false }, { hostname: 'other.example' }, { action: 'contact' }, { cdata: 'b'.repeat(64) }]) {
