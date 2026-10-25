@@ -18,5 +18,6 @@
 	},
 	"timeAgo": "{{count}} {{unit}} ago",
 	"justNow": "just now",
-	"elevationSourceUnsupported": "This tool currently only works with the Sefinek API. Change the elevation data source in Settings."
+	"elevationSourceUnsupported": "This tool currently only works with the Sefinek API. Change the elevation data source in Settings.",
+	"coverageUnavailable": "The coverage layer is temporarily unavailable."
 }

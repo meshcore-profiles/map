@@ -18,5 +18,6 @@
 	},
 	"timeAgo": "{{count}} {{unit}} temu",
 	"justNow": "przed chwilą",
-	"elevationSourceUnsupported": "To narzędzie działa obecnie tylko z Sefinek API. Zmień źródło danych wysokościowych w Ustawieniach."
+	"elevationSourceUnsupported": "To narzędzie działa obecnie tylko z Sefinek API. Zmień źródło danych wysokościowych w Ustawieniach.",
+	"coverageUnavailable": "Warstwa zasięgu jest tymczasowo niedostępna."
 }

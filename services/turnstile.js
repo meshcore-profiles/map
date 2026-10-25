@@ -12,7 +12,15 @@ module.exports = async (token, ip, hostname, publicKey) => {
 			remoteip: ip,
 		}), { timeout: 8000 });
 
-		return data.success === true && (developmentTestKey || (data.hostname === hostname && data.action === 'node-deletion' && data.cdata === publicKey));
+		if (data.success !== true) {
+			console.warn('Turnstile siteverify rejected the token:', data['error-codes']);
+			return false;
+		}
+		if (developmentTestKey) return true;
+
+		const valid = data.hostname === hostname && data.action === 'node-deletion' && data.cdata === publicKey;
+		if (!valid) console.warn(`Turnstile token mismatch: hostname=${data.hostname} (expected ${hostname}), action=${data.action}, cdata match=${data.cdata === publicKey}`);
+		return valid;
 	} catch (err) {
 		console.error('Turnstile verification failed:', err.message);
 		return false;
