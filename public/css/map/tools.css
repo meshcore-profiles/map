@@ -386,7 +386,10 @@ li.tool-panel-empty {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	margin-bottom: 12px;
+}
+
+.coverage-result-group:last-child .terrain-result-summary {
+	margin-bottom: 0;
 }
 
 .coverage-result-group-title {
