@@ -410,6 +410,7 @@ if (Number(urlParams.lat) && Number(urlParams.lon) && Number(urlParams.zoom)) {
 const map = window.leafletMap = L.map('map', {
 	minZoom: 2,
 	maxZoom: 20,
+	zoomSnap: 0.25,
 	maxBounds: [
 		[-90, -180],
 		[90, 200],

@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const crypto = require('node:crypto');
 const { version } = require('./package.json');
+
 const { DOMAIN, NODE_ENV, PORT, SITE_MODE } = process.env;
 const isProd = NODE_ENV === 'production';
 const siteMode = (SITE_MODE || 'auto').toLowerCase();

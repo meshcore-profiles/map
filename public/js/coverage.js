@@ -389,8 +389,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 			interactive: false,
 			className: 'coverage-grid',
 		}).addTo(group);
-
-		return gridBounds;
 	};
 
 	const drawLines = (group, rayResults, searchCapM) => {
@@ -429,8 +427,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 				fresnel: formatDistance(r.fresnelRange),
 			})).addTo(group);
 		}
-
-		return L.latLngBounds(opticalPoints.map(p => [p.lat, p.lng]));
 	};
 
 	const renderLayer = (rayResults, linkBudgetRangeM, fit = true) => {
@@ -441,7 +437,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 		const searchCapM = Math.min(MAX_RANGE_M, linkBudgetRangeM);
 		const tiles = getLayerStyle() === 'tiles';
-		const bounds = (tiles ? drawTiles : drawLines)(group, rayResults, searchCapM, linkBudgetRangeM);
+		(tiles ? drawTiles : drawLines)(group, rayResults, searchCapM, linkBudgetRangeM);
 
 		const budgetLimits = linkBudgetRangeM < MAX_RANGE_M;
 		if (budgetLimits) {
@@ -465,7 +461,11 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		}).bindTooltip(origin.label ? escapeHtml(origin.label) : t('coverage:originFallback')).addTo(group);
 
 		ensureLegend(budgetLimits, tiles);
-		if (fit) map.fitBounds(bounds, { padding: [40, 40] });
+		if (fit) {
+			const bounds = L.latLngBounds(rayResults.map(r => [r.opticalPoint.lat, r.opticalPoint.lng]));
+			bounds.extend([origin.lat, origin.lng]);
+			map.fitBounds(bounds, { padding: [60, 60] });
+		}
 	};
 
 	const refreshLayer = () => {

@@ -1,6 +1,16 @@
 {
 	"entries": [
 		{
+			"version": "0.10.1",
+			"date": "27.10.2026",
+			"changes": [
+				"Narzędzia „Analiza terenu i zasięgu” oraz „Warstwa zasięgu” są ponownie dostępne.",
+				"Poprawiono automatyczne dopasowanie widoku mapy po obliczeniu zasięgu: uwzględnia faktyczne granice warstwy zamiast całego obszaru obliczeń.",
+				"Usunięto zbędny odstęp pod wynikami strefy Fresnela w oknie narzędzia „Warstwa zasięgu”.",
+				"Zaktualizowano zależności backendu do najnowszych wersji."
+			]
+		},
+		{
 			"version": "0.10.0",
 			"date": "23.10.2026",
 			"changes": [
@@ -10,7 +20,7 @@
 				"Naprawiono pozycjonowanie popupów węzłów, aby górna nawigacja nie zasłaniała ich treści.",
 				"Zwiększono limit punktów wysokościowych w warstwie zasięgu, aby rozdzielczość „Wysoka” (144 kierunki) zachowywała pełne próbkowanie wzdłuż promienia przy zasięgu 20 km.",
 				"Dodano opcję wyglądu warstwy zasięgu: domyślnie pokazywane są kafelki (linie są opcją), w których im ciemniejszy kafelek, tym większa szansa odbioru.",
-				"Usunięto pole „Zasięg maksymalny” w Warstwa zasięgu.",
+				"Usunięto pole „Zasięg maksymalny” w narzędziu „Warstwa zasięgu”.",
 				"Pole mocy ERP w narzędziu zasięgu nazwano „Moc nadawania ERP (dBm)”."
 			]
 		},

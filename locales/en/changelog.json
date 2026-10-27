@@ -1,6 +1,16 @@
 {
 	"entries": [
 		{
+			"version": "0.10.1",
+			"date": "2026-10-27",
+			"changes": [
+				"The \"Terrain and range analysis\" and \"Coverage layer\" tools are available again.",
+				"Improved automatic map fitting after calculating coverage: the view now fits the actual layer boundaries instead of the entire calculation area.",
+				"Removed unnecessary spacing below the Fresnel zone results in the \"Coverage layer\" dialog.",
+				"Updated backend dependencies to their latest versions."
+			]
+		},
+		{
 			"version": "0.10.0",
 			"date": "2026-10-23",
 			"changes": [
@@ -10,9 +20,7 @@
 				"Fixed node popup positioning so the top navigation no longer obscures their contents.",
 				"Raised the elevation point limit in the coverage layer so the \"High\" resolution (144 directions) keeps full sampling along each ray at a 20 km range.",
 				"Added a layer style option to the coverage layer: tiles are shown by default, with lines as an alternative, where the darker the tile, the higher the chance of reception.",
-				"The coverage layer shows an error instead of a false result when the API returns incomplete elevation data.",
-				"Coverage tiles now use a smooth shade scale based on the link margin (ERP power) and are finer.",
-				"Removed the \"Maximum range\" field: range follows the link budget, capped at 30 km. Terrain sampling covers only that area, improving accuracy at low power.",
+				"Removed the \"Maximum range\" field from the \"Coverage layer\" tool.",
 				"Renamed the ERP field in the coverage tool to \"Transmit power ERP (dBm)\"."
 			]
 		},
