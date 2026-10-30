@@ -186,29 +186,39 @@
 }
 
 #node-deletion-panel {
-	max-width: 480px;
-	gap: 14px;
+	max-width: 535px;
+	gap: 16px;
 	padding: 20px;
 }
 
 #node-deletion-title {
+	margin-bottom: -8px;
 	padding-right: 38px;
 }
 
 #node-deletion-identity {
 	display: flex;
+	min-width: 0;
 	flex-direction: column;
 	gap: 4px;
+	padding: 12px 14px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background: rgba(0, 0, 0, 0.12);
 }
 
 #node-deletion-name {
+	font-size: 15px;
 	font-weight: 600;
+	line-height: 1.4;
 	overflow-wrap: anywhere;
 }
 
 #node-deletion-key {
 	color: var(--text-muted);
+	font-family: var(--font-mono);
 	font-size: 12px;
+	line-height: 1.5;
 	overflow-wrap: anywhere;
 }
 
@@ -219,14 +229,35 @@
 	line-height: 1.55;
 }
 
+#node-deletion-text {
+	color: var(--text);
+}
+
 #node-deletion-captcha {
+	align-self: center;
+	width: 100%;
 	min-width: 0;
+	max-width: 300px;
+	line-height: 0;
+	text-align: center;
+}
+
+#node-deletion-captcha iframe {
+	border-radius: var(--radius-sm);
 }
 
 #node-deletion-actions {
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: flex-end;
 	gap: 10px;
+}
+
+#node-deletion-actions .region-warning-btn {
+	flex: 0 1 auto;
+	padding: 8px 14px;
+	font-size: 15px;
+	line-height: 1.4;
 }
 
 #node-deletion-actions a {

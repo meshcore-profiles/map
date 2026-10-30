@@ -5,6 +5,8 @@
 			"date": "30.10.2026",
 			"changes": [
 				"Zaktualizowano zależności frontendu do najnowszych stabilnych wersji.",
+				"Poprawiono układ i wygląd okna zgłaszania usunięcia węzła oraz dopasowanie widżetu CAPTCHA.",
+				"Naprawiono obsługę kluczy testowych Cloudflare Turnstile w środowisku deweloperskim, wykorzystując oznaczenie odpowiedzi testowej z API Cloudflare.",
 				"Wprowadzono ogólne poprawki i uporządkowano kod backendu oraz frontendu, poprawiając jakość strony."
 			]
 		},
