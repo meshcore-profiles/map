@@ -5,6 +5,8 @@
 			"date": "2026-10-30",
 			"changes": [
 				"Updated frontend dependencies to their latest stable versions.",
+				"Improved the layout and appearance of the node deletion dialog and the sizing of its CAPTCHA widget.",
+				"Fixed Cloudflare Turnstile test key handling in development using the test response flag returned by the Cloudflare API.",
 				"Made general improvements and cleaned up backend and frontend code to improve overall site quality."
 			]
 		},
