@@ -1,6 +1,14 @@
 {
 	"entries": [
 		{
+			"version": "0.10.2",
+			"date": "2026-10-30",
+			"changes": [
+				"Updated frontend dependencies to their latest stable versions.",
+				"Made general improvements and cleaned up backend and frontend code to improve overall site quality."
+			]
+		},
+		{
 			"version": "0.10.1",
 			"date": "2026-10-27",
 			"changes": [

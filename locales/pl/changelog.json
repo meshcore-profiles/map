@@ -1,6 +1,14 @@
 {
 	"entries": [
 		{
+			"version": "0.10.2",
+			"date": "30.10.2026",
+			"changes": [
+				"Zaktualizowano zależności frontendu do najnowszych stabilnych wersji.",
+				"Wprowadzono ogólne poprawki i uporządkowano kod backendu oraz frontendu, poprawiając jakość strony."
+			]
+		},
+		{
 			"version": "0.10.1",
 			"date": "27.10.2026",
 			"changes": [

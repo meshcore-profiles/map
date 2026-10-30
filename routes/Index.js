@@ -20,7 +20,6 @@ router.get('/robots.txt', (req, res) => {
 router.get('/sitemap.xml', (req, res) => {
 	const urls = LANGUAGES.map(({ code }) => `\t<url>
 \t\t<loc>https://${req.site.domain}${langPath(code, '/', req.site.defaultLanguage)}</loc>
-\t\t<priority>${code === req.site.defaultLanguage ? '1.00' : '0.80'}</priority>
 \t</url>`).join('\n');
 
 	res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
