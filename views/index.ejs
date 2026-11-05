@@ -129,7 +129,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<form id="search-form">
 		<svg class="icon" id="search-icon" aria-hidden="true"><use href="/icons/icons.svg#search"></use></svg>
 		<input type="text" class="text-input" id="search-input" placeholder="<%= t('map:searchPlaceholder') %>" autocomplete="off">
-		<button type="button" id="filter-toggle" title="<%= t('filters:toggleTitle') %>" aria-label="<%= t('filters:toggleTitle') %>">
+		<button type="button" id="filter-toggle" title="<%= t('filters:toggleTitle') %>" aria-label="<%= t('filters:toggleTitle') %>" aria-expanded="false" aria-controls="node-filter">
 			<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#filter"></use></svg>
 			<span id="filter-active-dot" hidden></span>
 		</button>
@@ -156,39 +156,85 @@ const _titleBrand = site.shortName || site.brandName; %>
 	</a>
 </header>
 
-<menu id="node-filter" hidden>
-	<li id="filters-row">
-		<div class="filters-col" id="filters-col-main">
-			<fieldset id="node-type-group">
-				<legend><%= t('filters:nodeTypesLegend') %></legend>
-				<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="1" checked> <%= t('filters:clients') %></label>
-				<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="2" checked> <%= t('filters:repeaters') %></label>
-				<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="3" checked> <%= t('filters:roomServers') %></label>
-				<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="4" checked> <%= t('filters:sensors') %></label>
+<section id="node-filter" aria-labelledby="filters-title" hidden>
+	<div class="filters-header">
+		<div class="filters-heading">
+			<h2 id="filters-title"><%= t('filters:title') %></h2>
+			<p class="filters-summary" id="filters-summary" aria-live="polite" hidden></p>
+		</div>
+		<div class="filters-header-actions">
+			<button type="button" class="filters-icon-btn" id="filters-share" title="<%= t('filters:shareTitle') %>" aria-label="<%= t('filters:shareTitle') %>">
+				<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#link"></use></svg>
+			</button>
+			<button type="button" class="filters-icon-btn" id="filters-close" title="<%= t('common:close') %>" aria-label="<%= t('common:close') %>">
+				<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#close"></use></svg>
+			</button>
+		</div>
+	</div>
+	<div class="filters-body">
+		<fieldset id="node-type-group" class="filter-section">
+			<legend><%= t('filters:nodeTypesLegend') %></legend>
+			<div class="filter-type-grid">
+				<% [['1', 'clients'], ['2', 'repeaters'], ['3', 'roomServers'], ['4', 'sensors']].forEach(([value, key]) => { %>
+				<label class="filter-chip"><input type="checkbox" class="node-type-checkbox" value="<%= value %>" checked><span><%= t(`filters:${key}`) %></span></label>
+				<% }); %>
+			</div>
+		</fieldset>
+		<div class="filter-section">
+			<h3><%= t('filters:radioTitle') %></h3>
+			<% ['freq', 'sf', 'cr', 'bw'].forEach(key => { %>
+			<fieldset class="radio-filter-group" id="<%= key %>-filter-group" data-radio-filter="<%= key %>">
+				<legend>
+					<span class="radio-filter-heading">
+						<span class="radio-filter-title">
+							<%= t(`filters:${key === 'freq' ? 'frequency' : key}`) %>
+							<span class="radio-filter-count" data-count></span>
+						</span>
+						<span class="filter-bulk-actions">
+							<button type="button" data-select="all"><%= t('filters:selectAll') %></button>
+							<button type="button" data-select="none"><%= t('filters:selectNone') %></button>
+						</span>
+					</span>
+				</legend>
+				<% if (key === 'freq') { %>
+				<input type="search" id="freq-filter-search" class="date-input" aria-label="<%= t('filters:searchFrequency') %>" placeholder="<%= t('filters:searchFrequency') %>" autocomplete="off">
+				<% } %>
+				<div class="filter-chip-grid" id="<%= key %>-filter-list"></div>
+				<% if (key === 'freq') { %>
+				<p class="filter-help" id="freq-filter-empty" hidden><%= t('filters:noFrequencies') %></p>
+				<% } %>
 			</fieldset>
-			<div class="field-group">
-				<label for="from-date"><%= t('filters:lastUpdate') %></label>
-				<input type="date" class="date-input" id="from-date">
+			<% }); %>
+		</div>
+		<div class="filter-section">
+			<h3><%= t('filters:datesTitle') %></h3>
+			<div class="filter-date-grid">
+				<div class="field-group">
+					<label for="from-date"><%= t('filters:lastUpdate') %></label>
+					<input type="date" class="date-input" id="from-date">
+				</div>
+				<div class="field-group">
+					<label for="from-insert-date"><%= t('filters:added') %></label>
+					<input type="date" class="date-input" id="from-insert-date">
+				</div>
 			</div>
+		</div>
+		<div class="filter-section">
+			<h3><%= t('filters:mapTitle') %></h3>
 			<div class="field-group">
-				<label for="from-insert-date"><%= t('filters:added') %></label>
-				<input type="date" class="date-input" id="from-insert-date">
-			</div>
-			<div class="field-group">
-				<label for="clustering-zoom"><%= t('filters:clusteringZoom') %></label>
+				<label for="clustering-zoom"><%= t('filters:clusteringZoom') %> <output id="clustering-zoom-value" for="clustering-zoom">11</output></label>
 				<input type="range" id="clustering-zoom" min="10" max="17" value="11">
 			</div>
 		</div>
-		<div class="filters-col field-group" id="freq-filter-group" hidden>
-			<span><%= t('filters:frequency') %></span>
-			<div id="freq-filter-list"></div>
+	</div>
+	<div class="filters-footer">
+		<div class="filters-actions">
+			<button type="button" class="restore-filters-btn" id="restore-filters-btn" title="<%= t('filters:restoreTitle') %>" hidden><%= t('filters:restore') %></button>
+			<button type="button" class="clear-filters-btn" id="clear-filters-btn"><%= t('filters:clearFilters') %></button>
+			<button type="button" class="apply-filters-btn" id="apply-filters-btn"><%= t('filters:apply') %></button>
 		</div>
-	</li>
-	<li class="filters-actions">
-		<button type="button" class="apply-filters-btn" id="apply-filters-btn"><%= t('filters:apply') %></button>
-		<button type="button" class="clear-filters-btn" id="clear-filters-btn" hidden><%= t('filters:clearFilters') %></button>
-	</li>
-</menu>
+	</div>
+</section>
 
 <ul id="search-results" hidden></ul>
 

@@ -1,12 +1,22 @@
 {
 	"entries": [
 		{
-			"version": "0.10.3",
+			"version": "0.11.0",
 			"date": "05.11.2026",
 			"changes": [
+				"Przebudowano panel filtrów: nowy wygląd spójny z paskiem nawigacji, wybór wartości w formie przełączanych chipów, liczniki wybranych opcji oraz podgląd liczby pasujących węzłów na żywo.",
+				"Dodano filtry parametrów radiowych: SF, CR i BW obok częstotliwości, z przyciskami „Wszystkie” i „Żadne”, wyszukiwarką częstotliwości oraz osobną opcją dla węzłów bez danych.",
+				"Dodano udostępnianie filtrów linkiem. Filtry z linku obowiązują tylko w danej sesji i nie są zapisywane w przeglądarce, a przycisk „Przywróć moje” przywraca własne ustawienia.",
+				"Węzły bez parametrów radiowych pokazują teraz w oknie szczegółów „Brak danych” zamiast mylącego presetu własnego.",
+				"Lista wyników wyszukiwania ma teraz taką samą szerokość jak pole wyszukiwania, także na małych ekranach.",
+				"Panel filtrów zamyka się klawiszem Escape i ma przycisk zamknięcia, a przycisk „Resetuj” jest zawsze dostępny i czyści także filtry dat.",
+				"Współrzędne węzła są pokazywane z rzeczywistą dokładnością z danych (np. 52.2441), bez dopełniania zerami do sześciu miejsc.",
+				"Kolory statusów aktualizacji w oknie węzła są teraz zgodne z kolorami ikon na mapie i w legendzie.",
+				"Ujednolicono nazwę „Room serwer” w polskich tłumaczeniach.",
+				"Naprawiono brak animacji spinnera w powiadomieniach na stronach bez stylów ekranu ładowania.",
 				"Presety radiowe są teraz pobierane z API mapy, korzystającego ze wspólnej pamięci podręcznej Redis odświeżanej przez zadanie cykliczne, zamiast bezpośrednio z zewnętrznego API.",
 				"Usunięto z polityki CSP zgodę na bezpośrednie połączenia przeglądarki z api.meshcore.nz, ponieważ presety są teraz udostępniane przez API mapy.",
-				"Zaktualizowano zależności backendu: express-rate-limit do 8.7.3, i18next do 26.7.1, i18next-http-middleware do 3.10.0, mongoose do 9.12.0 i msgpackr do 2.1.4.",
+				"Zaktualizowano zależności backendu: express-rate-limit do 8.7.3, i18next do 26.7.2, i18next-http-middleware do 3.10.0, mongoose do 9.12.0 i msgpackr do 2.1.4.",
 				"Zaktualizowano frontendową bibliotekę msgpackr z 2.1.3 do 2.1.4.",
 				"Ujednolicono wysokości mapy, paneli i okien, zastępując jednostki vh przez dvh. Usunięto zbędne deklaracje dla starszych przeglądarek.",
 				"Zaktualizowano globals, używane przez konfigurację ESLint, do wersji 17.14.0."

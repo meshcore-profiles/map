@@ -5,6 +5,9 @@ import * as ntools from './node-utils.js';
 import { t, tRaw, plural } from './i18n.js';
 import { initModal } from './modal.js';
 import { initNodeDeletionDialog } from './node-deletion.js';
+import { initRadioFilters } from './radio-filters.js';
+import { RADIO_FILTER_KEYS, loadRadioFilters, createRadioMatcher, radioValue } from './radio-filter-utils.js';
+import { buildFilterParams, parseSharedFilters } from './filter-share.js';
 import { initLegendPanel } from './legend.js';
 import { initStatsModal } from './stats.js';
 import { initChangelogModal } from './changelog.js';
@@ -104,11 +107,18 @@ const timeAgo = msec => {
 	return t('common:justNow');
 };
 
+const getRadioParamKeys = params => paramOrder.filter(key => radioValue(params, key) !== 'unknown');
+
 const findPreset = params => presets.find(p =>
 	params.sf === p.params.sf &&
 	params.freq === p.params.freq &&
 	params.bw === p.params.bw
 ) ?? {};
+
+const getPresetLabel = params => {
+	if (!['freq', 'sf', 'bw'].every(key => radioValue(params, key) !== 'unknown')) return t('map:noRadioData');
+	return findPreset(params).name || t('map:customPreset');
+};
 
 const withCopyButton = (displayHtml, copyValue, btnTitle, textTitle = '') => `
 	<span class="copy-cell">
@@ -152,18 +162,19 @@ const columns = {
 	},
 	preset: {
 		label: t('map:columns.preset'),
-		value: val => {
-			const preset = findPreset(val);
-			return preset.params?.freq ? preset.name : t('map:customPreset');
-		},
+		value: getPresetLabel,
 	},
 	params: {
 		label: t('map:columns.params'),
-		value: val => `<span class="param-chips">${paramOrder.filter(key => key in val).map(key => {
-			const paramKey = radioParamDesc[key];
-			const text = `${paramKey.short}${val[key]}${paramKey.unit}`;
-			return `<span class="param-chip" title="${radioParamLabel(key)}">${escapeHtml(text)}</span>`;
-		}).join('')}</span>`,
+		value: val => {
+			const keys = getRadioParamKeys(val);
+			if (!keys.length) return t('map:noRadioData');
+			return `<span class="param-chips">${keys.map(key => {
+				const paramKey = radioParamDesc[key];
+				const text = `${paramKey.short}${val[key]}${paramKey.unit}`;
+				return `<span class="param-chip" title="${radioParamLabel(key)}">${escapeHtml(text)}</span>`;
+			}).join('')}</span>`;
+		},
 	},
 	link: {
 		label: t('map:columns.link'),
@@ -189,7 +200,7 @@ const getSvgIcon = (text, color) => {
 };
 
 const getTable = node => '<table class="node-info"><tbody>' +
-	'<tr>' + columnOrder.flatMap(key => node[key] ? [`<td><b>${columns[key].label}</b></td><td>${columns[key].value ? columns[key].value(node[key]) : node[key]}</td>`] : []).join('</tr><tr>') + '</tr>' +
+	'<tr>' + columnOrder.flatMap(key => node[key] || key === 'preset' || key === 'params' ? [`<td><b>${columns[key].label}</b></td><td>${columns[key].value ? columns[key].value(node[key]) : node[key]}</td>`] : []).join('</tr><tr>') + '</tr>' +
 '</tbody></table>';
 
 const discordTimestamp = date => `<t:${Math.floor(date.getTime() / 1000)}:R>`;
@@ -204,14 +215,16 @@ const getNodeInfoText = node => {
 	if (node.updatedDate) lines.push(`- **${t('map:columns.updatedDate')}:** ${ntools.formatDateTime(node.updatedDate)} (${discordTimestamp(node.updatedDate)})`);
 	lines.push(`- **${t('map:columns.coords')}:** \`${node.coords}\` ([${t('common:mapWord')}](https://google.com/maps/place/${node.coords.replace(' ', '')}))`);
 
-	if (node.params) {
-		const preset = findPreset(node.params);
-		lines.push(`- **${t('map:columns.preset')}:** ${preset.params?.freq ? preset.name : t('map:customPreset')}`);
-		lines.push(`- **${t('settings:title')}:**`);
-		for (const key of paramOrder.filter(k => k in node.params)) {
+	lines.push(`- **${t('map:columns.preset')}:** ${getPresetLabel(node.params)}`);
+	const radioKeys = getRadioParamKeys(node.params);
+	if (radioKeys.length) {
+		lines.push(`- **${t('map:columns.params')}:**`);
+		for (const key of radioKeys) {
 			const paramKey = radioParamDesc[key];
 			lines.push(`  - ${radioParamLabel(key)}: ${node.params[key]}${paramKey.unit}`);
 		}
+	} else {
+		lines.push(`- **${t('map:columns.params')}:** ${t('map:noRadioData')}`);
 	}
 
 	return lines.join('\n');
@@ -720,9 +733,11 @@ const filterMenu = document.getElementById('node-filter');
 const fromDateInput = document.getElementById('from-date');
 const fromInsertDateInput = document.getElementById('from-insert-date');
 const clusteringZoomInput = document.getElementById('clustering-zoom');
-const freqFilterGroup = document.getElementById('freq-filter-group');
-const freqFilterList = document.getElementById('freq-filter-list');
+const clusteringZoomValue = document.getElementById('clustering-zoom-value');
+const filtersSummary = document.getElementById('filters-summary');
+const filtersShareBtn = document.getElementById('filters-share');
 const clearFiltersBtn = document.getElementById('clear-filters-btn');
+const restoreFiltersBtn = document.getElementById('restore-filters-btn');
 const applyFiltersBtn = document.getElementById('apply-filters-btn');
 const nodeTypeCheckboxes = [...document.querySelectorAll('.node-type-checkbox')];
 const legendUpdatedAtEl = document.getElementById('legend-updated-at');
@@ -749,39 +764,52 @@ const loadSavedFilters = () => {
 	}
 };
 
-const savedFilters = loadSavedFilters();
+// Filtry z linku mają pierwszeństwo, ale działają tylko w tej sesji i nie trafiają do localStorage
+const sharedFilters = parseSharedFilters(urlParams);
+let filtersFromLink = sharedFilters !== null;
+const initialFilters = sharedFilters ?? loadSavedFilters();
+const initialRegion = sharedFilters?.region ?? storedRegion;
 
 const state = {
 	search: '',
-	region: regionToggle && (storedRegion === 'all' || storedRegion === 'pl') ? storedRegion : window.MAP_CONFIG.defaultRegion,
-	nodeFilter: savedFilters.nodeFilter ?? ['1', '2', '3', '4'],
-	freqFilter: savedFilters.freqFilter ?? [],
-	availableFreqs: [],
-	hasUnknownFreq: false,
-	includeUnknownFreq: savedFilters.includeUnknownFreq ?? true,
-	fromDate: savedFilters.fromDate ?? '',
-	fromInsertDate: savedFilters.fromInsertDate ?? '',
-	clusteringZoom: savedFilters.clusteringZoom ?? 11,
+	region: regionToggle && (initialRegion === 'all' || initialRegion === 'pl') ? initialRegion : window.MAP_CONFIG.defaultRegion,
+	nodeFilter: initialFilters.nodeFilter ?? ['1', '2', '3', '4'],
+	radioFilters: loadRadioFilters(initialFilters),
+	fromDate: initialFilters.fromDate ?? '',
+	fromInsertDate: initialFilters.fromInsertDate ?? '',
+	clusteringZoom: initialFilters.clusteringZoom ?? 11,
 	nodes: [],
 	nodesByType: {},
 	filteredNodes: [],
 };
 
 const saveFiltersToStorage = () => {
+	if (filtersFromLink) return;
+
 	localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify({
 		nodeFilter: state.nodeFilter,
-		freqFilter: state.freqFilter,
-		includeUnknownFreq: state.includeUnknownFreq,
+		radioFilters: state.radioFilters,
 		fromDate: state.fromDate,
 		fromInsertDate: state.fromInsertDate,
 		clusteringZoom: state.clusteringZoom,
 	}));
 };
 
+function updateClusteringSlider() {
+	const value = Number(clusteringZoomInput.value);
+	const min = Number(clusteringZoomInput.min);
+	const max = Number(clusteringZoomInput.max);
+	const progress = (value - min) / (max - min) * 100;
+
+	clusteringZoomValue.value = value;
+	clusteringZoomInput.style.setProperty('--range-progress', `${progress}%`);
+}
+
 nodeTypeCheckboxes.forEach(cb => { cb.checked = state.nodeFilter.includes(cb.value); });
 fromDateInput.value = state.fromDate;
 fromInsertDateInput.value = state.fromInsertDate;
 clusteringZoomInput.value = state.clusteringZoom;
+updateClusteringSlider();
 
 let highlightLayer = null;
 let highlightToast = null;
@@ -959,7 +987,19 @@ const positionDropdown = (el, anchor = searchInline, { fullWidthOnMobile = true 
 	const rect = anchor.getBoundingClientRect();
 	el.style.top = `${rect.bottom + 10}px`;
 
-	if (fullWidthOnMobile && window.innerWidth <= 800) {
+	if (el === filterMenu) {
+		const availableHeight = window.innerHeight - rect.bottom - 24;
+		el.style.maxHeight = `${Math.max(0, Math.min(780, availableHeight))}px`;
+	}
+
+	if (el === searchResultsEl) {
+		// Lista wyników zajmuje dokładnie tyle miejsca, co pole wyszukiwania, na każdej szerokości ekranu
+		el.style.left = `${rect.left}px`;
+		el.style.right = 'auto';
+		el.style.width = `${rect.width}px`;
+		el.style.maxWidth = 'none';
+	}
+	else if (fullWidthOnMobile && el !== filterMenu && window.innerWidth <= 800) {
 		el.style.left = '14px';
 		el.style.right = '14px';
 		el.style.width = 'auto';
@@ -974,15 +1014,15 @@ const positionDropdown = (el, anchor = searchInline, { fullWidthOnMobile = true 
 	}
 };
 
-const refreshMap = ({ clusteringZoom = 0 } = {}) => {
+const refreshMap = () => {
 	markerClusterGroup.clearLayers();
 	const nodes = state.filteredNodes;
 
 	map.removeLayer(markerClusterGroup);
 
-	if (clusteringZoom) {
+	if (markerClusterGroup.options.disableClusteringAtZoom !== state.clusteringZoom) {
 		markerClusterGroup = L.markerClusterGroup({
-			disableClusteringAtZoom: clusteringZoom,
+			disableClusteringAtZoom: state.clusteringZoom,
 			chunkedLoading: true,
 		});
 		attachClusterClickHandler(markerClusterGroup);
@@ -1037,7 +1077,6 @@ const updateFiltersActiveUI = () => {
 	const active = state.nodes.length !== state.filteredNodes.length;
 	filterToggle.classList.toggle('active', active);
 	filterActiveDot.hidden = !active;
-	clearFiltersBtn.hidden = !active;
 };
 
 const renderStats = () => {
@@ -1108,11 +1147,11 @@ function renderSearchResults() {
 	setSearchActiveIndex(0);
 }
 
-const runFilterPass = () => {
+const collectFilteredNodes = () => {
 	const fromDate = new Date(state.fromDate);
 	const fromInsertDate = new Date(state.fromInsertDate);
 	const byType = state.nodesByType;
-	const freqSet = new Set(state.freqFilter.length ? state.freqFilter : state.availableFreqs);
+	const matchesRadio = createRadioMatcher(state.radioFilters);
 
 	const result = [];
 	for (const type of state.nodeFilter) {
@@ -1123,12 +1162,35 @@ const runFilterPass = () => {
 			const node = typeNodes[i];
 			if (node.updatedDate ? node.updatedDate <= fromDate : node.insertDate <= fromDate) continue;
 			if (node.insertDate <= fromInsertDate) continue;
-			if (node.params?.freq ? !freqSet.has(Math.floor(node.params.freq)) : !state.includeUnknownFreq) continue;
+			if (!matchesRadio(node.radio)) continue;
 			result.push(node);
 		}
 	}
 
-	state.filteredNodes = result;
+	return result;
+};
+
+const numberFormat = new Intl.NumberFormat(window.MAP_CONFIG.languageCode);
+let summaryTimer = 0;
+
+const renderFilterSummary = matching => {
+	const total = state.nodes.length;
+
+	filtersSummary.hidden = total === 0;
+	filtersSummary.textContent = t('filters:summary', { matching: numberFormat.format(matching), total: numberFormat.format(total) });
+};
+
+// Podgląd liczby pasujących węzłów podczas zmiany filtrów, jeszcze przed kliknięciem "Zastosuj"
+const scheduleFilterSummary = () => {
+	clearTimeout(summaryTimer);
+	summaryTimer = setTimeout(() => renderFilterSummary(collectFilteredNodes().length), 120);
+};
+
+const runFilterPass = () => {
+	clearTimeout(summaryTimer);
+
+	state.filteredNodes = collectFilteredNodes();
+	renderFilterSummary(state.filteredNodes.length);
 	refreshMap();
 	syncUrlParams();
 	updateFiltersActiveUI();
@@ -1160,49 +1222,26 @@ const applyFilters = ({ silent = false } = {}) => {
 	}));
 };
 
-const onFreqFilterChange = () => {
-	state.freqFilter = [...freqFilterList.querySelectorAll('.freq-checkbox:checked')].map(cb => Number(cb.value));
-	state.includeUnknownFreq = freqFilterList.querySelector('.freq-unknown-checkbox')?.checked ?? true;
-};
+const radioFilters = initRadioFilters(state, { onChange: scheduleFilterSummary });
 
-const renderFreqFilters = () => {
-	const checkedFreqs = state.freqFilter.length ? state.freqFilter : state.availableFreqs;
+const applyFilterSettings = settings => {
+	state.nodeFilter = settings.nodeFilter ?? ['1', '2', '3', '4'];
+	state.radioFilters = loadRadioFilters(settings);
+	state.fromDate = settings.fromDate ?? '';
+	state.fromInsertDate = settings.fromInsertDate ?? '';
+	state.clusteringZoom = settings.clusteringZoom ?? 11;
 
-	freqFilterGroup.hidden = state.availableFreqs.length === 0 && !state.hasUnknownFreq;
-
-	const unknownCheckboxHtml = state.hasUnknownFreq ? `
-		<label class="checkbox-label">
-			<input type="checkbox" class="freq-unknown-checkbox" ${state.includeUnknownFreq ? 'checked' : ''}>
-			${t('filters:unknownFreq')}
-		</label>
-	` : '';
-
-	freqFilterList.innerHTML = state.availableFreqs.map(freq => `
-		<label class="checkbox-label">
-			<input type="checkbox" class="freq-checkbox" value="${freq}" ${checkedFreqs.includes(freq) ? 'checked' : ''}>
-			${freq} MHz
-		</label>
-	`).join('') + unknownCheckboxHtml;
-
-	freqFilterList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-		checkbox.addEventListener('change', onFreqFilterChange);
-	});
-};
-
-const clearFilters = () => {
-	state.nodeFilter = ['1', '2', '3', '4'];
-	state.freqFilter = [];
-	state.includeUnknownFreq = true;
-	state.fromDate = '2025-03-01';
-	state.fromInsertDate = '2025-03-01';
-	state.clusteringZoom = 11;
-
-	nodeTypeCheckboxes.forEach(cb => { cb.checked = true; });
+	nodeTypeCheckboxes.forEach(cb => { cb.checked = state.nodeFilter.includes(cb.value); });
 	fromDateInput.value = state.fromDate;
 	fromInsertDateInput.value = state.fromInsertDate;
 	clusteringZoomInput.value = state.clusteringZoom;
-	renderFreqFilters();
+	updateClusteringSlider();
+	document.getElementById('freq-filter-search').value = '';
+	radioFilters.render();
+};
 
+const clearFilters = () => {
+	applyFilterSettings({});
 	applyFilters();
 };
 
@@ -1228,9 +1267,7 @@ const renderLegendUpdatedAt = dataUpdatedAt => {
 const applyDownloadedNodes = cached => {
 	state.nodesByType = cached.byType;
 	state.nodes = cached.nodes;
-	state.availableFreqs = cached.availableFreqs;
-	state.hasUnknownFreq = cached.hasUnknownFreq;
-	renderFreqFilters();
+	radioFilters.render(cached.radioOptions);
 	renderLegendUpdatedAt(cached.dataUpdatedAt);
 };
 
@@ -1314,8 +1351,7 @@ const downloadNodes = async region => {
 		const presetsPromise = getPresets(abortController.signal);
 
 		const byType = {};
-		const freqSet = new Set();
-		let hasUnknownFreq = false;
+		const radioOptions = Object.fromEntries(RADIO_FILTER_KEYS.map(key => [key, new Set()]));
 		const CHUNK_SIZE = 2000;
 
 		for (let offset = 0; offset < nodes.length; offset += CHUNK_SIZE) {
@@ -1330,6 +1366,7 @@ const downloadNodes = async region => {
 			for (let i = offset; i < end; i++) {
 				const node = nodes[i];
 				inflateNode(node);
+				for (const key of RADIO_FILTER_KEYS) radioOptions[key].add(radioValue(node.params, key));
 				const updateStatus = getNodeUpdateStatus(node);
 
 				let icon = icons[updateStatus][node.type.toString()];
@@ -1346,14 +1383,12 @@ const downloadNodes = async region => {
 
 				node.status = updateStatus;
 				node.preset = node.params;
-				node.coords = `${node.lat.toFixed(6)}, ${node.lon.toFixed(6)}`;
+				// Number(...toFixed(6)) ucina szum zmiennoprzecinkowy, ale nie dopisuje zer, których nie ma w danych
+				node.coords = `${Number(node.lat.toFixed(6))}, ${Number(node.lon.toFixed(6))}`;
 				node.lastAdvertDate = new Date(node.last_advert);
 				node.insertDate = new Date(node.inserted_date);
 				node.updatedDate = node.updated_date && new Date(node.updated_date);
 				markerToNode.set(marker, node);
-
-				if (node.params?.freq) freqSet.add(Math.floor(node.params.freq));
-				else hasUnknownFreq = true;
 			}
 		}
 
@@ -1371,7 +1406,7 @@ const downloadNodes = async region => {
 
 		setLoadingStatus(t('map:ready'));
 
-		nodesCache[region] = { nodes, byType, availableFreqs: [...freqSet].sort((a, b) => a - b), hasUnknownFreq, dataUpdatedAt };
+		nodesCache[region] = { nodes, byType, radioOptions, dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
 	} catch (err) {
 		if (err.name !== 'AbortError') {
@@ -1442,29 +1477,77 @@ document.addEventListener('keydown', e => {
 	searchInput.focus();
 });
 
+const closeFilters = () => {
+	filterMenu.hidden = true;
+	filterToggle.setAttribute('aria-expanded', 'false');
+};
+
 filterToggle.addEventListener('click', () => {
-	const willShow = filterMenu.hidden;
-	filterMenu.hidden = !filterMenu.hidden;
-	if (willShow) positionDropdown(filterMenu);
+	if (!filterMenu.hidden) {
+		closeFilters();
+		return;
+	}
+
+	filterMenu.hidden = false;
+	filterToggle.setAttribute('aria-expanded', 'true');
+	positionDropdown(filterMenu);
+});
+
+document.getElementById('filters-close').addEventListener('click', () => {
+	closeFilters();
+	filterToggle.focus();
+});
+
+filterMenu.addEventListener('keydown', e => {
+	if (e.key !== 'Escape') return;
+
+	closeFilters();
+	filterToggle.focus();
 });
 
 nodeTypeCheckboxes.forEach(checkbox => {
 	checkbox.addEventListener('change', () => {
 		state.nodeFilter = nodeTypeCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+		scheduleFilterSummary();
 	});
 });
 
 fromDateInput.addEventListener('change', () => {
 	state.fromDate = fromDateInput.value;
+	scheduleFilterSummary();
 });
 
 fromInsertDateInput.addEventListener('change', () => {
 	state.fromInsertDate = fromInsertDateInput.value;
+	scheduleFilterSummary();
+});
+
+const buildFilterShareUrl = () => {
+	const center = map.getCenter();
+	const params = new URLSearchParams({
+		lat: center.lat.toFixed(4),
+		lon: center.lng.toFixed(4),
+		zoom: map.getZoom(),
+	});
+
+	for (const [key, value] of buildFilterParams(state, { includeRegion: Boolean(regionToggle) })) {
+		params.set(key, value);
+	}
+
+	return `${location.origin}${location.pathname}?${params.toString().replaceAll('%2C', ',')}`;
+};
+
+filtersShareBtn.addEventListener('click', () => {
+	navigator.clipboard.writeText(buildFilterShareUrl()).then(
+		() => showToast(t('filters:linkCopied')),
+		() => showToast(t('filters:linkCopyFailed'), { status: 'error' })
+	);
 });
 
 clusteringZoomInput.addEventListener('input', () => {
 	state.clusteringZoom = Number(clusteringZoomInput.value);
-	refreshMap({ clusteringZoom: state.clusteringZoom });
+	updateClusteringSlider();
+	refreshMap();
 	syncUrlParams();
 });
 
@@ -1505,10 +1588,24 @@ coverageStyleSelect.addEventListener('change', () => {
 
 applyFiltersBtn.addEventListener('click', () => {
 	applyFilters();
-	if (closeFiltersOnApplyCheckbox.checked) filterMenu.hidden = true;
+	if (closeFiltersOnApplyCheckbox.checked) closeFilters();
 });
 
 clearFiltersBtn.addEventListener('click', clearFilters);
+
+restoreFiltersBtn.hidden = !filtersFromLink;
+
+restoreFiltersBtn.addEventListener('click', async () => {
+	filtersFromLink = false;
+	restoreFiltersBtn.hidden = true;
+	applyFilterSettings(loadSavedFilters());
+
+	const savedRegion = localStorage.getItem('regionSelected');
+	const region = regionToggle && (savedRegion === 'all' || savedRegion === 'pl') ? savedRegion : window.MAP_CONFIG.defaultRegion;
+
+	if (region === state.region) applyFilters();
+	else await setRegion(region);
+});
 
 loadingCancelBtn.addEventListener('click', () => currentDownloadAbort?.abort());
 
@@ -1708,7 +1805,7 @@ document.addEventListener('click', e => {
 });
 
 document.addEventListener('click', e => {
-	if (!filterMenu.hidden && !filterMenu.contains(e.target) && !filterToggle.contains(e.target)) filterMenu.hidden = true;
+	if (!filterMenu.hidden && !filterMenu.contains(e.target) && !filterToggle.contains(e.target)) closeFilters();
 	if (!searchResultsEl.hidden && !searchResultsEl.contains(e.target) && !searchInline.contains(e.target)) searchResultsEl.hidden = true;
 	if (!basemapMenu.hidden && !basemapMenu.contains(e.target) && !basemapToggle.contains(e.target)) basemapMenu.hidden = true;
 	if (langMenu && !langMenu.hidden && !langMenu.contains(e.target) && !langToggle.contains(e.target)) closeLanguageMenu();
@@ -1731,6 +1828,8 @@ updateRegionToggleUI();
 
 downloadNodes(state.region).then(() => {
 	applyFilters({ silent: true });
+
+	if (sharedFilters) showToast(t('filters:sharedApplied'), { status: 'info', duration: 5000 });
 
 	if (urlParams.node) {
 		const node = state.nodes.find(n => n.public_key === urlParams.node);

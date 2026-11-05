@@ -122,6 +122,12 @@
 			word-break: break-all;
 		}
 
+		.card svg.node-status {
+			color: revert;
+			fill: revert;
+			stroke: revert;
+		}
+
 		.card .bg {
 			background: repeating-conic-gradient(#2a2f3c 0% 25%, #20242e 0% 50%) 50% / 14px 14px;
 			border-radius: 8px;
@@ -204,6 +210,10 @@
 	<button type="button" class="trigger-btn" id="stack-demo">Kilka naraz (stos)</button>
 </div>
 
+<h2>Statusy węzłów</h2>
+<p class="subtitle">Kolor ikony węzła zależy od czasu ostatniej aktualizacji (zmienna <code>--node-color</code> w <code>global.css</code>). Taki sam efekt jest na mapie i w legendzie.</p>
+<div id="status-output"></div>
+
 <h2>Ikony SVG</h2>
 <p class="subtitle">Automatycznie wygenerowana lista wszystkich &lt;symbol&gt; z plików sprite w <code>/icons/</code>.</p>
 <div id="output"></div>
@@ -211,6 +221,13 @@
 <p class="footer">Wersja witryny: <%= v %></p>
 
 <div id="toast-container" aria-live="polite"></div>
+
+<script nonce="<%= cspNonce %>">
+	window.MAP_CONFIG = {
+		languageCode: <%- JSON.stringify(languageCode) %>,
+		i18n: <%- JSON.stringify(i18nBundle) %>,
+	};
+</script>
 
 <script type="module" nonce="<%= cspNonce %>">
 	import { showToast, updateToast } from '/js/toast.js';
@@ -259,64 +276,96 @@
 		{ path: '/icons/toast-icons.svg', label: 'toast-icons.svg (toasty)', strokeOnly: true },
 	];
 
+	const NODE_TYPES_SPRITE = '/icons/node-types.svg';
+	const NODE_TYPE_IDS = ['repeater', 'room-server', 'sensor'];
+	const UPDATE_STATUSES = ['none', 'recent', 'stale', 'old', 'extinct'];
+
 	const output = document.getElementById('output');
 
-	const spriteContainer = document.createElement('div');
-	spriteContainer.hidden = true;
-	document.body.appendChild(spriteContainer);
+	const createCard = ({ href, label, svgClass }) => {
+		const card = document.createElement('div');
+		card.className = 'card';
+
+		const bg = document.createElement('div');
+		bg.className = 'bg';
+
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		if (svgClass) svg.setAttribute('class', svgClass);
+
+		const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+		use.setAttribute('href', href);
+		svg.appendChild(use);
+		bg.appendChild(svg);
+
+		const code = document.createElement('code');
+		code.textContent = label;
+
+		card.append(bg, code);
+
+		return card;
+	};
+
+	const renderNodeStatuses = () => {
+		const container = document.getElementById('status-output');
+
+		for (const type of NODE_TYPE_IDS) {
+			const heading = document.createElement('h3');
+			heading.textContent = type;
+
+			const grid = document.createElement('div');
+			grid.className = 'grid';
+			grid.append(...UPDATE_STATUSES.map(status => createCard({
+				href: `${NODE_TYPES_SPRITE}#${type}`,
+				label: `update-${status}`,
+				svgClass: `node-status update-${status}`,
+			})));
+
+			container.append(heading, grid);
+		}
+	};
 
 	const renderSprite = async ({ path, label, strokeOnly }) => {
 		const section = document.createElement('section');
 		const heading = document.createElement('h3');
 		heading.textContent = `${label} - ${path}`;
 		section.appendChild(heading);
+		output.appendChild(section);
+
+		const message = text => {
+			const el = document.createElement('p');
+			el.className = 'empty';
+			el.textContent = text;
+			section.appendChild(el);
+		};
 
 		let symbolIds;
 		try {
 			const res = await fetch(path, { cache: 'no-store' });
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			const text = await res.text();
 
-			const sprite = document.createElement('div');
-			sprite.innerHTML = text;
-			spriteContainer.appendChild(sprite);
-
-			symbolIds = [...sprite.querySelectorAll('symbol[id]')].map(s => s.id);
-		}
-		catch (e) {
-			const err = document.createElement('p');
-			err.className = 'empty';
-			err.textContent = `Nie udało się wczytać ${path}: ${e.message}`;
-			section.appendChild(err);
-			output.appendChild(section);
+			// Regex zamiast DOMParser: parsowanie SVG z atrybutem style łamie CSP (style-src bez unsafe-inline)
+			symbolIds = [...(await res.text()).matchAll(/<symbol\s[^>]*?\bid="([^"]+)"/g)].map(match => match[1]);
+		} catch (err) {
+			message(`Nie udało się wczytać ${path}: ${err.message}`);
 			return;
 		}
 
 		if (!symbolIds.length) {
-			const empty = document.createElement('p');
-			empty.className = 'empty';
-			empty.textContent = 'Brak symboli w tym pliku.';
-			section.appendChild(empty);
-			output.appendChild(section);
+			message('Brak symboli w tym pliku.');
 			return;
 		}
 
 		const grid = document.createElement('div');
 		grid.className = 'grid';
-
-		for (const id of symbolIds) {
-			const card = document.createElement('div');
-			card.className = 'card';
-			card.innerHTML = `
-				<div class="bg"><svg class="${strokeOnly ? 'stroke-only' : ''}"><use href="#${id}"></use></svg></div>
-				<code>${id}</code>`;
-			grid.appendChild(card);
-		}
-
+		grid.append(...symbolIds.map(id => createCard({
+			href: `${path}#${id}`,
+			label: id,
+			svgClass: strokeOnly ? 'stroke-only' : '',
+		})));
 		section.appendChild(grid);
-		output.appendChild(section);
 	};
 
+	renderNodeStatuses();
 	spriteFiles.forEach(renderSprite);
 </script>
 </body>

@@ -171,22 +171,6 @@
 	height: auto!important;
 }
 
-.leaflet-marker-icon.update-recent, .legend-icon.update-recent {
-	filter: saturate(5) hue-rotate(260deg);
-}
-
-.leaflet-marker-icon.update-stale, .legend-icon.update-stale {
-	filter: saturate(28) hue-rotate(228deg);
-}
-
-.leaflet-marker-icon.update-old, .legend-icon.update-old {
-	filter: saturate(5) hue-rotate(165deg);
-}
-
-.leaflet-marker-icon.update-extinct, .legend-icon.update-extinct {
-	filter: grayscale(100);
-}
-
 .svg-node-icon {
 	border: none!important;
 	background: none!important;

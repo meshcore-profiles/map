@@ -2,7 +2,7 @@
 	"nodeTypes": {
 		"client": "Klient",
 		"repeater": "Repeater",
-		"roomServer": "Room server",
+		"roomServer": "Room serwer",
 		"sensor": "Czujnik"
 	},
 	"updateStatus": {
@@ -88,6 +88,7 @@
 	"serverError": "Serwer zwrócił błąd {{status}}",
 	"aboutSize": "około {{size}}",
 	"unknownSize": "nieznany rozmiar",
+	"noRadioData": "Brak danych",
 	"shiftSearchHint": "Wskazówka: wciśnij Shift, aby przejść od razu do wyszukiwania",
 	"highlightedNodes": "Podświetlono {{count}} {{unit}}",
 	"newNodeUnit": ["nowy węzeł", "nowe węzły", "nowych węzłów"],

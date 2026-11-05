@@ -137,19 +137,19 @@
 }
 
 .badge-status-recent {
-	color: var(--green-bright);
+	color: var(--status-text-recent);
 }
 
 .badge-status-stale {
-	color: var(--amber-bright);
+	color: var(--status-text-stale);
 }
 
 .badge-status-old {
-	color: var(--text-muted);
+	color: var(--status-text-old);
 }
 
 .badge-status-extinct {
-	color: var(--red-bright);
+	color: var(--status-text-extinct);
 }
 
 .param-chips {

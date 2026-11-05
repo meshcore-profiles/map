@@ -88,6 +88,7 @@
 	"serverError": "Server returned error {{status}}",
 	"aboutSize": "about {{size}}",
 	"unknownSize": "unknown size",
+	"noRadioData": "No data",
 	"shiftSearchHint": "Tip: press Shift to jump straight to search",
 	"highlightedNodes": "Highlighted {{count}} {{unit}}",
 	"newNodeUnit": ["new node", "new nodes"],

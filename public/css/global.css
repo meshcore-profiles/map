@@ -14,6 +14,14 @@
 	--blue-glow: rgba(51, 154, 240, 0.25);
 	--green-bright: #2dd881;
 	--amber-bright: #f2b134;
+	--status-recent: #319712;
+	--status-stale: #e4af00;
+	--status-old: #e35e3a;
+	--status-extinct: #787878;
+	--status-text-recent: #2dd881;
+	--status-text-stale: #f2c230;
+	--status-text-old: #ee7a5a;
+	--status-text-extinct: #9a9a9a;
 	--radius: 12px;
 	--radius-sm: 8px;
 	--shadow: 0 0 28px rgba(0, 0, 0, 0.4);
@@ -125,4 +133,26 @@ a:active {
 .icon-filled {
 	fill: currentColor;
 	stroke: none;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.update-recent {
+	--node-color: var(--status-recent);
+}
+
+.update-stale {
+	--node-color: var(--status-stale);
+}
+
+.update-old {
+	--node-color: var(--status-old);
+}
+
+.update-extinct {
+	--node-color: var(--status-extinct);
 }

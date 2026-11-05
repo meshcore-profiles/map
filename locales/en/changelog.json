@@ -1,12 +1,22 @@
 {
 	"entries": [
 		{
-			"version": "0.10.3",
+			"version": "0.11.0",
 			"date": "2026-11-05",
 			"changes": [
+				"Rebuilt the filter panel: a new look consistent with the navigation bar, toggleable chips for choosing values, selection counters and a live preview of how many nodes match.",
+				"Added radio parameter filters: SF, CR and BW alongside frequency, with \"All\" and \"None\" buttons, a frequency search and a separate option for nodes without data.",
+				"Added sharing of filters via a link. Filters from a link apply only to the current session and are not saved in the browser, and the \"Restore mine\" button restores your own settings.",
+				"Nodes without radio parameters now show \"No data\" in the details window instead of a misleading custom preset.",
+				"The search results list now has the same width as the search field, including on small screens.",
+				"The filter panel closes with the Escape key and has a close button, and the \"Reset\" button is always available and also clears the date filters.",
+				"Node coordinates are shown with the actual precision of the data (e.g. 52.2441), without padding with zeros to six decimal places.",
+				"Update status colors in the node window now match the icon colors on the map and in the legend.",
+				"Unified the \"Room serwer\" name in the Polish translations.",
+				"Fixed the missing spinner animation in notifications on pages without the loading screen styles.",
 				"Radio presets are now fetched from the map's API, backed by a shared Redis cache refreshed by a scheduled job, instead of directly from the external API.",
 				"Removed permission for direct browser connections to api.meshcore.nz from the CSP policy, since presets are now served by the map's API.",
-				"Updated backend dependencies: express-rate-limit to 8.7.3, i18next to 26.7.1, i18next-http-middleware to 3.10.0, mongoose to 9.12.0 and msgpackr to 2.1.4.",
+				"Updated backend dependencies: express-rate-limit to 8.7.3, i18next to 26.7.2, i18next-http-middleware to 3.10.0, mongoose to 9.12.0 and msgpackr to 2.1.4.",
 				"Updated the frontend msgpackr library from 2.1.3 to 2.1.4.",
 				"Standardized map, panel and dialog heights by replacing vh units with dvh. Removed redundant declarations for older browsers.",
 				"Updated globals, used by the ESLint configuration, to version 17.14.0."

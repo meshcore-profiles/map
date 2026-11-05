@@ -1,101 +1,63 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Interactive map of MeshCore network nodes. Node.js/Express backend (CommonJS) + plain-JS frontend (ES modules, no framework, no bundler) on Leaflet and optionally MapLibre GL. Node data comes from upstream `map.meshcore.io`, cached in Redis by `meshcore-profiles/cronjobs`.
 
-## Project
+One codebase serves **two public sites**, chosen by request host (`config/sites.js`):
+- `mapa.meshcorepolska.org` - Polish, default region `pl`.
+- `map.meshcoreprofiles.com` - global, default region `all`, default language English.
 
-Interactive map of MeshCore network nodes. Node.js/Express backend + plain-JS frontend (no framework, no bundler) built on Leaflet and (optionally) MapLibre GL. Sources node data from the upstream `map.meshcore.io`.
-
-A single codebase serves **two public sites**, chosen by request host (see `config/sites.js` and the "Multi-site & i18n" section below):
-- `mapa.meshcorepolska.org` - Polish version, default region `pl`.
-- `map.meshcoreprofiles.com` - global version, default region `all`, default language English.
-
-UI text and code comments in the **frontend** (`public/`) are in Polish. Code comments in the **backend** (`index.js`, `services/`, `routes/`, `middlewares/`, `utils/`, `database/`, `config/`) are in English.
+Comment language: **backend** (`index.js`, `services/`, `routes/`, `middlewares/`, `utils/`, `database/`, `config/`) in English, **frontend** (`public/`) in Polish. UI text is i18n-ed (see below).
 
 ## Commands
 
-- This repo has a git submodule (`global`, see below) - clone with `git clone --recurse-submodules`, or run `git submodule update --init` after a plain clone.
-- Run the server: `node .` (entry point is `index.js`, the package is CommonJS)
-- Lint: `npx eslint .` (flat config in `eslint.config.mjs`; ignores `public/vendor/**`)
-- Tests: `node --test tests/node-deletion.test.cjs` (Node's built-in runner; covers the node-deletion flow only - Turnstile verification, rate limits, mail generation, template rendering). Pass the file path - `node --test tests` fails because the directory is treated as a file.
-- `npm run m` - updates dependencies via `ncu -u && npm install && npm update` (maintenance only, not for regular development)
-- Production runs under PM2 as the `mcmap` process (see `ecosystem.config.js`); `npm run update` pulls, does a production install, and restarts via `pm2 restart mcmap`.
-- `global/database/syncIndexes.js` - standalone script run manually (`node global/database/syncIndexes.js`), syncs Mongoose indexes for every model in `global/database/models/` (see "Shared `global` submodule" below) against the actual state in MongoDB.
-- Requires running **MongoDB** and **Redis** instances, plus a `.env` file (copy of `.env.example`): `NODE_ENV`, `DOMAIN`, `PORT`, `SEFINEK_API` (base URL of the elevation API, exposed to the frontend), `SITE_MODE` (`auto`/`poland`/`global` - forces a site regardless of host), `MONGODB_URL`, `REDIS_HOST`, `REDIS_PASSWD`, optionally `MAPTILER_API_KEY` and `CARTO_API_KEY` (unlock extra basemaps), `TURNSTILE_SITEKEY` and `TURNSTILE_SECRET` (node-deletion CAPTCHA; the feature is disabled without them).
+- Clone with `--recurse-submodules` (or `git submodule update --init`); `global/` is a submodule.
+- Run: `node .`. Lint: `npx eslint .` (flat config, ignores `public/vendor/**`).
+- Prod: PM2 process `mcmap` (`ecosystem.config.js`); `npm run update` pulls, installs and restarts. `npm run m` is dependency maintenance only.
+- `node global/database/syncIndexes.js` - manual script, syncs Mongoose indexes of all models in `global/database/models/`.
+- Needs MongoDB, Redis and a `.env` (copy `.env.example`; every variable is documented there). Notable: `SITE_MODE` (`auto`/`poland`/`global`) forces a site regardless of host; the keys `ESRI_API_KEY`, `MAPTILER_API_KEY`, `CARTO_API_KEY` unlock basemaps; `TURNSTILE_*` enables node deletion (feature is off without them).
 
-## Architecture
+## Backend
 
-### Backend (Express, CommonJS)
+- `index.js` middleware order matters: helmet, CORS, `express.static('public')`, site resolver (`req.site`), language-prefix detection, language negotiation/redirects, i18next, morgan, rate limiter (production only), timeout. `.env` is loaded with `process.loadEnvFile()`; `global/database/mongoose.js` is imported for its side effect before listening.
+- `config/sites.js` defines both sites (default region/language/view, theme, branding, `maptilerHybridMapId`). `config/features.js` holds on/off switches for the terrain and coverage tools, passed to the frontend as `MAP_CONFIG.features`.
+- `routes/Api.js`: `GET /api/v1/nodes` (binary msgpack, `?region=pl|all`, default `pl`), `/repeater-stats` (JSON, CORS `*`, used by meshcorepolska.org), `/radio-presets` (Redis `radioPresets:data`, filled by `cronjobs/jobs/radio-presets.js`; 503 if missing; the frontend never calls the upstream API directly), `/stats/history` (MongoDB daily snapshots, `?days=` capped at 365, `days=all` max 5000 rows).
+- `routes/NodeDeletion.js`: `POST /api/v1/node-deletion` needs `ownerConfirmed`, a 64-hex `publicKey` and a Turnstile token (verified in `services/turnstile.js`: hostname, action `node-deletion`, `cdata` = public key; 503 without keys). Returns a `mailto:` link (`utils/nodeDeletionMail.js`, recipient `DELETION_EMAIL` in `config/sites.js`, also re-checked in `public/js/node-deletion.js`). Limiters `nodeDeletionAttempts` (10/10 min) and `nodeDeletion` (3 successful/day) in `middlewares/ratelimit.js`; responses are `no-store`.
+- `routes/Index.js` renders the map and generates `robots.txt`, `sitemap.xml` (one URL per language) and `manifest.webmanifest` from `req.site`. `/test` (icon/toast preview) exists only outside production.
+- `utils/httpError.js`: `HttpError(res, status, err)` logs and ends with just the status, no body; used by routes and the global error/404 handler.
+- Node reading layer is `global/services/nodeCache.js` (no local `services/nodes.js`).
 
-- `index.js` - entry point. Loads `.env` (`process.loadEnvFile()`) and imports `global/database/mongoose.js` (side effect, before the server starts listening). Middleware order: helmet → CORS (`cors({ origin: SAFE_ORIGINS })`) → `express.static('public')` → site resolver (`req.site` from `config/sites.js` based on `req.hostname`) → language-prefix detection in the URL → language negotiation/redirects (`middlewares/languageNegotiation.js`) → i18next (`middlewares/language.js`) → morgan → rate limiter (production only) → timeout. `app.locals` exposes only `domain`, `v` (version from `package.json`) and `features` (from `config/features.js`, the on/off switches for the terrain and coverage tools, passed to the frontend as `MAP_CONFIG.features`) to EJS views - `sefinekApi`/`cartoApiKey`/`maptilerApiKey` are read directly from `process.env` in `views/index.ejs`.
-- `config/sites.js` - definitions for the two sites (`poland`, `global`): default region/language, default map view, CSS theme (`public/css/themes/<theme>.css`), branding, `maptilerHybridMapId` (per-site). `HOSTS` maps domain → config; `resolveSite()` in `index.js` picks a site via `SITE_MODE` or by host.
-- `public/css/` - `global.css` (tokens, reset, buttons, icons) at the root, shared building blocks in `components/` (`loading`, `fab`, `dropdown`, `modal`, `toast`), map-page parts in `map/` (`header`, `toggles`, `highlight`, `filters`, `search`, `leaflet`, `node-panel`, `user-actions`, `responsive`, `legend`, `stats`, `tools`) and per-site color themes in `themes/`. Load order matters (it is the original cascade order) and lives in `views/partials/stylesheets.ejs`; add new files there.
-- `routes/Index.js` - renders `views/index.ejs` (the map) and `views/test.ejs` (an icon/toast preview panel at `/test`, registered only when `NODE_ENV` is not `production`, never linked from the UI), and also generates `/robots.txt`, `/sitemap.xml` (one URL per language from `LANGUAGES`) and `/manifest.webmanifest` - all dependent on `req.site`.
-- `routes/Api.js` - `GET /api/v1/nodes` (binary msgpack node payload, `?region=pl|all`, defaults to `pl`), `GET /api/v1/repeater-stats` (JSON stats, `?region=pl|all` defaults to `pl`, CORS `*`, used by external sites like meshcorepolska.org), `GET /api/v1/radio-presets` (suggested radio settings from the Redis key `radioPresets:data` that `cronjobs/jobs/radio-presets.js` fills from api.meshcore.nz; 503 when the key is missing; the frontend reads presets from here, never from the upstream API), and `GET /api/v1/stats/history` (historical daily snapshots from MongoDB, `?region=`, `?days=` capped at 365 unless `days=all`, which returns the whole history (at most 5000 rows), CORS `*`).
-- `routes/NodeDeletion.js` - `POST /api/v1/node-deletion` (node-removal request flow): requires `ownerConfirmed`, a 64-hex `publicKey` and a Cloudflare Turnstile token (verified by `services/turnstile.js` against hostname, action `node-deletion` and `cdata` = public key; returns 503 when `TURNSTILE_SITEKEY`/`TURNSTILE_SECRET` are unset), then responds with a `mailto:` link built by `utils/nodeDeletionMail.js` (the recipient is `DELETION_EMAIL` in `config/sites.js`, also exposed to the frontend as `MAP_CONFIG.nodeDeletionEmail` and re-checked in `public/js/node-deletion.js`). Guarded by the `nodeDeletionAttempts` (10 per 10 min) and `nodeDeletion` (3 successful per day) limiters in `middlewares/ratelimit.js`. Responses are `no-store`.
-- This app has no `services/nodes.js` of its own anymore - the whole node-data-reading layer is `global/services/nodeCache.js` (see "Shared `global` submodule" below), shared verbatim with `meshcorepolska.org`. `routes/Api.js` imports `getCachedNodes`, `getLastRefreshedAt`, `getStats`, `formatWarsawDate` straight from there.
-- `global/IndexNow.js` - a standalone script, **not** wired into the running server. Run manually, it submits URLs from the sitemap to the IndexNow API in batches; requires a verification file at `public/<random-name>.txt` matching the `FILENAME` constant in this script. Uses `global/services/axios.js`.
-- `utils/httpError.js` - a uniform `HttpError(res, status, err)` helper (logs `err` and ends the response with just the status, no body), used both in routes and in the global error/404 handler in `index.js`.
-- `middlewares/` - `ratelimit.js` (express-rate-limit with a Redis store; the global limiter is wired only in production, the node-deletion limiters are attached to that route directly), `timeout.js` (express-timeout-handler, 15s).
+## Shared `global` submodule
 
-### Shared `global` submodule
+`global/` ([meshcore-profiles/global](https://github.com/meshcore-profiles/global)) is shared **verbatim** by every MeshCore backend repo (`cronjobs`, `meshcoreprofiles.com`, `flasher.meshcoreprofiles.com`, `meshcorepolska.org`, this one), possibly at different commits. A change there affects all of them, so treat it as a shared library. Read the code before assuming behavior. What this repo uses:
+- `services/redis.js` (Redis db 8), `services/axios.js` (User-Agent from **this repo's** `package.json`), `services/nodeCache.js` (nodes cached in Redis by `cronjobs`; `getCachedNodes`, `getLastRefreshedAt`, `getStats`, `formatWarsawDate`).
+- `services/i18n.js` and `utils/languageResolver.js` (languages `en`, `pl`; language-prefixed paths per site default; negotiation from cookie and `Accept-Language`).
+- `utils/nodeStats.js` (`REDIS_KEYS`, node status `recent`/`stale`/`old`/`extinct` from `updated_date` age, thresholds 5/10/20 days, only for nodes with `source` starting with `u`), `middlewares/morgan.js`.
+- `database/mongoose.js` (connection failure is only logged), `database/models/statsDaily.model.js` (written by `cronjobs`, read here).
+- `IndexNow.js` is a manual script, not wired into the server; needs a `public/<random-name>.txt` verification file matching its `FILENAME` constant.
 
-`global/` is a git submodule ([meshcore-profiles/global](https://github.com/meshcore-profiles/global)) shared **verbatim** across every MeshCore backend repo, not just this one. On this machine, the same submodule (independently `git pull`-ed, so possibly at different commits until someone syncs them) is checked out at `global/` inside each of these sibling repos:
-- `D:\Projects\meshcore-profiles\map.meshcoreprofiles.com\global` (this repo)
-- `D:\Projects\meshcore-profiles\cronjobs\global`
-- `D:\Projects\meshcore-profiles\meshcoreprofiles.com\global`
-- `D:\Projects\meshcore-profiles\flasher.meshcoreprofiles.com\global`
-- `D:\Projects\meshcore\meshcorepolska.org\global`
+## Multi-site and i18n
 
-Files this repo actually requires from `global/`:
-- `global/services/redis.js` - shared Redis client (database 8), connected once on import.
-- `global/services/axios.js` - shared axios instance with a custom `User-Agent` derived from **this repo's own** `package.json` (resolved via a fixed `../../package.json` from the submodule's location, not the submodule's own) and a 14s timeout; used by `global/IndexNow.js`.
-- `global/services/nodeCache.js` - reads the MeshCore node buffers cached in Redis (`nodes:all`/`nodes:pl`/`nodes:updatedAt`, written by `meshcore-profiles/cronjobs`) and exposes `getCachedNodes`, `getLastRefreshedAt`, `getStats` (memoized per region) and `formatWarsawDate` - shared verbatim with `meshcorepolska.org`; this is what `routes/Api.js` imports.
-- `global/services/i18n.js` - initializes i18next, loads every `locales/<lang>/*.json` namespace, and detects the request language via a custom detector (`req.forcedLanguage` → `lang` cookie → `req.site.defaultLanguage`).
-- `global/utils/languageResolver.js` - the supported languages (`en`, `pl`), `prefixFor`/`langPath`/`detectLanguagePrefix` (each takes a per-site `defaultLanguage` argument, defaulting to the module's own `DEFAULT_LANGUAGE` only when the caller omits it), `negotiatePreferred(cookie, acceptLanguageHeader)` (cookie wins if valid, else the highest-`q` supported language from `Accept-Language`; used by `middlewares/languageNegotiation.js`), and `getLangCookie`.
-- `global/utils/nodeStats.js` - `REDIS_KEYS` plus pure node-stats computation (`getNodeStatus`, `computeStats`; node status `recent`/`stale`/`old`/`extinct` derived from the age of `updated_date` against thresholds of 5/10/20 days, only applying to nodes whose `source` starts with `'u'`) - shared verbatim with `cronjobs` and `meshcorepolska.org`.
-- `global/middlewares/morgan.js` - shared request logger, wired in `index.js` as `logger` (the uptime-monitoring-bot skip by User-Agent is currently commented out/disabled) - shared verbatim with `meshcorepolska.org`.
-- `global/database/mongoose.js` - a single Mongoose connection, connected on import; a connection failure is only logged, it doesn't crash the process.
-- `global/database/models/statsDaily.model.js` - the `StatsDaily` model (unique index on `{ region, date }`) for historical stats. Tracked **inside the shared submodule itself** (`git ls-files` inside `global/` shows it), identical across every consuming repo. This app only reads it (`routes/Api.js`'s `/api/v1/stats/history`); the daily snapshot rows are written by `meshcore-profiles/cronjobs` directly (`jobs/nodes-stats-snapshot.js`).
-- `global/database/syncIndexes.js` - see Commands above.
+- A site's default language never gets a URL prefix (for `poland`, `pl` has none and `en` lives under `/en`; for `global` the reverse).
+- Translations live in `locales/{pl,en}/*.json`, one namespace per file; both languages must keep identical file lists and keys. `middlewares/language.js` exposes `t`, `langPath`/`lp` and `i18nBundle` to views; the bundle reaches the frontend via `window.MAP_CONFIG.i18n`.
+- `middlewares/languageNegotiation.js` handles `?setlang=` and redirects to the prefixed URL; skipped for `/api/**`, `robots.txt`, `sitemap.xml`, `manifest.webmanifest`. It must run before `language.js`.
+- CSS: `public/css/global.css`, `components/`, `map/`, per-site `themes/`. Load order matters and lives in `views/partials/stylesheets.ejs`; register new files there.
 
-### Multi-site & i18n
+## Frontend
 
-- `global/utils/languageResolver.js` (see "Shared `global` submodule" above) - builds language-prefixed paths (`langPath`, `detectLanguagePrefix`), each parameterized by the current site's `defaultLanguage` so the two sites don't share a single "default" language. A given site's default language (`config/sites.js`) never gets a URL prefix (e.g. for `poland`, `pl` paths have no prefix while `en` lives under `/en`).
-- `global/services/i18n.js` - initializes i18next, loading every JSON namespace from `locales/<lang>/*.json` (namespaces are discovered dynamically from the file list in `locales/<FALLBACK_LANGUAGE>/`, which resolves to `locales/en/` here since `languageResolver.js`'s `DEFAULT_LANGUAGE` is `en` and both `locales/en/` and `locales/pl/` exist with identical file lists) for each supported language; a custom language detector prioritizes `req.forcedLanguage` → the `lang` cookie → the site's default language.
-- `middlewares/language.js` - wires up i18next-http-middleware and exposes `t`, `languageCode`, `site`, `langPath`/`lp` (helpers for building links with the right prefix), and `i18nBundle` (the full translation bundle for the current language, injected into the frontend via `window.MAP_CONFIG.i18n`) to EJS views, among other things.
-- `middlewares/languageNegotiation.js` - handles `?setlang=` (sets the cookie and redirects), and otherwise, absent a forced language, negotiates a preference from the cookie/header and redirects to the prefixed URL if it differs from the current one. Skipped for "language-agnostic" paths (`/api/**`, `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`). Runs in `index.js` **before** `middlewares/language.js` (negotiate/redirect first, then resolve i18next for the request that's actually served).
-- Translation namespaces (`locales/{pl,en}/*.json`): `common`, `map`, `settings`, `legend`, `stats`, `changelog`, `measure`, `route`, `terrain`, `filters`, `meta`, `error`, `coverage`.
+- Entry: `public/js/map.js` (`<script type="module">` in `views/index.ejs`), loaded after the global `leaflet.js` and `leaflet.markercluster.js`. `leaflet-esm.js` re-exports the global `L`. MapLibre GL is lazy-loaded from `public/vendor/maplibre/` only when a vector basemap is used.
+- `views/index.ejs` injects `window.MAP_CONFIG` (region, view, API URLs, map keys, language, i18n bundle) before any module runs.
+- `/api/v1/nodes` is streamed msgpack (vendored `msgpackr`); the UI shows download progress in bytes (`region=all` is large).
+- Modules in `public/js/` expose `init*` factories that bind DOM elements by ID (must match `views/index.ejs`) and return a small controller. Shared primitives: `pathtools.js` (measure, route), `elevation.js` (terrain, coverage), `modal.js`, `toast.js`, `i18n.js` (`t`/`tRaw`/`plural`).
+- Tools that pick a point on the map share one picker slot (`setPicker` in `map.js`); only one tool can listen at a time.
+- State (`state` in `map.js`) drives filtering, is persisted in `localStorage`, and the view, selected node and tool state are mirrored into the URL query via `history.replaceState` (`?node=<public_key>`, `lat`/`lon`/`zoom`).
+- Basemaps: raster ones in `tileBaseMaps`, vector ones (OpenFreeMap, Esri, MapTiler) in `maplibreBaseMapOptions`. Esri Hybrid needs `ESRI_API_KEY`, MapTiler needs `MAPTILER_API_KEY`, CartoDB needs `CARTO_API_KEY`. Default is Esri Hybrid, then MapTiler Hybrid, then OpenStreetMap (`defaultBaseMapName`). On load failure `basemapFallbackChain` applies; a toast informs when a saved choice is no longer available.
+- Gotchas: marker clustering is rebuilt from scratch when the clustering zoom threshold changes (that option is immutable). Desktop node popups use a custom `nodePopupPane` outside `mapPane` (z-index 1001, above `#stats-bar` 1000 and below `#fab-stack` 1002) synced via `syncPopupPane`; popups have `autoPan: false` and `panPopupIntoView` handles panning; `.node-qr` has a fixed size to keep popup height stable.
+- `terrain.js` and `coverage.js` fetch elevations from a swappable provider (`sefinek` via `SEFINEK_API`, `open-elevation`, `open-meteo`).
 
-### Frontend (plain JS, ES modules, no bundler)
+## Vendored dependencies
 
-- The entry point is `public/js/map.js`, loaded as `<script type="module">` directly from `views/index.ejs`, after the already-loaded vendored `leaflet.js` and `leaflet.markercluster.js` (loaded globally, not as modules - `map.js` declares `/* global L */`; `leaflet-esm.js` is a one-line shim re-exporting the global `L` as an ES module for other files). MapLibre GL and its Leaflet plugin are lazy-loaded on demand from `public/vendor/maplibre/` - only once the user picks, or defaults to, a vector basemap.
-- `views/index.ejs` injects server-side config into the page via `window.MAP_CONFIG` (among others: `defaultRegion`, `defaultView`, `sefinekApi`, `cartoApiKey`, `maptilerApiKey`, `maptilerHybridMapId`, `languageCode`, `i18n`), before any module script runs. The `data-theme` attribute on `<html>` and the loaded `css/themes/<site.theme>.css` stylesheet both depend on the active site.
-- Node data arrives from `/api/v1/nodes` as a streamed binary msgpack response (decoded client-side with the vendored `msgpackr`); the frontend shows download progress in bytes, since responses can be large, especially for `region=all`.
-- Basemaps in `map.js` split into two categories in the switcher: `tileBaseMaps` (raster, loaded directly by Leaflet: OpenStreetMap, Esri Hybrid, OpenTopoMap, CyclOSM, Humanitarian OSM, plus CartoDB Dark/Positron and MapTiler Outdoor when the relevant keys are configured) and `maplibreBaseMapOptions` (vector, via MapLibre GL: OpenFreeMap always, MapTiler Hybrid when `MAPTILER_API_KEY` is configured). `maptilerAvailable` is currently hardcoded to `false` in `map.js`, so MapTiler Hybrid/Outdoor are unavailable in the UI regardless of `MAPTILER_API_KEY` being set - the default basemap is always Esri Hybrid (`defaultBaseMapName`/`FALLBACK_BASEMAP_NAME`), not MapTiler Hybrid. `basemapFallbackChain` is `['Esri Hybrid', ...(cartoApiKey ? ['CartoDB Dark'] : []), 'OpenStreetMap']` - if the active basemap fails to load, it falls back along that chain; note CartoDB Dark (when `CARTO_API_KEY` is configured) does require an API key, unlike Esri Hybrid/OpenStreetMap. If a user's previously saved choice is no longer available (missing API key), a toast informs them of it.
-- Clicking a node (a popup on desktop / a full-screen modal on mobile) updates the URL to the shareable format (`?node=<public_key>`, the same one the "Share" button produces); once the detail view is closed, the URL reverts to the map-view params (`lat`/`lon`/`zoom`). Both directions go through `history.replaceState`, without adding entries to browser history.
-- `public/js/map.js` composes functional modules, each exposing an `init*` factory that wires up its own DOM elements (by ID, matching `views/index.ejs`) and returns a small controller object:
-  - `i18n.js` - `t()`/`tRaw()`/`plural()` reading from the bundle injected via `window.MAP_CONFIG.i18n`.
-  - `modal.js` - generic open/close/dismiss handling for a modal/panel (Escape key, click outside), used by every panel below.
-  - `legend.js`, `stats.js`, `changelog.js` - the legend panel, the node-stats modal (with time-range filtering), and the hardcoded changelog list.
-  - `pathtools.js` - shared primitives for drawing sequences of points/segments/distances on the map (used by both the measuring tool and the route tool).
-  - `measure.js` - the free-form, multi-point distance-measuring tool, built on `pathtools.js`.
-  - `route.js` - draws a route between nodes resolved by name/key from text the user types in, built on `pathtools.js`.
-  - `terrain.js` - line-of-sight/elevation-profile analysis between two points; fetches elevation samples from a swappable provider (`sefinek` via `SEFINEK_API`, `open-elevation`, or `open-meteo`) and computes obstructions along the path accounting for Earth's curvature.
-  - `coverage.js` - `initCoverageTool`, radio-coverage prediction tool; uses the `coverage` i18n namespace.
-  - `elevation.js` - shared geo/elevation primitives (`curvatureDrop`, `destinationPoint`, `ELEVATION_PROVIDERS`, `fetchElevations`, `parseLatLng`) used by both `terrain.js` and `coverage.js`.
-  - `toast.js` - toast notifications (including dismissible "action" toasts, e.g. after highlighting search results).
-  - `node-utils.js` - node-related formatting helpers (byte/hex conversion, date/time formatting, deterministic color/label hashing from a name for client-type node icons).
-- Node popups (desktop) use a dedicated pane, `nodePopupPane`, created outside Leaflet's `mapPane` with `z-index: 1001` so they render above the fixed `#stats-bar` (1000) but below `#fab-stack` (1002), dropdowns and modals; `mapPane` is its own stacking context, so a popup in the default pane could never rise above the bar. The pane mirrors the `mapPane` offset via `syncPopupPane` on `move`/`viewreset`/`zoom`. Popups have `autoPan: false`; `panPopupIntoView` pans the map after layout so the popup stays below the bar. `.node-qr` has a fixed size so the popup height doesn't change when the QR renders.
-- Node deletion dialog: `public/js/node-deletion.js` (`initNodeDeletionDialog`) lazy-loads Cloudflare Turnstile, posts to `nodeDeletionUrl` from `window.MAP_CONFIG`, and only then reveals the `mailto:` link.
-- Tools that need a point picked on the map share a single "picker" slot registered via `setPicker` in `map.js`, so only one tool at a time can "listen" for clicks on the map/a node.
-- Client-side state (`state` in `map.js`) drives filtering (node type, frequency, date thresholds) and is persisted to `localStorage`; the current map view, the selected node, and optionally the active measure/terrain tool state are also reflected in the URL query string so it can be shared.
-- Marker clustering rebuilds `L.markerClusterGroup` from scratch whenever the clustering zoom threshold changes (`refreshMap`), because that option isn't mutable on an existing cluster group.
+`public/vendor/README.md` lists the exact version and source of every vendored library and the procedure for swapping source maps. Never hand-edit `public/vendor/**`; replace files wholesale following that procedure.
 
-### Vendored dependencies (`public/vendor/`)
+## Style (enforced by `eslint.config.mjs`)
 
-`public/vendor/README.md` documents the exact version and direct source (jsDelivr/esm.sh) of every vendored library (Leaflet, Leaflet.markercluster, MapLibre GL JS, MapLibre GL Leaflet, msgpackr, qrcode), including the procedure for swapping the source map on files jsDelivr generates dynamically (the `+esm` bundle, on-the-fly `.min.*` minification). Never hand-edit files under `public/vendor/**` - they're fully excluded from linting and should be replaced wholesale following that procedure.
-
-## Style conventions (from `eslint.config.mjs`)
-
-Tab indentation, single quotes, required semicolons, `eqeqeq` (except against `null`), no `var`, prefer `const`, enforced arrow-parens/arrow-body-style, `no-use-before-define` for variables (functions are exempt thanks to hoisting). Applies to both the backend and `public/**/*.js` (the latter additionally gets `no-redeclare` plus linting with browser globals and ES module source type).
+Tabs, single quotes, semicolons, `eqeqeq` (except against `null`), no `var`, prefer `const`, enforced arrow-parens and arrow-body-style, `no-use-before-define` for variables (functions exempt). `public/**/*.js` additionally gets `no-redeclare`, browser globals and ES module source type.
