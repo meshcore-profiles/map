@@ -61,3 +61,21 @@
 	background: var(--red-glow);
 	color: #fff;
 }
+
+@media (max-width: 700px) {
+	#fab-stack {
+		right: 10px;
+		bottom: 10px;
+		gap: 8px;
+	}
+
+	.fab {
+		width: 40px;
+		height: 40px;
+	}
+
+	.fab .icon {
+		width: 20px;
+		height: 20px;
+	}
+}
