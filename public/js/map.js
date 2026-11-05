@@ -264,17 +264,17 @@ const getNodePopupHTML = node => {
 const getPresets = async signal => {
 	if (presets.length) return presets;
 
-	const res = await fetch('https://api.meshcore.nz/api/v1/config', { signal });
-	const presetsApi = (await res.json()).config.suggested_radio_settings.entries;
+	const res = await fetch('/api/v1/radio-presets', { signal });
+	if (!res.ok) throw new Error(`Radio presets request failed (${res.status})`);
 
-	presets = presetsApi.map(p => ({
+	presets = (await res.json()).data.map(p => ({
 		name: p.title,
 		desc: p.description,
 		params: {
 			freq: Number(p.frequency),
 			bw: Number(p.bandwidth),
-			sf: Number(p.spreading_factor),
-			cr: Number(p.coding_rate),
+			sf: Number(p.spreadingFactor),
+			cr: Number(p.codingRate),
 		},
 	}));
 

@@ -82,7 +82,7 @@ app.use(helmet({
 			styleSrc: ['\'self\'', 'https://fonts.googleapis.com', (req, res) => `'nonce-${res.locals.cspNonce}'`],
 			fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
 			imgSrc: ['\'self\'', 'data:', 'blob:', 'https://meshcorepolska.org', ...TILE_HOSTS],
-			connectSrc: ['\'self\'', 'https://challenges.cloudflare.com', 'https://meshcorepolska.org', 'https://api.meshcore.nz', 'https://api.open-elevation.com', 'https://api.open-meteo.com', ...(process.env.SEFINEK_API ? [process.env.SEFINEK_API] : []), ...TILE_HOSTS],
+			connectSrc: ['\'self\'', 'https://challenges.cloudflare.com', 'https://meshcorepolska.org', 'https://api.open-elevation.com', 'https://api.open-meteo.com', ...(process.env.SEFINEK_API ? [process.env.SEFINEK_API] : []), ...TILE_HOSTS],
 			workerSrc: ['\'self\'', 'blob:'],
 			childSrc: ['\'self\'', 'blob:'],
 			frameSrc: ['\'self\'', 'blob:', 'https://challenges.cloudflare.com'],

@@ -105,7 +105,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 	// Reentrant-safe: the modal can close and reopen (e.g. mid-pick via "Wskaż na mapie")
 	// before the first call resolves, so a second call must await the same in-flight
 	// population instead of appending a duplicate set of <option> elements. Shares map.js's
-	// own getPresets() (and its cache) instead of fetching api.meshcore.nz a second time.
+	// own getPresets() (and its cache) instead of fetching the presets a second time.
 	const populatePresets = () => {
 		if (presetsLoaded) return Promise.resolve();
 		if (populatingPromise) return populatingPromise;

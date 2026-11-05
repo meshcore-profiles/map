@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate } = require('../global/services/nodeCache.js');
+const getRadioPresets = require('../services/radioPresets.js');
 const StatsDaily = require('../global/database/models/statsDaily.model.js');
 
 const MAX_HISTORY_DAYS = 365;
@@ -18,6 +19,19 @@ router.get('/nodes', async (req, res) => {
 		if (lastRefreshedAt) res.set('X-Data-Updated', lastRefreshedAt.toISOString());
 
 		res.send(nodes);
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ success: false, status: 500, message: req.t('error:internalServerError') });
+	}
+});
+
+router.get('/radio-presets', async (req, res) => {
+	try {
+		const presets = await getRadioPresets();
+		if (!presets.length) return res.status(503).json({ success: false, status: 503, message: req.t('error:radioPresetsNotAvailable') });
+
+		res.set('Cache-Control', 'public, max-age=300');
+		res.json({ success: true, status: 200, message: 'OK', data: presets });
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ success: false, status: 500, message: req.t('error:internalServerError') });
