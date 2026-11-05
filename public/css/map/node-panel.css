@@ -20,7 +20,6 @@
 
 #node-panel-content {
 	overflow-y: auto;
-	max-height: calc(100vh - 40px);
 	max-height: calc(100dvh - 40px);
 	padding: 18px;
 	container-type: inline-size;
@@ -81,8 +80,8 @@
 }
 
 .node-qr canvas, .node-qr img {
-	width: 96px !important;
-	height: 96px !important;
+	width: 96px!important;
+	height: 96px!important;
 }
 
 .node-header-info {

@@ -81,7 +81,6 @@ select.date-input {
 	flex-direction: column;
 	gap: 14px;
 	width: 420px;
-	max-height: 70vh;
 	max-height: 70dvh;
 	margin: 0;
 	padding: 14px;
@@ -263,11 +262,7 @@ select.date-input {
 
 .apply-filters-btn {
 	border: 1px solid var(--red-dark);
-	background:
-			var(
-					--brand-gradient,
-					var(--red)
-			);
+	background: var(--brand-gradient, var(--red));
 	color: #fff;
 }
 

@@ -1,16 +1,16 @@
 .leaflet-bottom {
-	position: fixed !important;
+	position: fixed!important;
 }
 
 .leaflet-bottom.leaflet-left .leaflet-control-attribution {
-	margin: 0 !important;
+	margin: 0!important;
 }
 
 .leaflet-control-attribution {
-	padding: 3px 10px !important;
+	padding: 3px 10px!important;
 	border-radius: 0 var(--radius-sm) 0 0;
-	background: var(--bg-panel) !important;
-	color: var(--text-muted) !important;
+	background: var(--bg-panel)!important;
+	color: var(--text-muted)!important;
 	font-family: var(--font-body);
 	font-size: 11px;
 	line-height: 1.5;
@@ -34,7 +34,7 @@
 }
 
 .leaflet-attribution-flag {
-	display: none !important;
+	display: none!important;
 }
 
 .map-attribution-details {
@@ -68,7 +68,7 @@
 	bottom: calc(100% + 6px);
 	left: 0;
 	width: min(480px, calc(100vw - 20px));
-	max-height: 30vh;
+	max-height: 30dvh;
 	box-sizing: border-box;
 	overflow-y: auto;
 	padding: 10px;
@@ -145,15 +145,15 @@
 }
 
 .leaflet-popup-close-button {
-	top: 8px !important;
-	right: 8px !important;
-	color: var(--text-muted) !important;
+	top: 8px!important;
+	right: 8px!important;
+	color: var(--text-muted)!important;
 	opacity: 0.7;
 	transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s var(--ease);
 }
 
 .leaflet-popup-close-button:hover {
-	color: var(--red-bright) !important;
+	color: var(--red-bright)!important;
 	opacity: 1;
 }
 
@@ -167,8 +167,8 @@
 }
 
 .leaflet-container a.leaflet-popup-close-button {
-	width: auto !important;
-	height: auto !important;
+	width: auto!important;
+	height: auto!important;
 }
 
 .leaflet-marker-icon.update-recent, .legend-icon.update-recent {
@@ -188,6 +188,6 @@
 }
 
 .svg-node-icon {
-	border: none !important;
-	background: none !important;
+	border: none!important;
+	background: none!important;
 }

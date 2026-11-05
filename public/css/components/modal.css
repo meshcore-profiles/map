@@ -30,7 +30,6 @@
 	flex-direction: column;
 	width: 100%;
 	max-width: 500px;
-	max-height: calc(100vh - 40px);
 	max-height: calc(100dvh - 40px);
 	padding: 18px;
 	border: 1px solid var(--border);

@@ -69,11 +69,7 @@
 #loading-progress-bar {
 	width: 0;
 	height: 100%;
-	background:
-			var(
-					--brand-gradient,
-					var(--red)
-			);
+	background: var(--brand-gradient, var(--red));
 	transition: width 0.15s ease;
 }
 

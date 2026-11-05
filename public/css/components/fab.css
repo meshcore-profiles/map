@@ -36,11 +36,7 @@
 }
 
 #fab-primary {
-	background:
-			var(
-					--brand-gradient,
-					var(--red)
-			);
+	background: var(--brand-gradient, var(--red));
 	color: #fff;
 }
 

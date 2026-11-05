@@ -6,7 +6,6 @@
 	#filters-row {
 		overflow-y: auto;
 		flex-direction: column;
-		max-height: 55vh;
 		max-height: 55dvh;
 		overscroll-behavior: contain;
 	}
