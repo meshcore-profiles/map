@@ -6,7 +6,7 @@ const MIN_CLUSTERING_ZOOM = 10;
 const MAX_CLUSTERING_ZOOM = 17;
 const MAX_LIST_ITEMS = 200;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const RADIO_TOKEN_PATTERN = /^(?:\d{1,5}(?:\.\d{1,3})?|unknown|known)$/;
+const RADIO_TOKEN_PATTERN = /^(?:\d{1,5}(?:\.\d{1,3})?|unknown)$/;
 const REGIONS = ['pl', 'all'];
 
 const SHARE_KEYS = ['types', 'updated', 'added', 'cluster', 'region', ...RADIO_FILTER_KEYS];
@@ -23,7 +23,6 @@ const parseDate = value => {
 	return value;
 };
 
-// Zapisuje tylko wartości różne od domyślnych, żeby link był krótki
 export const buildFilterParams = (state, { includeRegion = false } = {}) => {
 	const params = new URLSearchParams();
 
@@ -42,8 +41,6 @@ export const buildFilterParams = (state, { includeRegion = false } = {}) => {
 	return params;
 };
 
-// Zwraca null, gdy w URL nie ma żadnego parametru filtrów. Brakujące parametry oznaczają wartość domyślną,
-// dzięki czemu link pokazuje dokładnie to, co widział nadawca, a nie to, co odbiorca ma w localStorage.
 export const parseSharedFilters = params => {
 	if (!SHARE_KEYS.some(key => key in params)) return null;
 

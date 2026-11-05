@@ -764,7 +764,6 @@ const loadSavedFilters = () => {
 	}
 };
 
-// Filtry z linku mają pierwszeństwo, ale działają tylko w tej sesji i nie trafiają do localStorage
 const sharedFilters = parseSharedFilters(urlParams);
 let filtersFromLink = sharedFilters !== null;
 const initialFilters = sharedFilters ?? loadSavedFilters();
@@ -888,14 +887,23 @@ let markerClusterGroup = L.markerClusterGroup({
 const MOBILE_NODE_VIEW_BREAKPOINT = 700;
 const isMobileNodeView = () => window.innerWidth <= MOBILE_NODE_VIEW_BREAKPOINT;
 
-const syncUrlParams = () => {
-	const params = {
-		lat: map.getCenter().lat.toFixed(4),
-		lon: map.getCenter().lng.toFixed(4),
+const buildViewQuery = ({ withFilters }) => {
+	const center = map.getCenter();
+	const query = new URLSearchParams({
+		lat: center.lat.toFixed(4),
+		lon: center.lng.toFixed(4),
 		zoom: map.getZoom(),
-	};
+	});
 
-	history.replaceState({}, '', `${location.pathname}?${new URLSearchParams(params)}`);
+	if (withFilters) {
+		for (const [key, value] of buildFilterParams(state, { includeRegion: Boolean(regionToggle) })) query.set(key, value);
+	}
+
+	return query.toString().replaceAll('%2C', ',');
+};
+
+const syncUrlParams = () => {
+	history.replaceState({}, '', `${location.pathname}?${buildViewQuery({ withFilters: filtersFromLink })}`);
 };
 
 const ensurePopup = marker => {
@@ -993,7 +1001,6 @@ const positionDropdown = (el, anchor = searchInline, { fullWidthOnMobile = true 
 	}
 
 	if (el === searchResultsEl) {
-		// Lista wyników zajmuje dokładnie tyle miejsca, co pole wyszukiwania, na każdej szerokości ekranu
 		el.style.left = `${rect.left}px`;
 		el.style.right = 'auto';
 		el.style.width = `${rect.width}px`;
@@ -1180,7 +1187,6 @@ const renderFilterSummary = matching => {
 	filtersSummary.textContent = t('filters:summary', { matching: numberFormat.format(matching), total: numberFormat.format(total) });
 };
 
-// Podgląd liczby pasujących węzłów podczas zmiany filtrów, jeszcze przed kliknięciem "Zastosuj"
 const scheduleFilterSummary = () => {
 	clearTimeout(summaryTimer);
 	summaryTimer = setTimeout(() => renderFilterSummary(collectFilteredNodes().length), 120);
@@ -1366,7 +1372,11 @@ const downloadNodes = async region => {
 			for (let i = offset; i < end; i++) {
 				const node = nodes[i];
 				inflateNode(node);
-				for (const key of RADIO_FILTER_KEYS) radioOptions[key].add(radioValue(node.params, key));
+				node.radio = {};
+				for (const key of RADIO_FILTER_KEYS) {
+					node.radio[key] = radioValue(node.params, key);
+					radioOptions[key].add(node.radio[key]);
+				}
 				const updateStatus = getNodeUpdateStatus(node);
 
 				let icon = icons[updateStatus][node.type.toString()];
@@ -1383,7 +1393,6 @@ const downloadNodes = async region => {
 
 				node.status = updateStatus;
 				node.preset = node.params;
-				// Number(...toFixed(6)) ucina szum zmiennoprzecinkowy, ale nie dopisuje zer, których nie ma w danych
 				node.coords = `${Number(node.lat.toFixed(6))}, ${Number(node.lon.toFixed(6))}`;
 				node.lastAdvertDate = new Date(node.last_advert);
 				node.insertDate = new Date(node.inserted_date);
@@ -1522,23 +1531,8 @@ fromInsertDateInput.addEventListener('change', () => {
 	scheduleFilterSummary();
 });
 
-const buildFilterShareUrl = () => {
-	const center = map.getCenter();
-	const params = new URLSearchParams({
-		lat: center.lat.toFixed(4),
-		lon: center.lng.toFixed(4),
-		zoom: map.getZoom(),
-	});
-
-	for (const [key, value] of buildFilterParams(state, { includeRegion: Boolean(regionToggle) })) {
-		params.set(key, value);
-	}
-
-	return `${location.origin}${location.pathname}?${params.toString().replaceAll('%2C', ',')}`;
-};
-
 filtersShareBtn.addEventListener('click', () => {
-	navigator.clipboard.writeText(buildFilterShareUrl()).then(
+	navigator.clipboard.writeText(`${location.origin}${location.pathname}?${buildViewQuery({ withFilters: true })}`).then(
 		() => showToast(t('filters:linkCopied')),
 		() => showToast(t('filters:linkCopyFailed'), { status: 'error' })
 	);
