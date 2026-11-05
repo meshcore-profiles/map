@@ -9,6 +9,8 @@
 				"Added sharing of filters via a link. Filters from a link apply only to the current session and are not saved in the browser, and the \"Restore mine\" button restores your own settings.",
 				"Nodes without radio parameters now show \"No data\" in the details window instead of a misleading custom preset.",
 				"The search results list now has the same width as the search field, including on small screens.",
+				"Made the changelog window wider, and the map tool buttons smaller on phones.",
+				"Filters opened from a link stay in the page address, so a refresh no longer loses the shared view. Selecting every value in a filter is now treated as no filter, so new values are not hidden by default.",
 				"The filter panel closes with the Escape key and has a close button, and the \"Reset\" button is always available and also clears the date filters.",
 				"Node coordinates are shown with the actual precision of the data (e.g. 52.2441), without padding with zeros to six decimal places.",
 				"Update status colors in the node window now match the icon colors on the map and in the legend.",

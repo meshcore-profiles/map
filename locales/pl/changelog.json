@@ -9,6 +9,8 @@
 				"Dodano udostępnianie filtrów linkiem. Filtry z linku obowiązują tylko w danej sesji i nie są zapisywane w przeglądarce, a przycisk „Przywróć moje” przywraca własne ustawienia.",
 				"Węzły bez parametrów radiowych pokazują teraz w oknie szczegółów „Brak danych” zamiast mylącego presetu własnego.",
 				"Lista wyników wyszukiwania ma teraz taką samą szerokość jak pole wyszukiwania, także na małych ekranach.",
+				"Zwiększono szerokość okna z listą zmian, a na telefonach zmniejszono przyciski narzędzi na mapie.",
+				"Filtry otwarte z linku pozostają w adresie strony, więc odświeżenie nie gubi udostępnionego widoku. Zaznaczenie wszystkich wartości w filtrze jest teraz traktowane jak brak filtra, dzięki czemu nowe wartości nie są domyślnie ukrywane.",
 				"Panel filtrów zamyka się klawiszem Escape i ma przycisk zamknięcia, a przycisk „Resetuj” jest zawsze dostępny i czyści także filtry dat.",
 				"Współrzędne węzła są pokazywane z rzeczywistą dokładnością z danych (np. 52.2441), bez dopełniania zerami do sześciu miejsc.",
 				"Kolory statusów aktualizacji w oknie węzła są teraz zgodne z kolorami ikon na mapie i w legendzie.",
