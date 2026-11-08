@@ -1,0 +1,343 @@
+html, body, #map {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+#map {
+	background: #0a0c11;
+	font-family: var(--font-body);
+}
+
+.leaflet-control-attribution {
+	padding: 2px 8px!important;
+	border-radius: var(--radius-sm) 0 0 0;
+	background: var(--bg-panel)!important;
+	color: var(--text-muted)!important;
+	font-size: 10px;
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+}
+
+.leaflet-control-attribution {
+	white-space: nowrap;
+}
+
+.map-attribution-details {
+	position: relative;
+	display: inline-block;
+}
+
+.map-attribution-details summary {
+	display: inline;
+	list-style: none;
+	cursor: pointer;
+	color: var(--blue-bright);
+}
+
+.map-attribution-details summary::-webkit-details-marker {
+	display: none;
+}
+
+.map-attribution-details summary:hover {
+	text-decoration: underline;
+}
+
+.map-attribution-sources {
+	position: absolute;
+	right: -8px;
+	bottom: calc(100% + 8px);
+	width: min(260px, calc(100vw - 20px));
+	max-height: 40vh;
+	overflow-y: auto;
+	padding: 8px 10px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background: var(--bg-panel-solid);
+	color: var(--text-muted);
+	box-shadow: var(--shadow);
+	line-height: 1.5;
+	text-align: left;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.leaflet-control-attribution a {
+	color: var(--blue-bright);
+}
+
+.leaflet-top.leaflet-right .leaflet-control-zoom {
+	margin: 10px 10px 0 0;
+}
+
+.leaflet-control-zoom {
+	border: none!important;
+	box-shadow: var(--shadow)!important;
+}
+
+.leaflet-control-zoom a {
+	background: var(--bg-panel-solid)!important;
+	color: var(--text)!important;
+	border-bottom: 1px solid var(--border)!important;
+	transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+.leaflet-control-zoom a,
+.leaflet-control-zoom a:hover {
+	text-decoration: none!important;
+}
+
+.leaflet-control-zoom a:hover {
+	background: var(--bg-panel-hover)!important;
+	color: var(--blue-light)!important;
+}
+
+.leaflet-control-zoom a:active {
+	background: #12151c!important;
+	color: var(--blue-bright)!important;
+}
+
+.svg-node-icon {
+	border: none!important;
+	background: none!important;
+}
+
+.embed-pin {
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+	transition: transform 0.15s var(--ease);
+}
+
+.embed-pin:hover {
+	transform: scale(1.12);
+}
+
+.embed-pin--repeater {
+	--node-color: #339af0;
+}
+
+.embed-pin--roomServer {
+	--node-color: #f2b134;
+}
+
+.embed-tip {
+	padding: 2px 8px;
+	border: 1px solid var(--border-strong);
+	border-radius: 999px;
+	background: var(--bg-panel);
+	color: var(--text);
+	font-family: var(--font-body);
+	font-size: 11px;
+	font-weight: 600;
+	box-shadow: var(--shadow);
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+}
+
+.embed-tip::before {
+	display: none;
+}
+
+.embed-distance {
+	width: auto;
+	height: auto;
+	border: none;
+	background: none;
+	pointer-events: none;
+}
+
+.embed-distance span {
+	display: inline-block;
+	transform: translate(-50%, -50%);
+	padding: 1px 7px;
+	border: 1px solid rgba(77, 171, 247, 0.5);
+	border-radius: 999px;
+	background: rgba(10, 12, 17, 0.82);
+	color: var(--blue-light);
+	font-family: var(--font-mono);
+	font-size: 10px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.embed-summary {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	max-width: calc(100vw - 80px);
+	margin: 10px 0 0 10px;
+}
+
+.embed-chip {
+	padding: 4px 10px;
+	border: 1px solid var(--border-strong);
+	border-radius: 999px;
+	background: var(--bg-panel);
+	color: var(--text-muted);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	white-space: nowrap;
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+}
+
+.embed-chip b {
+	color: var(--text);
+}
+
+.embed-chip--repeater {
+	border-color: rgba(51, 154, 240, 0.5);
+}
+
+.embed-chip--roomServer {
+	border-color: rgba(242, 177, 52, 0.5);
+}
+
+.embed-popup-wrap .leaflet-popup-content-wrapper,
+.embed-popup-wrap .leaflet-popup-tip {
+	background: var(--bg-panel-solid);
+	color: var(--text);
+	border: 1px solid var(--border-strong);
+	box-shadow: var(--shadow);
+}
+
+.embed-popup-wrap .leaflet-popup-content-wrapper {
+	border-radius: var(--radius);
+}
+
+.embed-popup-wrap .leaflet-popup-content {
+	margin: 12px;
+}
+
+.embed-popup {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	font-family: var(--font-body);
+}
+
+.embed-popup__head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.embed-popup__head svg {
+	flex: none;
+}
+
+.embed-popup__title {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+	min-width: 0;
+}
+
+.embed-popup__title strong {
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.25;
+	overflow-wrap: anywhere;
+}
+
+.embed-popup__coords {
+	padding: 6px 8px;
+	border-radius: var(--radius-sm);
+	background: var(--chip-bg);
+	color: var(--text-muted);
+	font-family: var(--font-mono);
+	font-size: 11px;
+}
+
+.embed-popup .embed-popup__link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 7px 10px;
+	border: 1px solid rgba(77, 171, 247, 0.4);
+	border-radius: var(--radius-sm);
+	background: rgba(51, 154, 240, 0.12);
+	color: var(--blue-light);
+	font-size: 12px;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background 0.15s var(--ease);
+}
+
+.embed-popup .embed-popup__link:hover {
+	background: rgba(51, 154, 240, 0.24);
+}
+
+.embed-badge {
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--chip-bg);
+	font-family: var(--font-mono);
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.embed-badge--repeater {
+	color: #74c0fc;
+}
+
+.embed-badge--roomServer {
+	color: var(--amber-bright);
+}
+
+.is-cover .leaflet-control-attribution {
+	margin: 8px 0 0 8px!important;
+	border-radius: var(--radius-sm);
+	background: rgba(8, 11, 15, 0.72)!important;
+	box-shadow: none;
+	color: rgba(255, 255, 255, 0.9)!important;
+}
+
+.is-cover .leaflet-control-attribution a {
+	color: #fff;
+}
+
+.is-cover #map {
+	pointer-events: none;
+}
+
+.is-cover .leaflet-control-attribution {
+	pointer-events: auto;
+}
+
+.is-cover .map-attribution-sources {
+	top: calc(100% + 8px);
+	right: auto;
+	bottom: auto;
+	left: 0;
+}
+
+.embed-pulse {
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	background: var(--node-color);
+	animation: embed-pulse 2.4s ease-out infinite;
+}
+
+@keyframes embed-pulse {
+	0% {
+		opacity: 0.55;
+		transform: scale(1);
+	}
+
+	100% {
+		opacity: 0;
+		transform: scale(3);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.embed-pulse {
+		animation: none;
+		opacity: 0.25;
+		transform: scale(1.8);
+	}
+}

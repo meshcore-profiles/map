@@ -28,6 +28,7 @@ const limiter = require('./middlewares/ratelimit.js');
 const language = require('./middlewares/language.js');
 const languageNegotiation = require('./middlewares/languageNegotiation.js');
 const { detectLanguagePrefix, isLanguageAgnosticPath } = require('./global/utils/languageResolver.js');
+const { SUPPORTED } = require('./global/services/i18n.js');
 const HttpError = require('./utils/httpError.js');
 
 // Create an Express app
@@ -108,6 +109,11 @@ app.use((req, res, next) => {
 	}
 	next();
 });
+// The embedded map is framed by another site, so its language comes from ?lang= instead of a URL prefix or negotiation
+app.use((req, res, next) => {
+	if (req.path === '/embed' && SUPPORTED.includes(req.query.lang)) req.forcedLanguage = req.query.lang;
+	next();
+});
 app.use(languageNegotiation);
 app.use(language);
 app.use(logger);
@@ -119,8 +125,10 @@ app.use(timeout());
 const IndexRouter = require('./routes/Index.js');
 const APIRouter = require('./routes/Api.js');
 const NodeDeletionRouter = require('./routes/NodeDeletion.js');
+const EmbedRouter = require('./routes/Embed.js');
 
 app.use(IndexRouter);
+app.use(EmbedRouter);
 app.use('/api/v1', APIRouter);
 app.use('/api/v1', NodeDeletionRouter);
 

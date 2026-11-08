@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="<%= languageCode %>" data-theme="<%= site.theme %>">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex">
+	<title><%= t('embed:mapLabel') %></title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+	<link rel="stylesheet" href="/css/global.css">
+	<link rel="stylesheet" href="/css/themes/global.css">
+	<link rel="stylesheet" href="/css/embed.css">
+</head>
+<body class="<%= cover ? 'is-cover' : '' %>">
+
+<main id="map" aria-label="<%= t('embed:mapLabel') %>"></main>
+
+<script nonce="<%= cspNonce %>">
+window.MAP_CONFIG = {
+	mapLanguage: <%- JSON.stringify(site.mapLanguage || null) %>,
+	esriApiKey: <%- JSON.stringify(process.env.ESRI_API_KEY || null) %>,
+	cartoApiKey: <%- JSON.stringify(process.env.CARTO_API_KEY || null) %>,
+	maptilerApiKey: <%- JSON.stringify(process.env.MAPTILER_API_KEY || null) %>,
+	maptilerHybridMapId: <%- JSON.stringify(site.maptilerHybridMapId) %>,
+	cover: <%- JSON.stringify(cover) %>,
+	languageCode: <%- JSON.stringify(languageCode) %>,
+	homeUrl: <%- JSON.stringify(lp('/')) %>,
+	i18n: <%- JSON.stringify(i18nBundle) %>,
+};
+</script>
+<script type="application/json" id="embed-points"><%- JSON.stringify(points).replace(/</g, '\u003c') %></script>
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script type="importmap" nonce="<%= cspNonce %>">
+{
+	"imports": {
+		"leaflet": "/js/leaflet-esm.js",
+		"maplibre-gl": "/vendor/maplibre/maplibre-gl.mjs"
+	}
+}
+</script>
+<script src="/js/embed.js" type="module"></script>
+</body>
+</html>

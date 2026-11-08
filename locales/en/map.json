@@ -91,6 +91,8 @@
 	"noRadioData": "No data",
 	"shiftSearchHint": "Tip: press Shift to jump straight to search",
 	"highlightedNodes": "Highlighted {{count}} {{unit}}",
+	"previewProfileNodes": "Nodes of {{owner}}: {{count}}, others are hidden",
+	"previewNodes": "Nodes: {{count}} (others are hidden)",
 	"newNodeUnit": ["new node", "new nodes"],
 	"noNodesInPeriod": "No nodes in the selected period.",
 	"showPolandOnly": "Show only Polish nodes",

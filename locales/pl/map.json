@@ -91,6 +91,8 @@
 	"noRadioData": "Brak danych",
 	"shiftSearchHint": "Wskazówka: wciśnij Shift, aby przejść od razu do wyszukiwania",
 	"highlightedNodes": "Podświetlono {{count}} {{unit}}",
+	"previewProfileNodes": "Węzły użytkownika {{owner}}: {{count}}, pozostałe są ukryte",
+	"previewNodes": "Węzły: {{count}} (pozostałe są ukryte)",
 	"newNodeUnit": ["nowy węzeł", "nowe węzły", "nowych węzłów"],
 	"noNodesInPeriod": "Brak węzłów w wybranym okresie.",
 	"showPolandOnly": "Pokaż tylko polskie węzły",
