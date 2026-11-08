@@ -1,4 +1,5 @@
 :root {
+	color-scheme: only dark;
 	--bg-panel: rgba(26, 29, 38, 0.88);
 	--bg-panel-solid: #1c2029;
 	--bg-panel-hover: #262b38;

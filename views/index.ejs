@@ -59,7 +59,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
 	<link rel="stylesheet" href="/vendor/markercluster/MarkerCluster.css">
 	<link rel="stylesheet" href="/vendor/markercluster/MarkerCluster.Default.css">
-	<%- include('partials/stylesheets', { theme: site.theme }) %>
+	<%- include('partials/stylesheets.ejs', { theme: site.theme }) %>
 
 	<!-- schema.org -->
 	<script type="application/ld+json" nonce="<%= cspNonce %>">
@@ -102,6 +102,16 @@ const _titleBrand = site.shortName || site.brandName; %>
 	</script>
 </head>
 <body>
+<dialog id="mourning-notice" aria-labelledby="mourning-title" aria-describedby="mourning-description">
+	<p class="mourning-date"><%= t('mourning:date') %></p>
+	<h2 id="mourning-title"><%= t('mourning:title') %></h2>
+	<p id="mourning-description"><%= t('mourning:description') %></p>
+	<form method="dialog">
+		<button class="btn" autofocus><%= t('mourning:close') %></button>
+	</form>
+</dialog>
+<script src="/js/mourning.js" defer></script>
+
 <h1 class="sr-only"><%= t('meta:heading', { brand: _titleBrand }) %></h1>
 <main id="map"></main>
 <div id="loading-overlay" role="status" aria-live="polite" aria-label="<%= t('map:loadingAriaLabel') %>" hidden>
