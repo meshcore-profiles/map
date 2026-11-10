@@ -102,16 +102,6 @@ const _titleBrand = site.shortName || site.brandName; %>
 	</script>
 </head>
 <body>
-<dialog id="mourning-notice" aria-labelledby="mourning-title" aria-describedby="mourning-description">
-	<p class="mourning-date"><%= t('mourning:date') %></p>
-	<h2 id="mourning-title"><%= t('mourning:title') %></h2>
-	<p id="mourning-description"><%= t('mourning:description') %></p>
-	<form method="dialog">
-		<button class="btn" autofocus><%= t('mourning:close') %></button>
-	</form>
-</dialog>
-<script src="/js/mourning.js" defer></script>
-
 <h1 class="sr-only"><%= t('meta:heading', { brand: _titleBrand }) %></h1>
 <main id="map"></main>
 <div id="loading-overlay" role="status" aria-live="polite" aria-label="<%= t('map:loadingAriaLabel') %>" hidden>
