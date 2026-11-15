@@ -3,6 +3,7 @@ import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { Camera, Map as MapView } from '@maplibre/maplibre-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DEFAULT_BASEMAP_SELECTION } from '@meshcore-map/core/basemaps';
+import { SITES } from '@meshcore-map/core/sites';
 import { createDefaultFilters } from '@meshcore-map/core/nodes';
 import { FiltersSheet } from '../components/FiltersSheet';
 import { NodeLayer } from '../components/NodeLayer';
@@ -204,7 +205,7 @@ export const MapScreen = () => {
 						{TOOL_FABS.filter(tool => config?.features?.[tool.id] !== false).map(tool => (
 							<Fab key={tool.id} icon={tool.icon} label={t(tool.title)} onPress={() => openTool(tool.id)} />
 						))}
-						{config?.addNodeUrl && <Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(config.addNodeUrl)} />}
+						<Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(SITES[settings.region ?? 'all'].addNodeUrl)} />
 					</View>
 					<View style={[styles.bottom, { bottom: insets.bottom + spacing.md, right: spacing.md * 2 + FAB_SIZE }]}>
 						<StatusBanner />
