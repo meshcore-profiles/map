@@ -25,10 +25,6 @@ const sanitize = saved => {
 	};
 };
 
-export const loadSettings = async () => {
-	const saved = await readJson(FILE);
-	console.log("DEBUG settings", JSON.stringify(saved));
-	return sanitize(saved);
-};
+export const loadSettings = async () => sanitize(await readJson(FILE));
 
 export const saveSettings = settings => writeJson(FILE, settings);
