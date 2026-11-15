@@ -1,0 +1,91 @@
+name: Release (Android)
+
+on:
+  push:
+    tags: ['mobile-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-android-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      CI: 'true'
+      ANDROID_VERSION_CODE: ${{ github.run_number }}
+      ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: npm
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Read the app version
+        id: app
+        run: echo "version=$(node -p "require('./apps/mobile/app.json').expo.version")" >> "$GITHUB_OUTPUT"
+
+      - name: Tag matches the app version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          if [ "${GITHUB_REF_NAME#mobile-v}" != "${{ steps.app.outputs.version }}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match version ${{ steps.app.outputs.version }} in apps/mobile/app.json" >&2
+            exit 1
+          fi
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm test
+
+      - name: Restore the keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+
+      - name: Generate the native project
+        run: npm exec -w apps/mobile -- expo prebuild --platform android --no-install
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build the signed APK and AAB
+        working-directory: apps/mobile/android
+        run: ./gradlew -I "$GITHUB_WORKSPACE/.github/android-release.init.gradle" assembleRelease bundleRelease
+
+      - name: Name the artifacts
+        run: |
+          mkdir dist
+          cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk "dist/MeshCore-Map-${{ steps.app.outputs.version }}.apk"
+          cp apps/mobile/android/app/build/outputs/bundle/release/app-release.aab "dist/MeshCore-Map-${{ steps.app.outputs.version }}.aab"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android-release
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publish the GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "MeshCore Map ${{ steps.app.outputs.version }}" --generate-notes

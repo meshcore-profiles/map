@@ -7,7 +7,7 @@
 		"desc": "The global map shows nodes worldwide, while the Poland-only map shows just those in Poland."
 	},
 	"loading": {
-		"reading": "Loading saved data...",
+		"reading": "Loading nodes...",
 		"downloading": "Downloading node data... {{percent}}%",
 		"failed": "Could not download the data. Check your internet connection.",
 		"retry": "Retry",

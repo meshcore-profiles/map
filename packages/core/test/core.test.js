@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { haversineDistance, destinationPoint, parseLatLng, formatDistance, curvatureDrop } from '../src/geo.js';
 import { escapeHtml, truncateKey, formatBytes, resolveNodeByQuery, getNameIconLabel } from '../src/node-utils.js';
 import { radioValue, createRadioMatcher, updateRadioSelection } from '../src/radio-filter-utils.js';
-import { createDefaultFilters, collectFilteredNodes, prepareNodes, searchNodes, timeAgoParts } from '../src/nodes.js';
+import { createDefaultFilters, collectFilteredNodes, prepareNodes, prepareNodesAsync, searchNodes, timeAgoParts } from '../src/nodes.js';
 import { createI18n } from '../src/i18n.js';
 import { regionForLocale } from '../src/sites.js';
 import { parseMapLink } from '../src/links.js';
@@ -123,6 +123,18 @@ test('fetchElevationsChunked dzieli na paczki', async () => {
 	const out = await fetchElevationsChunked(providers, [1, 2, 3, 4, 5], 'sefinek');
 	assert.deepEqual(calls, [2, 2, 1]);
 	assert.equal(out.length, 5);
+});
+
+test('prepareNodesAsync: ten sam wynik co prepareNodes i oddaje watek co chunk', async () => {
+	const now = Date.parse('2026-11-15T12:00:00Z');
+	const make = () => Array.from({ length: 5 }, (_, i) => ({ pk: new Uint8Array([i, 1]), t: 1 + (i % 2), n: `N${i}`, la: new Date(now).toISOString(), id: new Date(now).toISOString(), ud: new Date(now).toISOString(), p: {}, s: 'u-auto', lat: 50 + i, lon: 19 }));
+	let turns = 0;
+	const asyncResult = await prepareNodesAsync(make(), { now, chunkSize: 2, yieldTurn: async () => { turns++; } });
+	const syncResult = prepareNodes(make(), now);
+
+	assert.equal(turns, 2);
+	assert.deepEqual(asyncResult.nodes.map(n => n.public_key), syncResult.nodes.map(n => n.public_key));
+	assert.deepEqual(Object.keys(asyncResult.byType), Object.keys(syncResult.byType));
 });
 
 test('prepareNodes: inflate, status, indeksy', () => {

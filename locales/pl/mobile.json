@@ -7,7 +7,7 @@
 		"desc": "Mapa globalna pokazuje węzły z całego świata, a polska tylko te z Polski."
 	},
 	"loading": {
-		"reading": "Wczytywanie zapisanych danych...",
+		"reading": "Wczytywanie węzłów...",
 		"downloading": "Pobieranie danych węzłów... {{percent}}%",
 		"failed": "Nie udało się pobrać danych. Sprawdź połączenie z internetem.",
 		"retry": "Ponów",

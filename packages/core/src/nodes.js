@@ -89,6 +89,22 @@ export const prepareNodes = (rawNodes, now = Date.now()) => {
 	return { nodes: rawNodes, ...index };
 };
 
+const yieldToEventLoop = () => new Promise(resolve => setTimeout(resolve, 0));
+
+// Same result as prepareNodes, but hands the thread back every chunkSize nodes so a UI thread sharing it stays responsive.
+export const prepareNodesAsync = async (rawNodes, { now = Date.now(), chunkSize = 2000, yieldTurn = yieldToEventLoop } = {}) => {
+	const thresholds = createStatusThresholds(now);
+	const index = createNodeIndex();
+
+	for (let i = 0; i < rawNodes.length; i++) {
+		prepareNode(rawNodes[i], thresholds);
+		indexNode(index, rawNodes[i]);
+		if ((i + 1) % chunkSize === 0) await yieldTurn();
+	}
+
+	return { nodes: rawNodes, ...index };
+};
+
 export const createDefaultFilters = () => ({
 	nodeFilter: [...NODE_TYPES],
 	radioFilters: Object.fromEntries(RADIO_FILTER_KEYS.map(key => [key, null])),

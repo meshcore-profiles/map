@@ -1,6 +1,6 @@
 import { File } from 'expo-file-system';
 import { unpack } from 'msgpackr';
-import { prepareNodes } from '@meshcore-map/core/nodes';
+import { prepareNodesAsync } from '@meshcore-map/core/nodes';
 import { fileOf, readJson, writeJson } from '../storage/files';
 import { apiFetch, apiHeaders } from './http';
 
@@ -22,7 +22,7 @@ const decode = async region => {
 	if (!file.exists) return null;
 
 	const nodes = unpack(await file.bytes());
-	return prepareNodes(nodes);
+	return prepareNodesAsync(nodes);
 };
 
 export const readCachedRegion = async region => {

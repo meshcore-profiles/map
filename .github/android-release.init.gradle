@@ -1,0 +1,16 @@
+// Gradle init script for CI: signs the release build with the keystore from the environment and sets versionCode.
+// Applied in finalizeDsl so it runs after the generated app/build.gradle, which signs release with the debug key.
+allprojects {
+	plugins.withId('com.android.application') {
+		extensions.getByName('androidComponents').finalizeDsl { android ->
+			def signing = android.signingConfigs.maybeCreate('release')
+			signing.storeFile = file(System.getenv('ANDROID_KEYSTORE_PATH'))
+			signing.storePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD')
+			signing.keyAlias = System.getenv('ANDROID_KEY_ALIAS')
+			signing.keyPassword = System.getenv('ANDROID_KEY_PASSWORD')
+
+			android.buildTypes.getByName('release').signingConfig = signing
+			android.defaultConfig.versionCode = Integer.parseInt(System.getenv('ANDROID_VERSION_CODE'))
+		}
+	}
+}
