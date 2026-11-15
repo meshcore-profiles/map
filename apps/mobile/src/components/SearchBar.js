@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { FlatList, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { NODE_TYPE_COLORS } from '@meshcore-map/core/colors';
 import { searchNodes } from '@meshcore-map/core/nodes';
@@ -24,7 +24,9 @@ const styles = StyleSheet.create({
 export const SearchBar = ({ nodes, onSelect, leading, children }) => {
 	const { t } = useI18n();
 	const [query, setQuery] = useState('');
-	const results = useMemo(() => searchNodes(nodes, query.trim()), [nodes, query]);
+	// The search scans every node (tens of thousands for the worldwide map), so it runs on the deferred value and typing stays responsive.
+	const deferredQuery = useDeferredValue(query);
+	const results = useMemo(() => searchNodes(nodes, deferredQuery.trim()), [nodes, deferredQuery]);
 
 	const select = node => {
 		Keyboard.dismiss();

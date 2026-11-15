@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Line, Polygon } from 'react-native-svg';
-import { formatDistance, haversineDistance, parseLatLng } from '@meshcore-map/core/geo';
+import { formatDistance, haversineDistance } from '@meshcore-map/core/geo';
 import { analyzeLineOfSight, clearanceAt, sampleLine } from '@meshcore-map/core/los';
-import { resolveNodeByQuery } from '@meshcore-map/core/node-utils';
 import { getElevations } from '../data/appConfig';
 import { useI18n } from '../i18n';
 import { Button, Field, Hint, Stat } from '../ui/controls';
 import { ToolPanel } from '../ui/ToolPanel';
 import { colors, radius, spacing } from '../theme';
 import { boundsOf, buildPathFeatures } from './pathFeatures';
+import { PointField } from './PointField';
+import { describePoint, pointFromText } from './points';
+import { useMapPicker } from './useMapPicker';
 
 const SAMPLE_COUNT = 48;
 const CHART_WIDTH = 320;
@@ -18,9 +20,6 @@ const CHART_PAD = 8;
 const COLOR = colors.amber;
 
 const styles = StyleSheet.create({
-	pointRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
-	pointField: { flex: 1 },
-	pickButton: { minWidth: 96 },
 	heights: { flexDirection: 'row', gap: spacing.sm },
 	heightField: { flex: 1 },
 	actions: { flexDirection: 'row', gap: spacing.sm },
@@ -74,30 +73,17 @@ export const TerrainTool = ({ ctx }) => {
 
 	const setPoint = (key, point) => {
 		setPoints(current => ({ ...current, [key]: point }));
-		setTexts(current => ({ ...current, [key]: point.label ?? `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}` }));
+		setTexts(current => ({ ...current, [key]: describePoint(point) }));
 		setResult(null);
 	};
 
-	useEffect(() => {
-		if (!picking) {
-			setPicker(null);
-			return;
-		}
+	// Picking A moves on to B, picking B ends the selection.
+	useMapPicker(setPicker, picking !== null, point => {
+		setPoint(picking, point);
+		setPicking(current => current === 'a' ? 'b' : null);
+	});
 
-		const done = point => {
-			setPoint(picking, point);
-			setPicking(current => current === 'a' ? 'b' : null);
-		};
-		setPicker({
-			onMap: ({ lat, lng }) => done({ lat, lng, label: null }),
-			onNode: node => done({ lat: node.lat, lng: node.lon, label: node.adv_name }),
-		});
-	}, [picking, setPicker]);
-
-	useEffect(() => () => {
-		setPicker(null);
-		setOverlay(null);
-	}, [setOverlay, setPicker]);
+	useEffect(() => () => setOverlay(null), [setOverlay]);
 
 	useEffect(() => {
 		const list = [points.a && { ...points.a, label: 'A' }, points.b && { ...points.b, label: 'B' }].filter(Boolean);
@@ -105,12 +91,8 @@ export const TerrainTool = ({ ctx }) => {
 	}, [points, setOverlay]);
 
 	const syncFromText = key => {
-		const text = texts[key];
-		const coords = parseLatLng(text);
-		if (coords) return setPoint(key, { ...coords, label: null });
-
-		const node = resolveNodeByQuery(text, nodes);
-		if (node) setPoint(key, { lat: node.lat, lng: node.lon, label: node.adv_name });
+		const point = pointFromText(texts[key], nodes);
+		if (point) setPoint(key, point);
 	};
 
 	const analyze = async () => {
@@ -142,12 +124,16 @@ export const TerrainTool = ({ ctx }) => {
 	};
 
 	const renderPoint = key => (
-		<View style={styles.pointRow}>
-			<View style={styles.pointField}>
-				<Field label={key.toUpperCase()} value={texts[key]} onChangeText={text => setTexts(current => ({ ...current, [key]: text }))} onEndEditing={() => syncFromText(key)} placeholder={t('terrain:nodeNamePlaceholder')} />
-			</View>
-			<Button style={styles.pickButton} variant={picking === key ? 'primary' : 'secondary'} label={picking === key ? t('mobile:tools.picking') : t('terrain:pickOnMap')} onPress={() => setPicking(picking === key ? null : key)} />
-		</View>
+		<PointField
+			label={key.toUpperCase()}
+			value={texts[key]}
+			placeholder={t('terrain:nodeNamePlaceholder')}
+			picking={picking === key}
+			pickLabel={t('terrain:pickOnMap')}
+			onChangeText={text => setTexts(current => ({ ...current, [key]: text }))}
+			onEndEditing={() => syncFromText(key)}
+			onTogglePick={() => setPicking(picking === key ? null : key)}
+		/>
 	);
 
 	const unavailable = !config?.features?.terrain || !config?.sefinekApi;

@@ -8,11 +8,11 @@ const LABEL_LAYOUT = { 'text-field': ['get', 'label'], 'text-font': ['Noto Sans 
 const LABEL_PAINT = { 'text-color': '#fff', 'text-halo-color': '#000', 'text-halo-width': 1.5 };
 
 // Shared layer for the tools: features carry properties.kind = 'fill' | 'line' | 'point' | 'label' and color.
-export const OverlayLayer = memo(({ features }) => (
-	<GeoJSONSource id="overlay" data={{ type: 'FeatureCollection', features }}>
-		<Layer id="overlay-fill" type="fill" filter={['==', ['get', 'kind'], 'fill']} paint={FILL_PAINT} />
-		<Layer id="overlay-line" type="line" filter={['==', ['get', 'kind'], 'line']} paint={LINE_PAINT} />
-		<Layer id="overlay-point" type="circle" filter={['==', ['get', 'kind'], 'point']} paint={POINT_PAINT} />
-		<Layer id="overlay-label" type="symbol" filter={['has', 'label']} layout={LABEL_LAYOUT} paint={LABEL_PAINT} />
+export const OverlayLayer = memo(({ scope, features }) => (
+	<GeoJSONSource id={`overlay-${scope}`} data={{ type: 'FeatureCollection', features }}>
+		<Layer id={`overlay-fill-${scope}`} type="fill" filter={['==', ['get', 'kind'], 'fill']} paint={FILL_PAINT} />
+		<Layer id={`overlay-line-${scope}`} type="line" filter={['==', ['get', 'kind'], 'line']} paint={LINE_PAINT} />
+		<Layer id={`overlay-point-${scope}`} type="circle" filter={['==', ['get', 'kind'], 'point']} paint={POINT_PAINT} />
+		<Layer id={`overlay-label-${scope}`} type="symbol" filter={['has', 'label']} layout={LABEL_LAYOUT} paint={LABEL_PAINT} />
 	</GeoJSONSource>
 ));

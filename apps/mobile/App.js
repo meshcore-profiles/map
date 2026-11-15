@@ -1,3 +1,4 @@
+import { LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { installMapRequestHeaders } from './src/data/mapRequests';
@@ -10,6 +11,9 @@ import { ErrorBoundary } from './src/ui/ErrorBoundary';
 import { ToastProvider } from './src/ui/Toast';
 
 installMapRequestHeaders();
+
+// A rejected basemap style is handled by the fallback chain; the red dev toast would only cover the buttons in the bottom corner.
+LogBox.ignoreLogs(['loading style failed']);
 
 export default function App() {
 	return (

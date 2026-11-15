@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { NODE_TYPE_COLORS, STATUS_COLORS } from '@meshcore-map/core/colors';
@@ -9,7 +9,7 @@ import { useI18n } from '../i18n';
 import { Button, Divider } from '../ui/controls';
 import { Icon } from '../ui/Icon';
 import { useTheme } from '../state/ThemeContext';
-import { Sheet } from '../ui/Sheet';
+import { DockedSheet } from '../ui/Sheet';
 import { colors, NODE_TYPE_ICONS, radius, spacing } from '../theme';
 
 const styles = StyleSheet.create({
@@ -52,10 +52,13 @@ const Row = ({ label, value, mono, copyLabel, copied, onCopy }) => {
 	);
 };
 
-export const NodeSheet = ({ node, onClose }) => {
+const NodePanel = ({ node, visible, onClose, onExited }) => {
 	const { t, tRaw, plural } = useI18n();
 	const [copied, setCopied] = useState(null);
-	if (!node) return null;
+
+	useEffect(() => {
+		setCopied(null);
+	}, [node.public_key]);
 
 	const copy = async (id, value) => {
 		await Clipboard.setStringAsync(value);
@@ -79,7 +82,18 @@ export const NodeSheet = ({ node, onClose }) => {
 	};
 
 	return (
-		<Sheet visible title={node.adv_name} onClose={onClose}>
+		<DockedSheet
+			title={node.adv_name}
+			visible={visible}
+			onClose={onClose}
+			onExited={onExited}
+			footer={(
+				<View style={styles.actions}>
+					<Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} onPress={share} />
+					{CONTACT_ADDABLE_TYPES.includes(node.type) && <Button style={styles.action} icon="plus" label={t('map:addContact')} onPress={addContact} />}
+				</View>
+			)}
+		>
 			<View style={styles.badges}>
 				<View style={styles.badge}>
 					<Icon name={NODE_TYPE_ICONS[node.type]} size={16} color={NODE_TYPE_COLORS[node.type]} />
@@ -99,10 +113,20 @@ export const NodeSheet = ({ node, onClose }) => {
 				label={t('map:columns.params')}
 				value={radioKeys.length ? radioKeys.map(key => `${t(`map:radioParams.${key}`)}: ${node.params[key]}${RADIO_UNITS[key]}`).join('\n') : t('map:noRadioData')}
 			/>
-			<View style={styles.actions}>
-				<Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} onPress={share} />
-				{CONTACT_ADDABLE_TYPES.includes(node.type) && <Button style={styles.action} icon="plus" label={t('map:addContact')} onPress={addContact} />}
-			</View>
-		</Sheet>
+		</DockedSheet>
 	);
+};
+
+// Stays mounted for the slide-out animation after the parent clears `node`.
+export const NodeSheet = ({ node, onClose }) => {
+	const [lastNode, setLastNode] = useState(node);
+
+	useEffect(() => {
+		if (node) setLastNode(node);
+	}, [node]);
+
+	const display = node ?? lastNode;
+	if (!display) return null;
+
+	return <NodePanel node={display} visible={Boolean(node)} onClose={onClose} onExited={() => setLastNode(null)} />;
 };

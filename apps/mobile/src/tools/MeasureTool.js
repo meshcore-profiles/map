@@ -7,6 +7,7 @@ import { Button, Hint } from '../ui/controls';
 import { ToolPanel } from '../ui/ToolPanel';
 import { colors, spacing } from '../theme';
 import { buildPathFeatures } from './pathFeatures';
+import { useMapPicker } from './useMapPicker';
 
 const styles = StyleSheet.create({
 	total: { color: colors.text, fontSize: 24, fontWeight: '700' },
@@ -24,18 +25,9 @@ export const MeasureTool = ({ ctx }) => {
 	const { setOverlay, setPicker, onClose } = ctx;
 	const [points, setPoints] = useState([]);
 
-	useEffect(() => {
-		const add = point => setPoints(current => [...current, point]);
-		setPicker({
-			onMap: ({ lat, lng }) => add({ lat, lng, label: null }),
-			onNode: node => add({ lat: node.lat, lng: node.lon, label: node.adv_name, key: node.public_key }),
-		});
+	useMapPicker(setPicker, true, point => setPoints(current => [...current, point]));
 
-		return () => {
-			setPicker(null);
-			setOverlay(null);
-		};
-	}, [setOverlay, setPicker]);
+	useEffect(() => () => setOverlay(null), [setOverlay]);
 
 	useEffect(() => {
 		setOverlay(buildPathFeatures(points, { color: COLOR, labelFor: (p, i) => String(p.label ?? t('common:pointFallback', { n: i + 1 })) }));

@@ -15,6 +15,7 @@ export const SITES = {
 		brandUrl: 'https://meshcorepolska.org',
 		logo: 'https://meshcorepolska.org/images/brand/logo-1-80.jpg',
 		icon192: 'https://meshcorepolska.org/images/brand/logo-3-192.jpg',
+		mobileLogo: 'https://meshcorepolska.org/images/logo/android-chrome-192x192.png',
 	},
 	all: {
 		region: 'all',

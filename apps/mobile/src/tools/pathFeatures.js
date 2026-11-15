@@ -34,9 +34,15 @@ export const buildPathFeatures = (points, { color, labelFor, segmentLabels = tru
 	return features;
 };
 
+// [west, south, east, north]; a plain loop, because spreading thousands of points into Math.min/max overflows the call stack.
 export const boundsOf = points => {
-	const lngs = points.map(p => p.lng);
-	const lats = points.map(p => p.lat);
+	let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity;
+	for (const { lng, lat } of points) {
+		if (lng < west) west = lng;
+		if (lng > east) east = lng;
+		if (lat < south) south = lat;
+		if (lat > north) north = lat;
+	}
 
-	return [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
+	return [west, south, east, north];
 };

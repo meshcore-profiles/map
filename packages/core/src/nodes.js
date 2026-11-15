@@ -118,14 +118,25 @@ export const collectFilteredNodes = (filters, byType) => {
 	return result;
 };
 
+const nameCollator = new Intl.Collator();
+
+// The first `limit` matches in name order. Keeps a small sorted window instead of sorting every match (a one-letter query hits most of the map).
 export const searchNodes = (nodes, query, limit = 20) => {
 	const lower = query.toLowerCase();
-	if (!lower) return [];
+	if (!lower || limit < 1) return [];
 
-	return nodes
-		.filter(node => node.adv_name.toLowerCase().includes(lower) || node.public_key.startsWith(query))
-		.sort((a, b) => a.adv_name.localeCompare(b.adv_name))
-		.slice(0, limit);
+	const top = [];
+	for (const node of nodes) {
+		if (!node.adv_name.toLowerCase().includes(lower) && !node.public_key.startsWith(query)) continue;
+		if (top.length === limit && nameCollator.compare(node.adv_name, top[limit - 1].adv_name) >= 0) continue;
+
+		let index = top.length;
+		while (index > 0 && nameCollator.compare(node.adv_name, top[index - 1].adv_name) < 0) index--;
+		top.splice(index, 0, node);
+		if (top.length > limit) top.pop();
+	}
+
+	return top;
 };
 
 const TIME_UNITS = [

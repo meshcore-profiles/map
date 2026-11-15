@@ -1,6 +1,5 @@
 import { memo, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
-import { NODE_TYPE_COLORS } from '@meshcore-map/core/colors';
 import { countByType } from '@meshcore-map/core/nodes';
 import { useI18n } from '../i18n';
 import { useSettings } from '../state/SettingsContext';
@@ -15,12 +14,12 @@ const styles = StyleSheet.create({
 	text: { color: colors.text, fontSize: 14, fontWeight: '600' },
 });
 
-const Chip = ({ icon, iconColor, label, onPress, accessibilityLabel, accent }) => {
+const Chip = ({ icon, label, onPress, accessibilityLabel, accent }) => {
 	const { accentBright } = useTheme();
 
 	return (
 		<Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? label} style={({ pressed }) => [styles.chip, accent && { borderColor: accentBright }, pressed && { opacity: 0.8 }]}>
-			<Icon name={icon} size={16} color={iconColor ?? (accent ? accentBright : colors.textMuted)} />
+			{icon && <Icon name={icon} size={16} color={accent ? accentBright : colors.text} />}
 			<Text style={styles.text}>{label}</Text>
 		</Pressable>
 	);
@@ -40,10 +39,9 @@ export const QuickChips = memo(({ nodes, onStats }) => {
 			<Chip icon="globe" accent label={pl ? t('map:polandOnlyLabel') : t('map:allNodesLabel')} accessibilityLabel={t(pl ? 'map:showAllWorld' : 'map:showPolandOnly')} onPress={() => switchRegion(pl ? 'all' : 'pl')} />
 			{nodes.length > 0 && (
 				<>
-					<Chip icon="chart" label={format(nodes.length)} accessibilityLabel={t('map:totalCountTooltip')} onPress={onStats} />
-					<Chip icon={NODE_TYPE_ICONS[1]} iconColor={NODE_TYPE_COLORS[1]} label={format(counts.clients)} accessibilityLabel={t('map:clientsCountTooltip')} onPress={onStats} />
-					<Chip icon={NODE_TYPE_ICONS[2]} iconColor={NODE_TYPE_COLORS[2]} label={format(counts.repeaters)} accessibilityLabel={t('map:repeatersCountTooltip')} onPress={onStats} />
-					<Chip icon={NODE_TYPE_ICONS[3]} iconColor={NODE_TYPE_COLORS[3]} label={format(counts.roomServers)} accessibilityLabel={t('map:roomServersCountTooltip')} onPress={onStats} />
+					<Chip icon="user" label={format(counts.clients)} accessibilityLabel={t('map:clientsCountTooltip')} onPress={onStats} />
+					<Chip icon={NODE_TYPE_ICONS[2]} label={format(counts.repeaters)} accessibilityLabel={t('map:repeatersCountTooltip')} onPress={onStats} />
+					<Chip icon={NODE_TYPE_ICONS[3]} label={format(counts.roomServers)} accessibilityLabel={t('map:roomServersCountTooltip')} onPress={onStats} />
 				</>
 			)}
 		</ScrollView>

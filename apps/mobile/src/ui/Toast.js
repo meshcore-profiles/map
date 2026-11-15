@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, shadow, spacing } from '../theme';
 import { Icon } from './Icon';
@@ -15,22 +15,30 @@ const styles = StyleSheet.create({
 
 const ToastItem = ({ toast, onDone }) => {
 	const opacity = useRef(new Animated.Value(0)).current;
+	const closing = useRef(false);
+
+	const dismiss = useCallback(() => {
+		if (closing.current) return;
+
+		closing.current = true;
+		Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => onDone(toast.id));
+	}, [opacity, onDone, toast.id]);
 
 	useEffect(() => {
 		Animated.timing(opacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
-		const timer = setTimeout(() => {
-			Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => onDone(toast.id));
-		}, toast.duration);
+		const timer = setTimeout(dismiss, toast.duration);
 
 		return () => clearTimeout(timer);
-	}, [opacity, onDone, toast.id, toast.duration]);
+	}, [opacity, dismiss, toast.duration]);
 
 	const translateY = opacity.interpolate({ inputRange: [0, 1], outputRange: [12, 0] });
 
 	return (
-		<Animated.View style={[styles.toast, { opacity, transform: [{ translateY }] }]} accessibilityLiveRegion="polite">
-			<Icon name={STATUS_ICONS[toast.status] ?? 'info'} size={18} color={STATUS_COLORS[toast.status] ?? colors.blue} />
-			<Text style={styles.text}>{toast.message}</Text>
+		<Animated.View style={{ opacity, transform: [{ translateY }], maxWidth: '100%' }} accessibilityLiveRegion="polite">
+			<Pressable style={styles.toast} onPress={dismiss} accessibilityRole="button" accessibilityLabel={toast.message}>
+				<Icon name={STATUS_ICONS[toast.status] ?? 'info'} size={18} color={STATUS_COLORS[toast.status] ?? colors.blue} />
+				<Text style={styles.text}>{toast.message}</Text>
+			</Pressable>
 		</Animated.View>
 	);
 };
@@ -43,17 +51,16 @@ export const ToastProvider = ({ children }) => {
 	const counter = useRef(0);
 
 	const show = useCallback((message, { status = 'success', duration = 3000 } = {}) => {
-		counter.current += 1;
-		setToasts(current => [...current, { id: counter.current, message, status, duration }]);
+		const id = ++counter.current;
+		setToasts(current => [...current, { id, message, status, duration }]);
 	}, []);
 
 	const remove = useCallback(id => setToasts(current => current.filter(toast => toast.id !== id)), []);
-	const value = useMemo(() => show, [show]);
 
 	return (
-		<ToastContext.Provider value={value}>
+		<ToastContext.Provider value={show}>
 			{children}
-			<View pointerEvents="none" style={[styles.container, { bottom: insets.bottom + spacing.xl }]}>
+			<View pointerEvents="box-none" style={[styles.container, { bottom: insets.bottom + spacing.xl }]}>
 				{toasts.map(toast => <ToastItem key={toast.id} toast={toast} onDone={remove} />)}
 			</View>
 		</ToastContext.Provider>

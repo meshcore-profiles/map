@@ -2,7 +2,7 @@ import { Linking, StyleSheet, Text } from 'react-native';
 import { GITHUB_URL } from '@meshcore-map/core/sites';
 import Constants from 'expo-constants';
 import { useI18n } from '../i18n';
-import { useNodes } from '../state/NodesContext';
+import { useNodes, useNodesStatus } from '../state/NodesContext';
 import { useSettings } from '../state/SettingsContext';
 import { useRegionSwitch } from '../state/useRegionSwitch';
 import { Button, Divider, Hint, Section, SegmentedControl, SwitchRow } from '../ui/controls';
@@ -17,7 +17,8 @@ const styles = StyleSheet.create({
 export const SettingsSheet = ({ visible, onClose }) => {
 	const { t } = useI18n();
 	const { settings, update } = useSettings();
-	const { nodes, fetchedAt, phase, refresh } = useNodes();
+	const { nodes, fetchedAt, refresh } = useNodes();
+	const { phase } = useNodesStatus();
 	const switchRegion = useRegionSwitch();
 
 	return (

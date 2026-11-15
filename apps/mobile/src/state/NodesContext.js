@@ -5,10 +5,12 @@ import { downloadRegion, readCachedRegion } from '../data/nodesRepository';
 import { useSettings } from './SettingsContext';
 
 const NodesContext = createContext(null);
+const NodesStatusContext = createContext(null);
 
 const EMPTY = { nodes: [], byType: {}, radioOptions: {}, fetchedAt: null };
 
 // Phases: 'idle' | 'loading' (reading the cache) | 'downloading' | 'ready' | 'error'.
+// The data and the status live in separate contexts: the download progress ticks many times, and only the status banner has to follow them.
 export const NodesProvider = ({ children }) => {
 	const { settings, ready } = useSettings();
 	const { region } = settings;
@@ -29,11 +31,10 @@ export const NodesProvider = ({ children }) => {
 		setPhase('loading');
 		const cached = await readCachedRegion(region);
 		if (controller.signal.aborted) return;
+		// Without a cached copy the previous region's nodes stay on the map until the download finishes (or fails), instead of flashing an empty map.
 		if (cached) {
 			setData(cached);
 			setPhase('ready');
-		} else {
-			setData(EMPTY);
 		}
 
 		const fresh = cached && Date.now() - cached.fetchedAt < NODES_REFRESH_AFTER_MS;
@@ -44,7 +45,8 @@ export const NodesProvider = ({ children }) => {
 		try {
 			const downloaded = await downloadRegion(API_BASE, region, {
 				signal: controller.signal,
-				onProgress: ({ bytesWritten, totalBytes }) => totalBytes > 0 && setProgress(bytesWritten / totalBytes),
+				// Whole percents only: identical values bail out of the state update, so a large download does not re-render once per chunk.
+				onProgress: ({ bytesWritten, totalBytes }) => totalBytes > 0 && setProgress(Math.round(bytesWritten / totalBytes * 100)),
 			});
 			if (controller.signal.aborted) return;
 			setData(downloaded);
@@ -53,6 +55,7 @@ export const NodesProvider = ({ children }) => {
 			if (controller.signal.aborted) return;
 			console.error('Failed to download nodes:', err);
 			setError(err);
+			if (!cached) setData(EMPTY);
 			setPhase(cached ? 'ready' : 'error');
 		}
 	}, [region]);
@@ -64,10 +67,21 @@ export const NodesProvider = ({ children }) => {
 		return () => abortRef.current?.abort();
 	}, [ready, refresh]);
 
-	const filtered = useMemo(() => collectFilteredNodes(settings.filters, data.byType), [settings.filters, data.byType]);
-	const value = useMemo(() => ({ ...data, filtered, phase, progress, error, refresh }), [data, filtered, phase, progress, error, refresh]);
+	// Only the filters that decide which nodes match are a dependency: changing the clustering zoom must not rebuild the whole node list.
+	const { nodeFilter, radioFilters, fromDate, fromInsertDate } = settings.filters;
+	const filterKey = JSON.stringify([nodeFilter, radioFilters, fromDate, fromInsertDate]);
+	const filtered = useMemo(() => collectFilteredNodes({ nodeFilter, radioFilters, fromDate, fromInsertDate }, data.byType), [filterKey, data.byType]);
 
-	return <NodesContext.Provider value={value}>{children}</NodesContext.Provider>;
+	const value = useMemo(() => ({ ...data, filtered, refresh }), [data, filtered, refresh]);
+	const status = useMemo(() => ({ phase, progress, error }), [phase, progress, error]);
+
+	return (
+		<NodesContext.Provider value={value}>
+			<NodesStatusContext.Provider value={status}>{children}</NodesStatusContext.Provider>
+		</NodesContext.Provider>
+	);
 };
 
 export const useNodes = () => useContext(NodesContext);
+
+export const useNodesStatus = () => useContext(NodesStatusContext);

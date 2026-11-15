@@ -95,7 +95,8 @@ const BADGE_LAYOUT = {
 const WHITE = { 'text-color': '#fff' };
 
 // Clustering is disabled from zoom clusteringZoom upwards (like disableClusteringAtZoom on the web).
-export const NodeLayer = memo(({ nodes, selected, clusteringZoom, sourceRef, onPress }) => {
+// scope: unique per loaded style, so a freshly mounted copy never shares source or layer ids with the previous one (the native side would drop them together).
+export const NodeLayer = memo(({ scope, nodes, selected, clusteringZoom, sourceRef, onPress }) => {
 	const theme = useTheme();
 	const data = useMemo(() => ({ type: 'FeatureCollection', features: nodes.map(toFeature) }), [nodes]);
 	const paints = useMemo(() => createThemedPaints(theme), [theme]);
@@ -104,16 +105,16 @@ export const NodeLayer = memo(({ nodes, selected, clusteringZoom, sourceRef, onP
 	return (
 		<>
 			<Images images={NODE_IMAGES} />
-			<GeoJSONSource id="nodes" ref={sourceRef} data={data} cluster clusterRadius={50} clusterMaxZoom={clusteringZoom - 1} onPress={onPress}>
-				<Layer id="node-clusters-halo" type="circle" filter={CLUSTERS} paint={paints.clusterHalo} />
-				<Layer id="node-clusters" type="circle" filter={CLUSTERS} paint={paints.cluster} />
-				<Layer id="node-cluster-count" type="symbol" filter={CLUSTERS} layout={CLUSTER_LABEL_LAYOUT} paint={WHITE} />
-				<Layer id="node-clients" type="circle" filter={CLIENTS} paint={CLIENT_PAINT} />
-				<Layer id="node-clients-label" type="symbol" filter={CLIENTS} layout={CLIENT_LABEL_LAYOUT} paint={WHITE} />
-				<Layer id="node-badges" type="symbol" filter={ICONS} layout={BADGE_LAYOUT} />
+			<GeoJSONSource id={`nodes-${scope}`} ref={sourceRef} data={data} cluster clusterRadius={50} clusterMaxZoom={clusteringZoom - 1} onPress={onPress}>
+				<Layer id={`node-clusters-halo-${scope}`} type="circle" filter={CLUSTERS} paint={paints.clusterHalo} />
+				<Layer id={`node-clusters-${scope}`} type="circle" filter={CLUSTERS} paint={paints.cluster} />
+				<Layer id={`node-cluster-count-${scope}`} type="symbol" filter={CLUSTERS} layout={CLUSTER_LABEL_LAYOUT} paint={WHITE} />
+				<Layer id={`node-clients-${scope}`} type="circle" filter={CLIENTS} paint={CLIENT_PAINT} />
+				<Layer id={`node-clients-label-${scope}`} type="symbol" filter={CLIENTS} layout={CLIENT_LABEL_LAYOUT} paint={WHITE} />
+				<Layer id={`node-badges-${scope}`} type="symbol" filter={ICONS} layout={BADGE_LAYOUT} />
 			</GeoJSONSource>
-			<GeoJSONSource id="node-selected" data={highlight}>
-				<Layer id="node-selected-ring" type="circle" paint={paints.highlight} />
+			<GeoJSONSource id={`node-selected-${scope}`} data={highlight}>
+				<Layer id={`node-selected-ring-${scope}`} type="circle" paint={paints.highlight} />
 			</GeoJSONSource>
 		</>
 	);

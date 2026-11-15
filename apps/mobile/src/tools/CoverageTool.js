@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay, MAX_RANGE_M, RESOLUTIONS } from '@meshcore-map/core/coverage';
-import { formatDistance, parseLatLng } from '@meshcore-map/core/geo';
-import { resolveNodeByQuery } from '@meshcore-map/core/node-utils';
+import { formatDistance } from '@meshcore-map/core/geo';
 import { getElevationsChunked, loadRadioPresets } from '../data/appConfig';
 import { useI18n } from '../i18n';
 import { Button, Chip, ChipRow, Field, Hint, Label, SegmentedControl, Stat } from '../ui/controls';
 import { ToolPanel } from '../ui/ToolPanel';
 import { colors, spacing } from '../theme';
 import { boundsOf } from './pathFeatures';
+import { PointField } from './PointField';
+import { describePoint, pointFromText } from './points';
+import { useMapPicker } from './useMapPicker';
 
 const styles = StyleSheet.create({
-	pointRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
-	pointField: { flex: 1 },
-	pickButton: { minWidth: 96 },
 	grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 	gridField: { flexGrow: 1, flexBasis: '45%' },
 	actions: { flexDirection: 'row', gap: spacing.sm },
@@ -62,27 +61,17 @@ export const CoverageTool = ({ ctx }) => {
 		loadRadioPresets().then(list => setPresets(list)).catch(err => console.error('Failed to load radio presets:', err));
 	}, []);
 
-	useEffect(() => {
-		const apply = point => {
-			setOrigin(point);
-			setText(point.label ?? `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`);
-			setPicking(false);
-		};
+	useMapPicker(setPicker, picking, point => {
+		setOrigin(point);
+		setText(describePoint(point));
+		setPicking(false);
+	});
 
-		setPicker(picking ? { onMap: ({ lat, lng }) => apply({ lat, lng, label: null }), onNode: node => apply({ lat: node.lat, lng: node.lon, label: node.adv_name }) } : null);
-	}, [picking, setPicker]);
-
-	useEffect(() => () => {
-		setPicker(null);
-		setOverlay(null);
-	}, [setOverlay, setPicker]);
+	useEffect(() => () => setOverlay(null), [setOverlay]);
 
 	const syncFromText = () => {
-		const coords = parseLatLng(text);
-		if (coords) return setOrigin({ ...coords, label: null });
-
-		const node = resolveNodeByQuery(text, nodes);
-		if (node) setOrigin({ lat: node.lat, lng: node.lon, label: node.adv_name });
+		const point = pointFromText(text, nodes);
+		if (point) setOrigin(point);
 	};
 
 	const applyPreset = preset => {
@@ -164,12 +153,15 @@ export const CoverageTool = ({ ctx }) => {
 			{unavailable ? <Hint>{t('common:toolUnavailable')}</Hint> : (
 				<>
 					<Hint>{t('coverage:desc')}</Hint>
-					<View style={styles.pointRow}>
-						<View style={styles.pointField}>
-							<Field value={text} onChangeText={setText} onEndEditing={syncFromText} placeholder={t('coverage:nodeNamePlaceholder')} />
-						</View>
-						<Button style={styles.pickButton} variant={picking ? 'primary' : 'secondary'} label={picking ? t('mobile:tools.picking') : t('coverage:pickOnMap')} onPress={() => setPicking(current => !current)} />
-					</View>
+					<PointField
+						value={text}
+						placeholder={t('coverage:nodeNamePlaceholder')}
+						picking={picking}
+						pickLabel={t('coverage:pickOnMap')}
+						onChangeText={setText}
+						onEndEditing={syncFromText}
+						onTogglePick={() => setPicking(current => !current)}
+					/>
 					{presets.length > 0 && (
 						<>
 							<Label>{t('coverage:preset')}</Label>

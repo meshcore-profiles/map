@@ -148,6 +148,21 @@ test('prepareNodes: inflate, status, indeksy', () => {
 	assert.deepEqual(searchNodes(nodes, 'rep').map(n => n.adv_name), ['Repeater A', 'Reczny'].filter(n => n.toLowerCase().includes('rep')));
 });
 
+test('searchNodes: kolejnosc alfabetyczna, limit i dopasowanie po kluczu jak przy pelnym sortowaniu', () => {
+	const names = ['delta', 'Alfa', 'charlie', 'bravo', 'alfa', 'echo', 'Alfa'];
+	const nodes = names.map((adv_name, i) => ({ adv_name, public_key: `${i}`.repeat(64) }));
+	const reference = (query, limit) => nodes
+		.filter(n => n.adv_name.toLowerCase().includes(query.toLowerCase()) || n.public_key.startsWith(query))
+		.sort((a, b) => a.adv_name.localeCompare(b.adv_name))
+		.slice(0, limit);
+
+	for (const [query, limit] of [['a', 3], ['a', 20], ['ALFA', 2], ['e', 1], ['3', 5], ['zzz', 5]]) {
+		assert.deepEqual(searchNodes(nodes, query, limit), reference(query, limit), `${query}/${limit}`);
+	}
+
+	assert.deepEqual(searchNodes(nodes, '', 5), []);
+});
+
 test('timeAgoParts i createI18n', () => {
 	assert.deepEqual(timeAgoParts(0, 90 * 1000), { count: 1, unit: 'minute' });
 	assert.equal(timeAgoParts(1000, 1500), null);

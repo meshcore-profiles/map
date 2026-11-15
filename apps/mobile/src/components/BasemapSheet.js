@@ -11,6 +11,7 @@ const styles = StyleSheet.create({
 	row: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.chip },
 	rowText: { flex: 1, gap: 2 },
 	name: { color: colors.text, fontSize: 15 },
+	group: { gap: spacing.sm },
 	info: { color: colors.textMuted, fontSize: 12, lineHeight: 16 },
 });
 
@@ -42,7 +43,7 @@ export const BasemapSheet = ({ visible, onClose, basemaps, selection, onSelect }
 				if (!items.length) return null;
 
 				return (
-					<View key={group} style={{ gap: spacing.sm }}>
+					<View key={group} style={styles.group}>
 						<Label>{t(GROUP_LABELS[group])}</Label>
 						{items.map(basemap => option(basemap.name, basemap.name, tRaw('map:baseMapInfo')?.[basemap.name]))}
 					</View>

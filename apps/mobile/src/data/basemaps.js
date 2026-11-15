@@ -1,11 +1,16 @@
 import { createBasemapCatalog } from '@meshcore-map/core/basemaps';
 import { SITES } from '@meshcore-map/core/sites';
 
+// Raster styles carry no fonts, and the node layers draw text (cluster counts, client initials). Without `glyphs` a single text layer makes the
+// whole source render nothing, so the glyph server of OpenFreeMap (which has the "Noto Sans" stacks used in NodeLayer) is attached.
+const GLYPHS_URL = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
+
 const rasterStyle = ({ url, maxZoom, tileSize = 256, subdomains }) => {
 	const template = url.replace('{r}', '');
 
 	return {
 		version: 8,
+		glyphs: GLYPHS_URL,
 		sources: { base: { type: 'raster', tiles: subdomains ? [...subdomains].map(s => template.replace('{s}', s)) : [template], tileSize, maxzoom: maxZoom } },
 		layers: [{ id: 'base', type: 'raster', source: 'base' }],
 	};
