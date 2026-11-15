@@ -1,0 +1,46 @@
+{
+  "name": "@meshcore-map/web",
+  "version": "0.12.0",
+  "private": true,
+  "homepage": "https://map.meshcoreprofiles.com",
+  "bugs": {
+    "url": "https://github.com/meshcore-profiles/map/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meshcore-profiles/map.git"
+  },
+  "license": "MIT",
+  "author": "Sefinek <contact@sefinek.net> (https://sefinek.net)",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "allowScripts": {
+    "msgpackr-extract@3.0.7": true
+  },
+  "dependencies": {
+    "axios": "^1.21.1",
+    "cors": "^2.8.6",
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "express-timeout-handler": "^2.2.2",
+    "helmet": "^8.3.0",
+    "i18next": "^27.1.2",
+    "i18next-http-middleware": "^3.10.2",
+    "mongoose": "^9.12.1",
+    "morgan": "^1.12.1",
+    "msgpackr": "^2.1.4",
+    "rate-limit-redis": "^6.0.2",
+    "redis": "^6.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "globals": "^17.14.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

@@ -10,9 +10,9 @@ Comment language: **backend** (`index.js`, `services/`, `routes/`, `middlewares/
 
 ## Commands
 
-- Clone with `--recurse-submodules` (or `git submodule update --init`); `global/` is a submodule.
-- Run: `node .`. Lint: `npx eslint .` (flat config, ignores `public/vendor/**`).
-- Prod: PM2 process `mcmap` (`ecosystem.config.js`); `npm run update` pulls, installs and restarts. `npm run m` is dependency maintenance only.
+- Clone with `--recurse-submodules` (or `git submodule update --init`); `apps/web/global/` is a submodule.
+- Monorepo (npm workspaces): `apps/web` is the site described below (all paths in this file are relative to it), `packages/*` is reserved for shared code. Run: `npm start` (from the root; or `node .` in `apps/web`). Lint: `npm run lint` (flat config in `apps/web`, ignores `public/vendor/**`).
+- Prod: PM2 process `mcmap` (`apps/web/ecosystem.config.js`); root `npm run update` pulls, installs only `apps/web` and restarts. `npm run m` is dependency maintenance only.
 - `node global/database/syncIndexes.js` - manual script, syncs Mongoose indexes of all models in `global/database/models/`.
 - Needs MongoDB, Redis and a `.env` (copy `.env.example`; every variable is documented there). Notable: `SITE_MODE` (`auto`/`poland`/`global`) forces a site regardless of host; the keys `ESRI_API_KEY`, `MAPTILER_API_KEY`, `CARTO_API_KEY` unlock basemaps; `TURNSTILE_*` enables node deletion (feature is off without them).
 
