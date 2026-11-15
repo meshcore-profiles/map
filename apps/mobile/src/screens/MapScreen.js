@@ -12,11 +12,11 @@ import { OverlayLayer } from '../components/OverlayLayer';
 import { RegionPrompt } from '../components/RegionPrompt';
 import { SearchBar } from '../components/SearchBar';
 import { SettingsSheet } from '../components/SettingsSheet';
+import { BrandButton } from '../components/BrandButton';
 import { BasemapSheet } from '../components/BasemapSheet';
-import { StatsBar } from '../components/StatsBar';
+import { QuickChips } from '../components/QuickChips';
 import { StatsSheet } from '../components/StatsSheet';
 import { boundsOf } from '../tools/pathFeatures';
-import { TopBar } from '../components/TopBar';
 import { StatusBanner } from '../components/StatusBanner';
 import { DEFAULT_VIEW } from '../config';
 import { useAppConfig } from '../data/appConfig';
@@ -42,7 +42,6 @@ const styles = StyleSheet.create({
 	activeDot: { position: 'absolute', top: 9, right: 9, width: 9, height: 9, borderRadius: 5, borderWidth: 1.5, borderColor: colors.panelSolid },
 	fabStack: { position: 'absolute', right: spacing.md, alignItems: 'center', gap: spacing.sm },
 	bottom: { position: 'absolute', left: spacing.md },
-	search: { marginTop: spacing.sm },
 });
 
 const TOOL_FABS = [
@@ -78,6 +77,7 @@ export const MapScreen = () => {
 	const [selected, setSelected] = useState(null);
 	const [sheet, setSheet] = useState(null);
 	const [toolId, setToolId] = useState(null);
+	const [toolsOpen, setToolsOpen] = useState(false);
 	const [overlay, setOverlay] = useState(null);
 
 	const basemaps = useMemo(() => createBasemaps(config?.basemaps, settings.region ?? 'all'), [config, settings.region]);
@@ -123,7 +123,7 @@ export const MapScreen = () => {
 
 	const flyToNode = useCallback(node => cameraRef.current?.flyTo({ center: [node.lon, node.lat], zoom: 14, duration: 800 }), []);
 
-	const fitTo = useCallback(bounds => cameraRef.current?.fitBounds(bounds, { padding: { top: insets.top + 80, bottom: 360, left: 40, right: 40 }, duration: 600 }), [insets.top]);
+	const fitTo = useCallback(bounds => cameraRef.current?.fitBounds(bounds, { padding: { top: insets.top + 130, bottom: 360, left: 40, right: 40 }, duration: 600 }), [insets.top]);
 
 
 	const showRepeaters = useCallback(list => {
@@ -171,6 +171,7 @@ export const MapScreen = () => {
 
 	const openTool = id => {
 		setSelected(null);
+		setToolsOpen(false);
 		setToolId(id);
 	};
 
@@ -188,28 +189,23 @@ export const MapScreen = () => {
 			</MapView>
 
 			<View style={[styles.topBar, { top: insets.top + spacing.sm }]}>
-				<TopBar onStats={() => setSheet('stats')} onBasemap={() => setSheet('basemap')}>
-					<StatsBar nodes={filtered} />
-					<View style={styles.search}>
-						<SearchBar nodes={filtered} onSelect={showNode}>
-							<Pressable style={styles.barButton} onPress={() => setSheet('filters')} accessibilityRole="button" accessibilityLabel={t('filters:toggleTitle')}>
-								<Icon name="filter" size={22} color={filtersOn ? accentBright : colors.text} />
-								{filtersOn && <View style={[styles.activeDot, { backgroundColor: accentBright }]} />}
-							</Pressable>
-							<Pressable style={styles.barButton} onPress={() => setSheet('settings')} accessibilityRole="button" accessibilityLabel={t('settings:title')}>
-								<Icon name="settings" size={22} color={colors.text} />
-							</Pressable>
-						</SearchBar>
-					</View>
-				</TopBar>
+				<SearchBar nodes={filtered} onSelect={showNode} leading={<BrandButton onPress={() => setSheet('settings')} />}>
+					<Pressable style={styles.barButton} onPress={() => setSheet('filters')} accessibilityRole="button" accessibilityLabel={t('filters:toggleTitle')}>
+						<Icon name="filter" size={22} color={filtersOn ? accentBright : colors.text} />
+						{filtersOn && <View style={[styles.activeDot, { backgroundColor: accentBright }]} />}
+					</Pressable>
+				</SearchBar>
+				<QuickChips nodes={filtered} onStats={() => setSheet('stats')} />
 			</View>
 
 			{!ActiveTool && (
 				<>
 					<View style={[styles.fabStack, { bottom: insets.bottom + spacing.md }]}>
-						{TOOL_FABS.filter(tool => config?.features?.[tool.id] !== false).map(tool => (
+						{toolsOpen && TOOL_FABS.filter(tool => config?.features?.[tool.id] !== false).map(tool => (
 							<Fab key={tool.id} icon={tool.icon} label={t(tool.title)} onPress={() => openTool(tool.id)} />
 						))}
+						<Fab icon={toolsOpen ? 'close' : 'ruler'} label={t('mobile:tools.title')} onPress={() => setToolsOpen(open => !open)} />
+						<Fab icon="layers" label={t('map:basemapToggleTitle')} onPress={() => setSheet('basemap')} />
 						<Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(SITES[settings.region ?? 'all'].addNodeUrl)} />
 					</View>
 					<View style={[styles.bottom, { bottom: insets.bottom + spacing.md, right: spacing.md * 2 + FAB_SIZE }]}>

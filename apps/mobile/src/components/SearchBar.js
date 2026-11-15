@@ -9,7 +9,7 @@ import { colors, MIN_TOUCH, NODE_TYPE_ICONS, radius, shadow, spacing } from '../
 
 const styles = StyleSheet.create({
 	root: { flex: 1 },
-	bar: { minHeight: MIN_TOUCH + 8, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, paddingLeft: spacing.md, paddingRight: spacing.xs, ...shadow },
+	bar: { minHeight: MIN_TOUCH + 8, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, paddingLeft: spacing.xs, paddingRight: spacing.xs, ...shadow },
 	input: { flex: 1, minHeight: MIN_TOUCH, color: colors.text, fontSize: 15, paddingHorizontal: spacing.sm },
 	clear: { padding: spacing.xs },
 	actions: { flexDirection: 'row', alignItems: 'center' },
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
 	empty: { color: colors.textMuted, padding: spacing.lg },
 });
 
-export const SearchBar = ({ nodes, onSelect, children }) => {
+export const SearchBar = ({ nodes, onSelect, leading, children }) => {
 	const { t } = useI18n();
 	const [query, setQuery] = useState('');
 	const results = useMemo(() => searchNodes(nodes, query.trim()), [nodes, query]);
@@ -35,7 +35,7 @@ export const SearchBar = ({ nodes, onSelect, children }) => {
 	return (
 		<View style={styles.root}>
 			<View style={styles.bar}>
-				<Icon name="search" size={20} color={colors.textMuted} />
+				{leading ?? <Icon name="search" size={20} color={colors.textMuted} />}
 				<TextInput
 					style={styles.input}
 					value={query}

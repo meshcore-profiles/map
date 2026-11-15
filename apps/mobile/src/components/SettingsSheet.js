@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
+import { GITHUB_URL } from '@meshcore-map/core/sites';
 import Constants from 'expo-constants';
 import { useI18n } from '../i18n';
 import { useNodes } from '../state/NodesContext';
@@ -47,6 +48,7 @@ export const SettingsSheet = ({ visible, onClose }) => {
 			<Button variant="secondary" label={t('mobile:settings.refresh')} disabled={phase === 'downloading' || phase === 'loading'} onPress={() => refresh({ force: true })} />
 
 			<Divider />
+			<Button variant="secondary" icon="github" label={t('common:githubRepoTitle')} onPress={() => Linking.openURL(GITHUB_URL)} />
 			<Hint>{t('mobile:settings.version', { version: Constants.expoConfig?.version ?? '' })}</Hint>
 		</Sheet>
 	);

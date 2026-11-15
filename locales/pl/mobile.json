@@ -36,6 +36,7 @@
 		"lastDays": "{{count}} dni"
 	},
 	"tools": {
+		"title": "Narzędzia",
 		"picking": "Dotknij mapy...",
 		"routeDesc": "Trasa po nazwach lub początkach kluczy publicznych."
 	}

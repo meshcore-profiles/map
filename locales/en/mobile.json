@@ -36,6 +36,7 @@
 		"lastDays": "{{count}} days"
 	},
 	"tools": {
+		"title": "Tools",
 		"picking": "Tap the map...",
 		"routeDesc": "Route by names or the start of public keys."
 	}
