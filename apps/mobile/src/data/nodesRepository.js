@@ -2,6 +2,7 @@ import { File } from 'expo-file-system';
 import { unpack } from 'msgpackr';
 import { prepareNodes } from '@meshcore-map/core/nodes';
 import { fileOf, readJson, writeJson } from '../storage/files';
+import { apiFetch, apiHeaders } from './http';
 
 const nodesUrl = (apiBase, region) => `${apiBase}/api/v1/nodes?region=${region}`;
 const dataName = region => `nodes-${region}.bin`;
@@ -9,7 +10,7 @@ const metaName = region => `nodes-${region}.json`;
 
 // HEAD request: payload size and server-side data timestamp, without downloading.
 export const fetchRegionInfo = async (apiBase, region, signal) => {
-	const res = await fetch(nodesUrl(apiBase, region), { method: 'HEAD', signal });
+	const res = await apiFetch(nodesUrl(apiBase, region), { method: 'HEAD', signal });
 	if (!res.ok) throw new Error(`Nodes API returned ${res.status}`);
 
 	return { bytes: Number(res.headers.get('Content-Length')) || 0, updatedAt: res.headers.get('X-Data-Updated') };
@@ -42,7 +43,7 @@ export const readCachedRegion = async region => {
 export const downloadRegion = async (apiBase, region, { onProgress, signal } = {}) => {
 	const tmp = fileOf(`${dataName(region)}.tmp`);
 	try {
-		await File.downloadFileAsync(nodesUrl(apiBase, region), tmp, { idempotent: true, onProgress, signal });
+		await File.downloadFileAsync(nodesUrl(apiBase, region), tmp, { idempotent: true, headers: apiHeaders(), onProgress, signal });
 		await tmp.move(fileOf(dataName(region)), { overwrite: true });
 	} finally {
 		if (tmp.exists) tmp.delete();

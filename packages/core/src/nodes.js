@@ -124,7 +124,7 @@ export const searchNodes = (nodes, query, limit = 20) => {
 
 	return nodes
 		.filter(node => node.adv_name.toLowerCase().includes(lower) || node.public_key.startsWith(query))
-		.toSorted((a, b) => a.adv_name.localeCompare(b.adv_name))
+		.sort((a, b) => a.adv_name.localeCompare(b.adv_name))
 		.slice(0, limit);
 };
 

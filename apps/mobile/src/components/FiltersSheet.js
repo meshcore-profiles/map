@@ -28,7 +28,7 @@ const daysFromDate = value => {
 	return DAY_PRESETS.filter(p => p > 0).reduce((best, p) => Math.abs(p - days) < Math.abs(best - days) ? p : best, DAY_PRESETS[1]);
 };
 
-const sortValues = values => [...values].toSorted((a, b) => a === 'unknown' ? 1 : b === 'unknown' ? -1 : Number(a) - Number(b));
+const sortValues = values => [...values].sort((a, b) => a === 'unknown' ? 1 : b === 'unknown' ? -1 : Number(a) - Number(b));
 
 // Filters are edited on a draft copy; the match count updates live and settings change only on "Apply".
 export const FiltersSheet = ({ visible, filters, byType, radioOptions, total, onApply, onClose }) => {

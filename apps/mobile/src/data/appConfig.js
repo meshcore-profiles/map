@@ -4,12 +4,13 @@ import { createElevationProviders, fetchElevations, fetchElevationsChunked } fro
 import { normalizeRadioPresets } from '@meshcore-map/core/presets';
 import { API_BASE } from '../config';
 import { readJson, writeJson } from '../storage/files';
+import { apiFetch } from './http';
 
 const CONFIG_FILE = 'app-config.json';
 const PRESETS_FILE = 'radio-presets.json';
 
 const getJson = async path => {
-	const res = await fetch(`${API_BASE}${path}`);
+	const res = await apiFetch(`${API_BASE}${path}`);
 	if (!res.ok) throw new Error(`${path} returned ${res.status}`);
 
 	return (await res.json()).data;
@@ -52,7 +53,7 @@ export const useAppConfig = () => {
 	return config;
 };
 
-export const createProviders = sefinekApi => createElevationProviders({ getSefinekApi: () => sefinekApi, pack, unpack });
+export const createProviders = sefinekApi => createElevationProviders({ getSefinekApi: () => sefinekApi, pack, unpack, fetchImpl: apiFetch });
 
 export const getElevations = (sefinekApi, points) => fetchElevations(createProviders(sefinekApi), points, 'sefinek');
 
