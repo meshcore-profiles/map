@@ -73,14 +73,14 @@ export const useSheetMotion = ({ visible, onClose, animateOut = false, onExited,
 		Animated.timing(translateY, { toValue: heightRef.current, duration: 180, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start(() => onCloseRef.current?.());
 	}, [translateY]);
 
+	// maxHeight is a layout property, so it cannot use the native driver; that is fine for a short transition.
+	const settle = useCallback(index => {
+		snapIndex.current = index;
+		Animated.timing(maxHeight, { toValue: snapsRef.current[index], duration: RESIZE_DURATION, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start();
+	}, [maxHeight]);
+
 	const panHandlers = useMemo(() => {
 		const snapBack = () => Animated.spring(translateY, { toValue: 0, bounciness: 0, speed: 20, useNativeDriver: true }).start();
-
-		// maxHeight is a layout property, so it cannot use the native driver; that is fine for a short transition.
-		const settle = index => {
-			snapIndex.current = index;
-			Animated.timing(maxHeight, { toValue: snapsRef.current[index], duration: RESIZE_DURATION, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start();
-		};
 
 		const nearestSnap = target => snapsRef.current.reduce((best, value, index) => (Math.abs(value - target) < Math.abs(snapsRef.current[best] - target) ? index : best), 0);
 
@@ -133,9 +133,9 @@ export const useSheetMotion = ({ visible, onClose, animateOut = false, onExited,
 				snapBack();
 			},
 		}).panHandlers;
-	}, [translateY, maxHeight, close]);
+	}, [translateY, maxHeight, close, settle]);
 
 	const backdropOpacity = useMemo(() => translateY.interpolate({ inputRange: [0, height], outputRange: [1, 0], extrapolate: 'clamp' }), [translateY, height]);
 
-	return { translateY, backdropOpacity, panHandlers, close, maxHeight };
+	return { translateY, backdropOpacity, panHandlers, close, maxHeight, snapTo: settle };
 };
