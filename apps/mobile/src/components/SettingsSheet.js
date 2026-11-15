@@ -41,6 +41,7 @@ export const SettingsSheet = ({ visible, onClose }) => {
 
 			<Section>
 				<SwitchRow label={t('mobile:settings.rotateTilt')} description={t('mobile:settings.rotateTiltDesc')} value={settings.rotateTilt} onValueChange={rotateTilt => update({ rotateTilt })} />
+				<SwitchRow label={t('mobile:settings.haptics')} description={t('mobile:settings.hapticsDesc')} value={settings.haptics} onValueChange={haptics => update({ haptics })} />
 				<SwitchRow label={t('settings:closeFiltersLabel')} description={t('settings:closeFiltersDesc')} value={settings.closeFiltersOnApply} onValueChange={closeFiltersOnApply => update({ closeFiltersOnApply })} />
 			</Section>
 

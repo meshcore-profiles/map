@@ -4,6 +4,7 @@ import { NODE_TYPE_COLORS } from '@meshcore-map/core/colors';
 import { searchNodes } from '@meshcore-map/core/nodes';
 import { truncateKey } from '@meshcore-map/core/node-utils';
 import { useI18n } from '../i18n';
+import { haptics } from '../ui/haptics';
 import { Icon } from '../ui/Icon';
 import { colors, MIN_TOUCH, NODE_TYPE_ICONS, radius, shadow, spacing } from '../theme';
 
@@ -29,6 +30,7 @@ export const SearchBar = ({ nodes, onSelect, leading, children }) => {
 	const results = useMemo(() => searchNodes(nodes, deferredQuery.trim()), [nodes, deferredQuery]);
 
 	const select = node => {
+		haptics.tap();
 		Keyboard.dismiss();
 		setQuery('');
 		onSelect(node);

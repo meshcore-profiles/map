@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Animated, Easing, PanResponder, useWindowDimensions } from 'react-native';
+import { haptics } from './haptics';
 
 const DISMISS_DISTANCE = 90;
 const DISMISS_VELOCITY = 0.8;
@@ -82,6 +83,11 @@ export const useSheetMotion = ({ visible, onClose, animateOut = false, onExited,
 	const panHandlers = useMemo(() => {
 		const snapBack = () => Animated.spring(translateY, { toValue: 0, bounciness: 0, speed: 20, useNativeDriver: true }).start();
 
+		const settleWithFeedback = index => {
+			if (index !== snapIndex.current) haptics.select();
+			settle(index);
+		};
+
 		const nearestSnap = target => snapsRef.current.reduce((best, value, index) => (Math.abs(value - target) < Math.abs(snapsRef.current[best] - target) ? index : best), 0);
 
 		return PanResponder.create({
@@ -116,7 +122,7 @@ export const useSheetMotion = ({ visible, onClose, animateOut = false, onExited,
 				}
 
 				if (Math.abs(g.dy) < TAP_SLOP && Math.abs(g.dx) < TAP_SLOP) {
-					settle((snapIndex.current + 1) % list.length);
+					settleWithFeedback((snapIndex.current + 1) % list.length);
 					return;
 				}
 
@@ -125,7 +131,7 @@ export const useSheetMotion = ({ visible, onClose, animateOut = false, onExited,
 					return;
 				}
 
-				settle(nearestSnap(startHeight.current - g.dy - g.vy * VELOCITY_PROJECTION));
+				settleWithFeedback(nearestSnap(startHeight.current - g.dy - g.vy * VELOCITY_PROJECTION));
 				snapBack();
 			},
 			onPanResponderTerminate: () => {

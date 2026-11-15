@@ -18,6 +18,8 @@
 	},
 	"settings": {
 		"languageAuto": "Automatic",
+		"haptics": "Haptic feedback",
+		"hapticsDesc": "Short vibrations when you tap, pick an option or set a point.",
 		"rotateTilt": "Map rotation and tilt",
 		"rotateTiltDesc": "Enables two-finger gestures to rotate and tilt the map.",
 		"data": "Node data",

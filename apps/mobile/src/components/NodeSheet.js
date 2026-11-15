@@ -11,6 +11,7 @@ import { useI18n } from '../i18n';
 import { useTheme } from '../state/ThemeContext';
 import { colors, NODE_TYPE_ICONS, radius, spacing } from '../theme';
 import { Button } from '../ui/controls';
+import { haptics } from '../ui/haptics';
 import { Icon } from '../ui/Icon';
 import { QrCode } from '../ui/QrCode';
 import { DockedSheet } from '../ui/Sheet';
@@ -126,6 +127,7 @@ const NodePanel = ({ node, visible, onClose, onExited }) => {
 
 	const copyKey = async () => {
 		await Clipboard.setStringAsync(node.public_key);
+		haptics.success();
 		setCopied(true);
 	};
 

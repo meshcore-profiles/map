@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createDefaultSettings, loadSettings, saveSettings } from '../storage/settings';
+import { setHapticsEnabled } from '../ui/haptics';
 
 const SettingsContext = createContext(null);
 const SAVE_DEBOUNCE_MS = 300;
@@ -21,6 +22,10 @@ export const SettingsProvider = ({ children }) => {
 
 		return () => clearTimeout(saveTimer.current);
 	}, [settings, ready]);
+
+	useEffect(() => {
+		setHapticsEnabled(settings.haptics);
+	}, [settings.haptics]);
 
 	const update = useCallback(patch => setSettings(current => ({ ...current, ...patch })), []);
 	const value = useMemo(() => ({ settings, ready, update }), [settings, ready, update]);

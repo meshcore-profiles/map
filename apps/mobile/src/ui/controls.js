@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '../state/ThemeContext';
 import { colors, MIN_TOUCH, radius, spacing } from '../theme';
+import { haptics } from './haptics';
 import { Icon } from './Icon';
 
 const styles = StyleSheet.create({
@@ -57,7 +58,10 @@ export const Button = ({ label, onPress, variant = 'primary', disabled, style, i
 
 	return (
 		<Pressable
-			onPress={onPress}
+			onPress={event => {
+				haptics.tap();
+				onPress?.(event);
+			}}
 			disabled={disabled}
 			accessibilityRole="button"
 			accessibilityState={{ disabled }}
@@ -75,7 +79,10 @@ export const Chip = ({ label, selected, onPress, color, icon }) => {
 
 	return (
 		<Pressable
-			onPress={onPress}
+			onPress={event => {
+				haptics.select();
+				onPress?.(event);
+			}}
 			accessibilityRole="checkbox"
 			accessibilityState={{ checked: selected }}
 			style={[styles.chip, selected && { backgroundColor: `${fill}26`, borderColor: `${fill}99` }]}
@@ -112,7 +119,10 @@ export const SwitchRow = ({ label, value, onValueChange, description }) => {
 				<Text style={styles.switchLabel}>{label}</Text>
 				{description && <Hint>{description}</Hint>}
 			</View>
-			<Switch value={value} onValueChange={onValueChange} trackColor={{ false: colors.borderStrong, true: accent }} thumbColor={value ? '#fff' : colors.textMuted} ios_backgroundColor={colors.borderStrong} accessibilityLabel={label} />
+			<Switch value={value} onValueChange={next => {
+				haptics.select();
+				onValueChange(next);
+			}} trackColor={{ false: colors.borderStrong, true: accent }} thumbColor={value ? '#fff' : colors.textMuted} ios_backgroundColor={colors.borderStrong} accessibilityLabel={label} />
 		</View>
 	);
 };
@@ -128,7 +138,10 @@ export const SegmentedControl = ({ options, value, onChange }) => {
 				return (
 					<Pressable
 						key={option.value}
-						onPress={() => onChange(option.value)}
+						onPress={() => {
+							if (!selected) haptics.select();
+							onChange(option.value);
+						}}
 						accessibilityRole="radio"
 						accessibilityState={{ selected }}
 						style={[styles.segment, selected && { backgroundColor: `${accent}33`, borderColor: accent }]}
@@ -141,13 +154,22 @@ export const SegmentedControl = ({ options, value, onChange }) => {
 	);
 };
 
-export const Stepper = ({ value, min, max, onChange, label }) => (
-	<View style={styles.stepper} accessibilityLabel={label}>
-		<Pressable style={styles.stepButton} onPress={() => onChange(Math.max(min, value - 1))} accessibilityRole="button" accessibilityLabel="-"><Text style={styles.stepText}>-</Text></Pressable>
-		<Text style={styles.stepValue}>{value}</Text>
-		<Pressable style={styles.stepButton} onPress={() => onChange(Math.min(max, value + 1))} accessibilityRole="button" accessibilityLabel="+"><Text style={styles.stepText}>+</Text></Pressable>
-	</View>
-);
+export const Stepper = ({ value, min, max, onChange, label }) => {
+	const step = next => {
+		if (next === value) return;
+
+		haptics.select();
+		onChange(next);
+	};
+
+	return (
+		<View style={styles.stepper} accessibilityLabel={label}>
+			<Pressable style={styles.stepButton} onPress={() => step(Math.max(min, value - 1))} accessibilityRole="button" accessibilityLabel="-"><Text style={styles.stepText}>-</Text></Pressable>
+			<Text style={styles.stepValue}>{value}</Text>
+			<Pressable style={styles.stepButton} onPress={() => step(Math.min(max, value + 1))} accessibilityRole="button" accessibilityLabel="+"><Text style={styles.stepText}>+</Text></Pressable>
+		</View>
+	);
+};
 
 export const Stat = ({ label, value, tone }) => (
 	<View style={styles.stat}>
@@ -160,7 +182,10 @@ export const Option = ({ label, info, selected, onPress }) => {
 	const { accent, accentBright } = useTheme();
 
 	return (
-		<Pressable style={[styles.option, selected && { borderColor: accentBright, backgroundColor: `${accent}33` }]} onPress={onPress} accessibilityRole="radio" accessibilityState={{ selected }}>
+		<Pressable style={[styles.option, selected && { borderColor: accentBright, backgroundColor: `${accent}33` }]} onPress={() => {
+			haptics.select();
+			onPress?.();
+		}} accessibilityRole="radio" accessibilityState={{ selected }}>
 			<View style={styles.optionText}>
 				<Text style={styles.optionLabel}>{label}</Text>
 				{info ? <Text style={styles.optionInfo}>{info}</Text> : null}
@@ -186,7 +211,10 @@ export const Collapsible = ({ title, summary, children }) => {
 
 	return (
 		<View>
-			<Pressable style={styles.collapseHead} onPress={() => setOpen(current => !current)} accessibilityRole="button" accessibilityState={{ expanded: open }}>
+			<Pressable style={styles.collapseHead} onPress={() => {
+				haptics.tap();
+				setOpen(current => !current);
+			}} accessibilityRole="button" accessibilityState={{ expanded: open }}>
 				<Text style={styles.collapseTitle}>{title}</Text>
 				<Text style={styles.collapseSummary}>{summary}</Text>
 				<Svg width={16} height={16} viewBox="0 0 24 24" style={open ? { transform: [{ rotate: '180deg' }] } : null}>

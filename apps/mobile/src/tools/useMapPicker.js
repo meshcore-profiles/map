@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { haptics } from '../ui/haptics';
 import { pointFromCoords, pointFromNode } from './points';
 
 export const useMapPicker = (setPicker, active, onPick) => {
@@ -9,8 +10,14 @@ export const useMapPicker = (setPicker, active, onPick) => {
 		if (!active) return undefined;
 
 		setPicker({
-			onMap: coords => onPickRef.current(pointFromCoords(coords)),
-			onNode: node => onPickRef.current(pointFromNode(node)),
+			onMap: coords => {
+				haptics.confirm();
+				onPickRef.current(pointFromCoords(coords));
+			},
+			onNode: node => {
+				haptics.confirm();
+				onPickRef.current(pointFromNode(node));
+			},
 		});
 
 		return () => setPicker(null);

@@ -25,6 +25,7 @@ import { MeasureTool } from '../tools/MeasureTool';
 import { boundsOf } from '../tools/pathFeatures';
 import { RouteTool } from '../tools/RouteTool';
 import { TerrainTool } from '../tools/TerrainTool';
+import { haptics } from '../ui/haptics';
 import { DOCKED_MAX_HEIGHT } from '../ui/Sheet';
 import { colors } from '../theme';
 import { useBasemap } from './useBasemap';
@@ -133,6 +134,7 @@ export const MapScreen = () => {
 		const { properties } = feature;
 
 		if (properties.cluster) {
+			haptics.tap();
 			const zoom = await sourceRef.current?.getClusterExpansionZoom(properties.cluster_id);
 			const [lng, lat] = feature.geometry.coordinates;
 			if (zoom != null) cameraRef.current?.flyTo({ center: [lng, lat], zoom: zoom + 0.5, padding: NO_PADDING, duration: 500 });
@@ -147,6 +149,7 @@ export const MapScreen = () => {
 			return;
 		}
 
+		haptics.tap();
 		setSelected(node);
 		cameraRef.current?.easeTo({ center: [node.lon, node.lat], padding: nodePadding, duration: 400 });
 	}, [byKey, nodePadding]);

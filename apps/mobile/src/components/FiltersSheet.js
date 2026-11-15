@@ -11,6 +11,7 @@ import { useSettings } from '../state/SettingsContext';
 import { useTheme } from '../state/ThemeContext';
 import { colors, NODE_TYPE_ICONS, spacing } from '../theme';
 import { Button, Chip, ChipRow, Collapsible, Divider, Field, Heading, Hint, Stepper } from '../ui/controls';
+import { haptics } from '../ui/haptics';
 import { Icon } from '../ui/Icon';
 import { Sheet } from '../ui/Sheet';
 import { useToast } from '../ui/Toast';
@@ -123,6 +124,7 @@ export const FiltersSheet = ({ visible, filters, byType, radioOptions, total, on
 	const copyLink = async () => {
 		const params = buildFilterParams({ ...draft, region: settings.region }, { includeRegion: true });
 		await Clipboard.setStringAsync(`${API_BASE}/?${params}`);
+		haptics.success();
 		showToast(t('filters:linkCopied'));
 	};
 

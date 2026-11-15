@@ -18,6 +18,8 @@
 	},
 	"settings": {
 		"languageAuto": "Automatyczny",
+		"haptics": "Wibracje",
+		"hapticsDesc": "Krótkie wibracje przy dotyku, wyborze opcji i ustawianiu punktów.",
 		"rotateTilt": "Obracanie i pochylanie mapy",
 		"rotateTiltDesc": "Umożliwia obracanie i pochylanie mapy dwoma palcami.",
 		"data": "Dane węzłów",

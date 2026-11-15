@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { collectFilteredNodes } from '@meshcore-map/core/nodes';
 import { API_BASE, NODES_REFRESH_AFTER_MS } from '../config';
 import { downloadRegion, readCachedRegion } from '../data/nodesRepository';
+import { haptics } from '../ui/haptics';
 import { useSettings } from './SettingsContext';
 
 const NodesContext = createContext(null);
@@ -51,9 +52,11 @@ export const NodesProvider = ({ children }) => {
 			if (controller.signal.aborted) return;
 			setData(downloaded);
 			setPhase('ready');
+			if (force) haptics.success();
 		} catch (err) {
 			if (controller.signal.aborted) return;
 			console.error('Failed to download nodes:', err);
+			if (force) haptics.error();
 			setError(err);
 			if (!cached) setData(EMPTY);
 			setPhase(cached ? 'ready' : 'error');
