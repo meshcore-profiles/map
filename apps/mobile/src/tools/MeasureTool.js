@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
 	action: { flex: 1 },
 });
 
-const COLOR = '#4dabf7';
+const COLOR = colors.blue;
 
 export const MeasureTool = ({ ctx }) => {
 	const { t } = useI18n();
@@ -46,7 +46,7 @@ export const MeasureTool = ({ ctx }) => {
 	const nameOf = (p, i) => p.label ?? (p.key ? truncateKey(p.key) : t('common:pointFallback', { n: i + 1 }));
 
 	return (
-		<ToolPanel title={t('measure:title')} onClose={onClose}>
+		<ToolPanel icon="ruler" title={t('measure:title')} onClose={onClose}>
 			{points.length === 0 && <Hint>{t('measure:hint')}</Hint>}
 			{points.length === 1 && <Hint>{t('measure:selectSecondPoint')}</Hint>}
 			{points.length > 1 && <Text style={styles.total}>{formatDistance(total)}</Text>}

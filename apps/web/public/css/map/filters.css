@@ -617,3 +617,38 @@ select.date-input {
 	display: flex;
 	gap: 8px;
 }
+
+/* Przyciski akcji poza stopką filtrów (panele narzędzi: teren, zasięg, trasa, pomiar). Stopka nadpisuje je własnymi regułami. */
+.apply-filters-btn, .clear-filters-btn {
+	flex: 1;
+	padding: 9px 12px;
+	border: 1px solid var(--red-dark);
+	border-radius: var(--radius-sm);
+	font: inherit;
+	font-weight: 500;
+	transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s var(--ease);
+	cursor: pointer;
+}
+
+.apply-filters-btn:active, .clear-filters-btn:active {
+	transform: scale(0.97);
+}
+
+.apply-filters-btn {
+	background: var(--brand-gradient, var(--red));
+	color: #fff;
+}
+
+.apply-filters-btn:hover {
+	border-color: var(--red-bright);
+	background: var(--red-bright);
+}
+
+.clear-filters-btn {
+	background: transparent;
+	color: var(--red-bright);
+}
+
+.clear-filters-btn:hover {
+	background: var(--red-glow);
+}

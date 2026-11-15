@@ -1,37 +1,36 @@
+const { SITES, GITHUB_URL } = require('../../../packages/core/src/sites.js');
+
 const DELETION_EMAIL = 'recrof@gmail.com';
+const DISCORD_URL = 'https://meshcorepolska.org/discord';
+
+// Site data shared with the mobile app lives in packages/core/src/sites.js; this file adds what only the server and the views need.
+const withBrand = shared => ({
+	...shared,
+	githubUrl: GITHUB_URL,
+	discordUrl: DISCORD_URL,
+	brandNameHtml: shared.brandAccent ? shared.brandName.replace(shared.brandAccent, `<strong>${shared.brandAccent}</strong>`) : shared.brandName,
+});
 
 const poland = {
+	...withBrand(SITES.pl),
 	defaultLanguage: 'pl',
-	mapLanguage: 'pl',
-	defaultRegion: 'pl',
-	defaultView: { lat: 52.1537, lon: 19.3250, zoom: 7 },
 	defaultRadio: 'EU/UK (Narrow)',
-	maptilerHybridMapId: '01a04259-c91e-7408-8c84-e27953c48bf2',
 	theme: 'poland',
 	themeColor: '#95010b',
 	languageSwitcher: 'none',
 	showRegionToggle: true,
 	domain: 'mapa.meshcorepolska.org',
 	deletionEmail: DELETION_EMAIL,
-	brandName: 'MeshCore Polska',
-	brandNameHtml: 'MeshCore <strong>Polska</strong>',
-	brandUrl: 'https://meshcorepolska.org',
-	logo: 'https://meshcorepolska.org/images/brand/logo-1-80.jpg',
 	ogImage: 'https://meshcorepolska.org/images/brand/banner-og.jpg',
 	favicon: 'https://meshcorepolska.org/favicon.ico',
-	icon192: 'https://meshcorepolska.org/images/brand/logo-3-192.jpg',
 	icon512: 'https://meshcorepolska.org/images/brand/logo-3-512.jpg',
 	appleIcon: 'https://meshcorepolska.org/images/brand/logo-3-180.jpg',
-	discordUrl: 'https://meshcorepolska.org/discord',
 };
 
 const global = {
+	...withBrand(SITES.all),
 	defaultLanguage: 'en',
-	mapLanguage: 'local',
-	defaultRegion: 'all',
-	defaultView: { lat: 29.9836, lon: 7.0313, zoom: 3 },
 	defaultRadio: 'USA/Canada (Recommended)',
-	maptilerHybridMapId: '01a04275-e76d-714c-a0c9-bcd41ea874cd',
 	theme: 'global',
 	themeColor: '#4f46e5',
 	languageSwitcher: 'dropdown',
@@ -39,18 +38,12 @@ const global = {
 	domain: 'map.meshcoreprofiles.com',
 	deletionEmail: DELETION_EMAIL,
 	crossLinks: { pl: 'https://mapa.meshcorepolska.org' },
-	brandName: 'MeshCore Map',
-	brandNameHtml: 'MeshCore Map',
 	shortName: 'MeshCore',
-	brandUrl: 'https://meshcoreprofiles.com',
-	logo: '/images/logo-512.svg',
 	ogImage: 'https://meshcoreprofiles.com/images/banner.png',
 	favicon: '/favicon.ico',
 	faviconSvg: '/favicon.svg',
-	icon192: '/images/icon-192.png',
 	icon512: '/images/icon-512.png',
 	appleIcon: '/apple-touch-icon.png',
-	discordUrl: 'https://meshcorepolska.org/discord',
 };
 
 const HOSTS = {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { pack, unpack } from 'msgpackr';
 import { createElevationProviders, fetchElevations, fetchElevationsChunked } from '@meshcore-map/core/elevation-providers';
 import { normalizeRadioPresets } from '@meshcore-map/core/presets';
-import { API_BASE } from '../config';
+import { API_BASE, SEFINEK_API } from '../config';
 import { readJson, writeJson } from '../storage/files';
 import { apiFetch } from './http';
 
@@ -30,12 +30,17 @@ const loadWithCache = async (path, file) => {
 	}
 };
 
+// Used when the server predates /api/v1/app-config (404) or sends only part of it: the tools stay available instead of silently turning off.
+const DEFAULT_CONFIG = { features: { terrain: true, coverage: true }, sefinekApi: SEFINEK_API };
+
+const withDefaults = data => ({ ...DEFAULT_CONFIG, ...data, features: { ...DEFAULT_CONFIG.features, ...data?.features }, sefinekApi: data?.sefinekApi ?? DEFAULT_CONFIG.sefinekApi });
+
 let configPromise = null;
 
 export const loadAppConfig = () => {
-	configPromise ??= loadWithCache('/api/v1/app-config', CONFIG_FILE).catch(err => {
-		configPromise = null;
-		throw err;
+	configPromise ??= loadWithCache('/api/v1/app-config', CONFIG_FILE).then(withDefaults).catch(err => {
+		console.warn('App config unavailable, using built-in defaults:', err.message);
+		return DEFAULT_CONFIG;
 	});
 
 	return configPromise;

@@ -1,6 +1,7 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { createPathLayer, findNodeNearLatLng, formatDistance, loadJson, resolveNodeByQuery } from './pathtools.js';
+import { PALETTE } from '/core/colors.js';
 import { analyzeLineOfSight, clearanceAt, sampleLine } from '/core/los.js';
 import { ELEVATION_PROVIDERS, fetchElevations, haversineDistance, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
 
@@ -8,14 +9,14 @@ const SAMPLE_COUNT = 48;
 
 const getCssVar = (name, fallback) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 
-const COLOR_TERRAIN = '#99a1b5';
+const COLOR_TERRAIN = PALETTE.textMuted;
 const COLOR_BORDER = 'rgba(148, 166, 204, 0.25)';
 const COLOR_TEXT = '#eef1f8';
-const COLOR_TEXT_MUTED = '#99a1b5';
-const COLOR_GREEN = '#2dd881';
-const COLOR_RED_BRIGHT = getCssVar('--red-bright', '#ff3352');
-const COLOR_RED = getCssVar('--red', '#e01230');
-const COLOR_BLUE = '#4dabf7';
+const COLOR_TEXT_MUTED = PALETTE.textMuted;
+const COLOR_GREEN = PALETTE.green;
+const COLOR_RED_BRIGHT = getCssVar('--red-bright', PALETTE.redBright);
+const COLOR_RED = getCssVar('--red', PALETTE.red);
+const COLOR_BLUE = PALETTE.blue;
 
 const buildChartSvg = ({ samples, distances, total, elevA, elevB, obstructed }) => {
 	const width = 640, height = 220;
@@ -80,7 +81,7 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 	const clearBtn = document.getElementById('terrain-clear-btn');
 	const resultEl = document.getElementById('terrain-result');
 
-	const preview = createPathLayer({ map, color: '#f2b134' });
+	const preview = createPathLayer({ map, color: PALETTE.amber });
 	preview.hide();
 
 	const points = { a: null, b: null };

@@ -148,3 +148,32 @@ export const timeAgoParts = (msec, now = Date.now()) => {
 
 	return null;
 };
+
+// "3 hours ago"; i18n is { t, tRaw, plural } from the caller (the website and the app each have their own).
+export const formatTimeAgo = (msec, { t, tRaw, plural }) => {
+	const ago = timeAgoParts(msec);
+	if (!ago) return t('common:justNow');
+
+	return t('common:timeAgo', { count: ago.count, unit: plural(ago.count, tRaw(`common:timeUnits.${ago.unit}`)) });
+};
+
+export const MS_PER_DAY = 86400000;
+
+// Periods of the "new nodes" statistics (24h, 7d, 30d), in days.
+export const STATS_PERIOD_DAYS = { '24h': 1, '7d': 7, '30d': 30 };
+
+export const nodesInsertedSince = (nodes, days, now = Date.now()) => {
+	const threshold = now - days * MS_PER_DAY;
+	return nodes.filter(node => node.insertDate.getTime() > threshold);
+};
+
+export const countByType = nodes => {
+	let clients = 0, repeaters = 0, roomServers = 0;
+	for (const node of nodes) {
+		if (node.type === 1) clients++;
+		else if (node.type === 2) repeaters++;
+		else if (node.type === 3) roomServers++;
+	}
+
+	return { clients, repeaters, roomServers };
+};

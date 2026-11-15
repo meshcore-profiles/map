@@ -1,22 +1,36 @@
 import { memo, useMemo } from 'react';
-import { GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
-import { getColourForName } from '@meshcore-map/core/node-utils';
-import { colors, statusColors, typeColors } from '../theme';
+import { GeoJSONSource, Images, Layer } from '@maplibre/maplibre-react-native';
+import { getColourForName, getNameIconLabel } from '@meshcore-map/core/node-utils';
+import { useTheme } from '../state/ThemeContext';
+import { NODE_TYPE_ICON_NAMES } from '@meshcore-map/core/colors';
+import { NODE_IMAGES } from './nodeImages';
 
 const featureCache = new WeakMap();
 
-// GeoJSON feature built once per node, so changing filters does not recompute colours and coordinates.
+// Letters the map's glyph font covers. Anything else (emoji, symbols, other scripts) would draw an empty disc, so it gets the person glyph instead.
+const TEXT_LABEL = /^[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{N}]+$/u;
+const CLIENT_GLYPH = 'client-glyph';
+
+const clientLabel = name => {
+	const label = getNameIconLabel(name);
+	return TEXT_LABEL.test(label) ? label : '';
+};
+
+// GeoJSON feature built once per node, so changing filters does not recompute labels, colours and coordinates.
 const toFeature = node => {
 	let feature = featureCache.get(node);
 	if (!feature) {
+		const isClient = node.type === 1;
+		const label = isClient ? clientLabel(node.adv_name) : '';
 		feature = {
 			type: 'Feature',
 			geometry: { type: 'Point', coordinates: [node.lon, node.lat] },
 			properties: {
 				key: node.public_key,
 				type: node.type,
-				status: node.status,
-				color: node.type === 1 ? getColourForName(node.adv_name) : statusColors[node.status],
+				icon: isClient ? (label ? '' : CLIENT_GLYPH) : `${NODE_TYPE_ICON_NAMES[node.type]}-${node.status}`,
+				color: isClient ? getColourForName(node.adv_name) : '',
+				label,
 			},
 		};
 		featureCache.set(node, feature);
@@ -25,52 +39,81 @@ const toFeature = node => {
 	return feature;
 };
 
-const byType = (values, fallback) => ['match', ['get', 'type'], 1, values[1], 2, values[2], 3, values[3], 4, values[4], fallback];
+// Same look as the website's marker clusters: translucent halo around a stronger disc, in the theme's accent colour.
+const createThemedPaints = ({ accent, accentBright }) => ({
+	clusterHalo: {
+		'circle-color': accent,
+		'circle-opacity': 0.3,
+		'circle-radius': ['step', ['get', 'point_count'], 22, 50, 27, 500, 33],
+	},
+	cluster: {
+		'circle-color': accent,
+		'circle-opacity': ['step', ['get', 'point_count'], 0.65, 50, 0.78, 500, 0.9],
+		'circle-radius': ['step', ['get', 'point_count'], 16, 50, 20, 500, 25],
+	},
+	highlight: {
+		'circle-color': 'rgba(0, 0, 0, 0)',
+		'circle-radius': 20,
+		'circle-stroke-width': 3,
+		'circle-stroke-color': accentBright,
+	},
+});
 
-const CLUSTER_PAINT = {
-	'circle-color': colors.blue,
-	'circle-opacity': 0.85,
-	'circle-radius': ['step', ['get', 'point_count'], 16, 50, 20, 500, 26],
-	'circle-stroke-width': 2,
-	'circle-stroke-color': '#fff',
-};
+const CLUSTERS = ['has', 'point_count'];
+const IS_CLIENT = ['==', ['get', 'type'], 1];
+const CLIENTS = ['all', ['!', CLUSTERS], IS_CLIENT];
+const ICONS = ['all', ['!', CLUSTERS], ['!=', ['get', 'icon'], '']];
 
 const CLUSTER_LABEL_LAYOUT = {
 	'text-field': ['get', 'point_count_abbreviated'],
-	'text-font': ['Noto Sans Regular'],
+	'text-font': ['Noto Sans Bold'],
 	'text-size': 13,
 	'text-allow-overlap': true,
 };
 
-const POINT_PAINT = {
+// Clients: coloured disc (hash of the name) with the name's initial or emoji, like the website.
+const CLIENT_PAINT = {
 	'circle-color': ['get', 'color'],
-	'circle-radius': byType({ 1: 6, 2: 8, 3: 8, 4: 7 }, 7),
-	'circle-stroke-width': 2,
-	'circle-stroke-color': byType(typeColors, '#fff'),
-	'circle-opacity': ['case', ['==', ['get', 'status'], 'extinct'], 0.55, 1],
+	'circle-radius': 13,
 };
 
-const HIGHLIGHT_PAINT = {
-	'circle-color': 'rgba(0, 0, 0, 0)',
-	'circle-radius': 17,
-	'circle-stroke-width': 3,
-	'circle-stroke-color': colors.green,
+const CLIENT_LABEL_LAYOUT = {
+	'text-field': ['get', 'label'],
+	'text-font': ['Noto Sans Bold'],
+	'text-size': 14,
+	'text-allow-overlap': true,
+	'text-ignore-placement': true,
 };
+
+const BADGE_LAYOUT = {
+	'icon-image': ['get', 'icon'],
+	'icon-size': ['case', IS_CLIENT, 0.2, 0.34],
+	'icon-allow-overlap': true,
+	'icon-ignore-placement': true,
+};
+
+const WHITE = { 'text-color': '#fff' };
 
 // Clustering is disabled from zoom clusteringZoom upwards (like disableClusteringAtZoom on the web).
 export const NodeLayer = memo(({ nodes, selected, clusteringZoom, sourceRef, onPress }) => {
+	const theme = useTheme();
 	const data = useMemo(() => ({ type: 'FeatureCollection', features: nodes.map(toFeature) }), [nodes]);
+	const paints = useMemo(() => createThemedPaints(theme), [theme]);
 	const highlight = useMemo(() => ({ type: 'FeatureCollection', features: selected ? [toFeature(selected)] : [] }), [selected]);
 
 	return (
 		<>
+			<Images images={NODE_IMAGES} />
 			<GeoJSONSource id="nodes" ref={sourceRef} data={data} cluster clusterRadius={50} clusterMaxZoom={clusteringZoom - 1} onPress={onPress}>
-				<Layer id="node-clusters" type="circle" filter={['has', 'point_count']} paint={CLUSTER_PAINT} />
-				<Layer id="node-cluster-count" type="symbol" filter={['has', 'point_count']} layout={CLUSTER_LABEL_LAYOUT} paint={{ 'text-color': '#fff' }} />
-				<Layer id="node-points" type="circle" filter={['!', ['has', 'point_count']]} paint={POINT_PAINT} />
+				<Layer id="node-clusters-halo" type="circle" filter={CLUSTERS} paint={paints.clusterHalo} />
+				<Layer id="node-clusters" type="circle" filter={CLUSTERS} paint={paints.cluster} />
+				<Layer id="node-cluster-count" type="symbol" filter={CLUSTERS} layout={CLUSTER_LABEL_LAYOUT} paint={WHITE} />
+				<Layer id="node-clients" type="circle" filter={CLIENTS} paint={CLIENT_PAINT} />
+				<Layer id="node-clients-label" type="symbol" filter={CLIENTS} layout={CLIENT_LABEL_LAYOUT} paint={WHITE} />
+				<Layer id="node-badges" type="symbol" filter={ICONS} layout={BADGE_LAYOUT} />
 			</GeoJSONSource>
 			<GeoJSONSource id="node-selected" data={highlight}>
-				<Layer id="node-selected-ring" type="circle" paint={HIGHLIGHT_PAINT} />
+				<Layer id="node-selected-ring" type="circle" paint={paints.highlight} />
 			</GeoJSONSource>
 		</>
 	);

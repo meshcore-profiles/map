@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { Camera, Map as MapView } from '@maplibre/maplibre-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DEFAULT_BASEMAP_SELECTION } from '@meshcore-map/core/basemaps';
 import { createDefaultFilters } from '@meshcore-map/core/nodes';
 import { FiltersSheet } from '../components/FiltersSheet';
 import { NodeLayer } from '../components/NodeLayer';
@@ -10,10 +11,15 @@ import { OverlayLayer } from '../components/OverlayLayer';
 import { RegionPrompt } from '../components/RegionPrompt';
 import { SearchBar } from '../components/SearchBar';
 import { SettingsSheet } from '../components/SettingsSheet';
+import { BasemapSheet } from '../components/BasemapSheet';
+import { StatsBar } from '../components/StatsBar';
+import { StatsSheet } from '../components/StatsSheet';
+import { boundsOf } from '../tools/pathFeatures';
+import { TopBar } from '../components/TopBar';
 import { StatusBanner } from '../components/StatusBanner';
-import { ToolsSheet } from '../components/ToolsSheet';
-import { DEFAULT_VIEW, MAP_STYLE } from '../config';
+import { DEFAULT_VIEW } from '../config';
 import { useAppConfig } from '../data/appConfig';
+import { createBasemaps } from '../data/basemaps';
 import { useI18n } from '../i18n';
 import { useNodes } from '../state/NodesContext';
 import { useSettings } from '../state/SettingsContext';
@@ -21,21 +27,29 @@ import { CoverageTool } from '../tools/CoverageTool';
 import { MeasureTool } from '../tools/MeasureTool';
 import { RouteTool } from '../tools/RouteTool';
 import { TerrainTool } from '../tools/TerrainTool';
-import { colors, MIN_TOUCH, radius, spacing } from '../theme';
+import { Fab, FAB_SIZE } from '../ui/Fab';
+import { useToast } from '../ui/Toast';
+import { useTheme } from '../state/ThemeContext';
+import { Icon } from '../ui/Icon';
+import { colors, MIN_TOUCH, spacing } from '../theme';
 
 const styles = StyleSheet.create({
 	root: { flex: 1, backgroundColor: colors.bg },
 	map: { flex: 1 },
-	topBar: { position: 'absolute', left: spacing.md, right: spacing.md, flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-	roundButton: { width: MIN_TOUCH, height: MIN_TOUCH, borderRadius: radius.md, backgroundColor: colors.panel, alignItems: 'center', justifyContent: 'center', elevation: 4 },
-	roundButtonText: { color: colors.text, fontSize: 20 },
-	pills: { position: 'absolute', right: spacing.md, gap: spacing.sm, alignItems: 'flex-end' },
-	pill: { minHeight: MIN_TOUCH, paddingHorizontal: spacing.lg, borderRadius: 22, backgroundColor: colors.panel, justifyContent: 'center', elevation: 4 },
-	pillActive: { backgroundColor: colors.blue },
-	pillText: { color: colors.text, fontWeight: '600' },
-	pillTextActive: { color: '#0b0e14' },
-	bottom: { position: 'absolute', left: spacing.md, right: spacing.md },
+	topBar: { position: 'absolute', left: spacing.md, right: spacing.md },
+	barButton: { width: MIN_TOUCH, height: MIN_TOUCH, alignItems: 'center', justifyContent: 'center' },
+	activeDot: { position: 'absolute', top: 9, right: 9, width: 9, height: 9, borderRadius: 5, borderWidth: 1.5, borderColor: colors.panelSolid },
+	fabStack: { position: 'absolute', right: spacing.md, alignItems: 'center', gap: spacing.sm },
+	bottom: { position: 'absolute', left: spacing.md },
+	search: { marginTop: spacing.sm },
 });
+
+const TOOL_FABS = [
+	{ id: 'terrain', icon: 'terrain', title: 'terrain:toggleTitle' },
+	{ id: 'coverage', icon: 'coverage', title: 'coverage:toggleTitle' },
+	{ id: 'route', icon: 'route', title: 'route:toggleTitle' },
+	{ id: 'measure', icon: 'ruler', title: 'measure:toggleTitle' },
+];
 
 const TOOLS = { measure: MeasureTool, route: RouteTool, terrain: TerrainTool, coverage: CoverageTool };
 
@@ -49,8 +63,11 @@ const filtersActive = filters => {
 
 export const MapScreen = () => {
 	const { t } = useI18n();
+	const showToast = useToast();
 	const insets = useSafeAreaInsets();
 	const { settings, ready, update } = useSettings();
+	const { accentBright } = useTheme();
+	const filtersOn = useMemo(() => filtersActive(settings.filters), [settings.filters]);
 	const { nodes, byType, radioOptions, filtered } = useNodes();
 	const config = useAppConfig();
 
@@ -62,6 +79,33 @@ export const MapScreen = () => {
 	const [toolId, setToolId] = useState(null);
 	const [overlay, setOverlay] = useState(null);
 
+	const basemaps = useMemo(() => createBasemaps(config?.basemaps, settings.region ?? 'all'), [config, settings.region]);
+	const [fallbackName, setFallbackName] = useState(null);
+	const selectedName = basemaps.resolve(settings.basemap);
+	const available = basemaps.byName(selectedName) ? selectedName : basemaps.defaultName;
+	const activeName = fallbackName && basemaps.byName(fallbackName) ? fallbackName : available;
+	const activeBasemap = basemaps.byName(activeName);
+
+	useEffect(() => {
+		setFallbackName(null);
+	}, [settings.basemap, settings.region]);
+
+	useEffect(() => {
+		if (config && basemaps.isMissingKey(settings.basemap)) {
+			showToast(t('map:basemapMissingApiKey', { name: settings.basemap }), { status: 'error', duration: 6000 });
+			update({ basemap: DEFAULT_BASEMAP_SELECTION });
+		}
+	}, [config, basemaps, settings.basemap, showToast, t, update]);
+
+	const handleBasemapFailed = useCallback(() => {
+		const next = basemaps.nextFallback(activeName);
+		if (!next) return;
+
+		showToast(t('map:basemapFallback', { failed: activeName, fallback: next }), { status: 'error', duration: 6000 });
+		setFallbackName(next);
+	}, [basemaps, activeName, showToast, t]);
+
+	const repeaters = useMemo(() => byType[2] ?? [], [byType]);
 	const byKey = useMemo(() => new Map(nodes.map(node => [node.public_key, node])), [nodes]);
 
 	useEffect(() => {
@@ -74,6 +118,12 @@ export const MapScreen = () => {
 	const flyToNode = useCallback(node => cameraRef.current?.flyTo({ center: [node.lon, node.lat], zoom: 14, duration: 800 }), []);
 
 	const fitTo = useCallback(bounds => cameraRef.current?.fitBounds(bounds, { padding: { top: insets.top + 80, bottom: 360, left: 40, right: 40 }, duration: 600 }), [insets.top]);
+
+
+	const showRepeaters = useCallback(list => {
+		setSheet(null);
+		if (list.length) fitTo(boundsOf(list.map(node => ({ lat: node.lat, lng: node.lon }))));
+	}, [fitTo]);
 
 	const setPicker = useCallback(handlers => {
 		pickerRef.current = handlers;
@@ -113,6 +163,11 @@ export const MapScreen = () => {
 
 	const closeTool = useCallback(() => setToolId(null), []);
 
+	const openTool = id => {
+		setSelected(null);
+		setToolId(id);
+	};
+
 	const toolContext = useMemo(() => ({ nodes, config, setOverlay, setPicker, fitTo, onClose: closeTool }), [nodes, config, setPicker, fitTo, closeTool]);
 	const ActiveTool = toolId ? TOOLS[toolId] : null;
 
@@ -120,30 +175,38 @@ export const MapScreen = () => {
 
 	return (
 		<View style={styles.root}>
-			<MapView style={styles.map} mapStyle={MAP_STYLE} onPress={handleMapPress}>
+			<MapView style={styles.map} mapStyle={activeBasemap.style} onPress={handleMapPress} onDidFailLoadingMap={handleBasemapFailed}>
 				<Camera ref={cameraRef} initialViewState={{ center: view.center, zoom: view.zoom }} />
 				<NodeLayer nodes={filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />
 				{overlay && <OverlayLayer features={overlay} />}
 			</MapView>
 
 			<View style={[styles.topBar, { top: insets.top + spacing.sm }]}>
-				<SearchBar nodes={filtered} onSelect={showNode} />
-				<Pressable style={styles.roundButton} onPress={() => setSheet('settings')} accessibilityRole="button" accessibilityLabel={t('mobile:settings.title')}>
-					<Text style={styles.roundButtonText}>⚙</Text>
-				</Pressable>
+				<TopBar onStats={() => setSheet('stats')} onBasemap={() => setSheet('basemap')}>
+					<StatsBar nodes={filtered} />
+					<View style={styles.search}>
+						<SearchBar nodes={filtered} onSelect={showNode}>
+							<Pressable style={styles.barButton} onPress={() => setSheet('filters')} accessibilityRole="button" accessibilityLabel={t('filters:toggleTitle')}>
+								<Icon name="filter" size={22} color={filtersOn ? accentBright : colors.text} />
+								{filtersOn && <View style={[styles.activeDot, { backgroundColor: accentBright }]} />}
+							</Pressable>
+							<Pressable style={styles.barButton} onPress={() => setSheet('settings')} accessibilityRole="button" accessibilityLabel={t('settings:title')}>
+								<Icon name="settings" size={22} color={colors.text} />
+							</Pressable>
+						</SearchBar>
+					</View>
+				</TopBar>
 			</View>
 
 			{!ActiveTool && (
 				<>
-					<View style={[styles.pills, { bottom: insets.bottom + 72 }]}>
-						<Pressable style={[styles.pill, filtersActive(settings.filters) && styles.pillActive]} onPress={() => setSheet('filters')} accessibilityRole="button">
-							<Text style={[styles.pillText, filtersActive(settings.filters) && styles.pillTextActive]}>{t('filters:title')}</Text>
-						</Pressable>
-						<Pressable style={styles.pill} onPress={() => setSheet('tools')} accessibilityRole="button">
-							<Text style={styles.pillText}>{t('mobile:tools.title')}</Text>
-						</Pressable>
+					<View style={[styles.fabStack, { bottom: insets.bottom + spacing.md }]}>
+						{TOOL_FABS.filter(tool => config?.features?.[tool.id] !== false).map(tool => (
+							<Fab key={tool.id} icon={tool.icon} label={t(tool.title)} onPress={() => openTool(tool.id)} />
+						))}
+						{config?.addNodeUrl && <Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(config.addNodeUrl)} />}
 					</View>
-					<View style={[styles.bottom, { bottom: insets.bottom + spacing.sm }]}>
+					<View style={[styles.bottom, { bottom: insets.bottom + spacing.md, right: spacing.md * 2 + FAB_SIZE }]}>
 						<StatusBanner />
 					</View>
 				</>
@@ -167,17 +230,9 @@ export const MapScreen = () => {
 					onClose={() => setSheet(null)}
 				/>
 			)}
+			<StatsSheet visible={sheet === 'stats'} onClose={() => setSheet(null)} nodes={nodes} repeaters={repeaters} onSelectNode={node => { setSheet(null); showNode(node); }} onShowOnMap={showRepeaters} />
+			<BasemapSheet visible={sheet === 'basemap'} onClose={() => setSheet(null)} basemaps={basemaps} selection={settings.basemap} onSelect={name => { update({ basemap: name }); setSheet(null); }} />
 			<SettingsSheet visible={sheet === 'settings'} onClose={() => setSheet(null)} />
-			<ToolsSheet
-				visible={sheet === 'tools'}
-				features={config?.features}
-				onSelect={id => {
-					setSheet(null);
-					setSelected(null);
-					setToolId(id);
-				}}
-				onClose={() => setSheet(null)}
-			/>
 			<RegionPrompt visible={ready && !settings.region} />
 		</View>
 	);

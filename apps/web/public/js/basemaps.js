@@ -1,90 +1,35 @@
 /* global L */
+import { createBasemapCatalog, DEFAULT_BASEMAP_SELECTION, ESRI_HYBRID_NAME } from '/core/basemaps.js';
 import { t, tRaw } from './i18n.js';
 import { escapeHtml } from './pathtools.js';
 
-const MAPTILER_HYBRID_NAME = 'MapTiler Hybrid';
-const MAPTILER_OUTDOOR_NAME = 'MapTiler Outdoor';
-const CARTO_DARK_NAME = 'CartoDB Dark';
-const CARTO_POSITRON_NAME = 'CartoDB Positron';
-const OPENFREEMAP_NAME = 'OpenFreeMap';
-const ESRI_HYBRID_NAME = 'Esri Hybrid';
-const ESRI_ROADS_MIN_ZOOM = 12;
 const mapLanguage = window.MAP_CONFIG.mapLanguage || 'local';
+const ESRI_ROADS_MIN_ZOOM = 12;
 
-const esriApiKey = window.MAP_CONFIG.esriApiKey?.trim();
-const esriToken = encodeURIComponent(esriApiKey || '');
-const cartoApiKey = window.MAP_CONFIG.cartoApiKey;
-const maptilerApiKey = window.MAP_CONFIG.maptilerApiKey;
-const maptilerAvailable = Boolean(maptilerApiKey);
+// Names, URLs, default and fallback order are shared with the mobile app (packages/core/src/basemaps.js).
+const catalog = createBasemapCatalog({
+	esriApiKey: window.MAP_CONFIG.esriApiKey,
+	cartoApiKey: window.MAP_CONFIG.cartoApiKey,
+	maptilerApiKey: window.MAP_CONFIG.maptilerApiKey,
+	maptilerHybridMapId: window.MAP_CONFIG.maptilerHybridMapId,
+	mapLanguage,
+});
+const { defaultName: defaultBaseMapName, nextFallback: getNextFallbackBaseMap, resolve: resolveBaseMapName, isMissingKey: isBaseMapMissingKey } = catalog;
 
-const basemapFallbackChain = [
-	...(esriApiKey ? [ESRI_HYBRID_NAME] : []),
-	...(maptilerAvailable ? [MAPTILER_HYBRID_NAME] : []),
-	...(cartoApiKey ? [CARTO_DARK_NAME] : []),
-	'OpenStreetMap',
-];
-const getNextFallbackBaseMap = failedName => {
-	const index = basemapFallbackChain.indexOf(failedName);
-	return index === -1 ? basemapFallbackChain[0] : basemapFallbackChain[index + 1];
-};
+const maplibreBaseMapOptions = Object.fromEntries(catalog.basemaps
+	.filter(basemap => basemap.group === 'vector')
+	.map(basemap => [basemap.name, { style: basemap.url, maxZoom: basemap.maxZoom }]));
 
-const maplibreBaseMapOptions = {
-	...(esriApiKey ? {
-		[ESRI_HYBRID_NAME]: {
-			style: `https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/imagery?language=${encodeURIComponent(mapLanguage)}&token=${esriToken}`,
-			maxZoom: 18,
-		},
-	} : {}),
-	...(maptilerAvailable ? {
-		[MAPTILER_HYBRID_NAME]: {
-			style: `https://api.maptiler.com/maps/${window.MAP_CONFIG.maptilerHybridMapId}/style.json?key=${maptilerApiKey}`,
-			maxZoom: 20,
-		},
-	} : {}),
-	[OPENFREEMAP_NAME]: {
-		style: 'https://tiles.openfreemap.org/styles/liberty',
-		maxZoom: 20,
-	},
-};
-const createMapTilerRasterLayer = mapId => L.tileLayer(`https://api.maptiler.com/maps/${mapId}/{z}/{x}/{y}.jpg?key=${maptilerApiKey}`, {
-	tileSize: 512,
-	zoomOffset: -1,
-	minZoom: 1,
-	maxZoom: 20,
+const createTileLayer = ({ url, maxZoom, subdomains, tileSize }) => L.tileLayer(url, {
+	maxZoom,
 	referrerPolicy: 'strict-origin-when-cross-origin',
+	...(subdomains ? { subdomains } : {}),
+	...(tileSize === 512 ? { tileSize, zoomOffset: -1, minZoom: 1 } : {}),
 });
 
-const tileBaseMaps = {
-	...(cartoApiKey ? {
-		[CARTO_DARK_NAME]: L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`, {
-			maxZoom: 20,
-			subdomains: 'abcd',
-			referrerPolicy: 'strict-origin-when-cross-origin',
-		}),
-		[CARTO_POSITRON_NAME]: L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${cartoApiKey}`, {
-			maxZoom: 20,
-			subdomains: 'abcd',
-			referrerPolicy: 'strict-origin-when-cross-origin',
-		}),
-	} : {}),
-	'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		referrerPolicy: 'strict-origin-when-cross-origin',
-	}),
-	'OpenTopoMap': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-		maxZoom: 17,
-		subdomains: 'abc',
-	}),
-	...(maptilerAvailable ? { [MAPTILER_OUTDOOR_NAME]: createMapTilerRasterLayer('outdoor-v4') } : {}),
-	'CyclOSM': L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
-		maxZoom: 20,
-		subdomains: 'abc',
-	}),
-	'Humanitarian OSM': L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-		maxZoom: 20,
-		subdomains: 'abc',
-	}),
-};
+const tileBaseMaps = Object.fromEntries(catalog.basemaps
+	.filter(basemap => basemap.group === 'tiles')
+	.map(basemap => [basemap.name, createTileLayer(basemap)]));
 const maplibreBaseMaps = {};
 const maplibreBaseMapPromises = {};
 
@@ -96,9 +41,6 @@ const getBaseMapGroups = () => [
 	{ label: t('map:vectorBaseMaps'), names: Object.keys(maplibreBaseMapOptions) },
 ].filter(group => group.names.length);
 const getBaseMapNames = () => getBaseMapGroups().flatMap(group => group.names);
-const defaultBaseMapName = esriApiKey ? ESRI_HYBRID_NAME : maptilerAvailable ? MAPTILER_HYBRID_NAME : 'OpenStreetMap';
-const DEFAULT_BASEMAP_SELECTION = 'Default';
-const resolveBaseMapName = name => name === DEFAULT_BASEMAP_SELECTION ? defaultBaseMapName : name;
 
 let maplibreLoadPromise = null;
 const loadMaplibreGL = () => {
@@ -188,14 +130,7 @@ const getMaplibreBaseMapLayer = async name => {
 };
 
 export {
-	MAPTILER_HYBRID_NAME,
-	MAPTILER_OUTDOOR_NAME,
-	CARTO_DARK_NAME,
-	CARTO_POSITRON_NAME,
-	ESRI_HYBRID_NAME,
-	esriApiKey,
-	cartoApiKey,
-	maptilerAvailable,
+	isBaseMapMissingKey,
 	getNextFallbackBaseMap,
 	maplibreBaseMapOptions,
 	tileBaseMaps,

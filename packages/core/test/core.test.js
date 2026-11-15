@@ -38,6 +38,9 @@ test('node-utils', () => {
 	assert.equal(truncateKey('0123456789abcdefghij0123456789', 4), '0123...6789');
 	assert.equal(formatBytes(1536), '1.5 KB');
 	assert.equal(getNameIconLabel('Foo Bar'), 'FB');
+	assert.equal(getNameIconLabel('🛰 Sat'), '🛰S');
+	assert.equal(getNameIconLabel('𝗠esh'), '𝗠');
+	assert.equal(getNameIconLabel('   '), '');
 	const nodes = [{ adv_name: 'Alpha', public_key: 'AB12' }, { adv_name: 'Beta', public_key: 'CD34' }];
 	assert.equal(resolveNodeByQuery('cd', nodes), nodes[1]);
 	assert.equal(resolveNodeByQuery('', nodes), null);

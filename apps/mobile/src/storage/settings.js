@@ -1,3 +1,4 @@
+import { DEFAULT_BASEMAP_SELECTION } from '@meshcore-map/core/basemaps';
 import { createDefaultFilters } from '@meshcore-map/core/nodes';
 import { readJson, writeJson } from './files';
 
@@ -6,6 +7,7 @@ const FILE = 'settings.json';
 export const createDefaultSettings = () => ({
 	region: null,
 	language: 'auto',
+	basemap: DEFAULT_BASEMAP_SELECTION,
 	filters: createDefaultFilters(),
 });
 
@@ -17,6 +19,7 @@ const sanitize = saved => {
 	return {
 		region: saved?.region === 'all' || saved?.region === 'pl' ? saved.region : null,
 		language: ['auto', 'pl', 'en'].includes(saved?.language) ? saved.language : 'auto',
+		basemap: typeof saved?.basemap === 'string' && saved.basemap ? saved.basemap : DEFAULT_BASEMAP_SELECTION,
 		filters: {
 			...filters,
 			radioFilters: { ...defaults.filters.radioFilters, ...filters.radioFilters },

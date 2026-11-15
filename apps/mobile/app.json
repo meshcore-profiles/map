@@ -4,10 +4,15 @@
     "slug": "meshcore-map",
     "version": "0.1.0",
     "orientation": "portrait",
+    "platforms": ["android", "ios"],
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "plugins": ["@maplibre/maplibre-react-native"],
     "ios": { "bundleIdentifier": "com.meshcoreprofiles.map" },
-    "android": { "package": "com.meshcoreprofiles.map" },
-    "extra": { "apiBase": "https://map.meshcoreprofiles.com" }
+    "android": {
+      "package": "com.meshcoreprofiles.map",
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-foreground.png", "backgroundImage": "./assets/adaptive-background.png" }
+    },
+    "extra": { "apiBase": "https://map.meshcoreprofiles.com", "sefinekApi": "https://api.sefinek.net" }
   }
 }

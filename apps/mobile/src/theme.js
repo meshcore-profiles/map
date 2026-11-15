@@ -1,34 +1,22 @@
-// Values match public/css/global.css (the map's dark theme).
+import { NODE_TYPE_ICON_NAMES, PALETTE } from '@meshcore-map/core/colors';
+
+// Neutral palette shared by both themes (public/css/global.css). Accent colours depend on the theme: see state/ThemeContext.js.
 export const colors = {
 	bg: '#12151c',
-	panel: '#1c2029',
+	panel: 'rgba(26, 29, 38, 0.92)',
+	panelSolid: '#1c2029',
 	panelHover: '#262b38',
-	border: 'rgba(148, 166, 204, 0.25)',
+	chip: 'rgba(148, 166, 204, 0.12)',
+	border: 'rgba(148, 166, 204, 0.16)',
+	borderStrong: 'rgba(148, 166, 204, 0.3)',
 	text: '#eef1f8',
-	textMuted: '#99a1b5',
-	green: '#2dd881',
-	blue: '#4dabf7',
-	amber: '#f2b134',
-	red: '#e01230',
-	redBright: '#ff3352',
-	violet: '#b197fc',
-	statusNone: '#667b89',
-	statusRecent: '#319712',
-	statusStale: '#e4af00',
-	statusOld: '#e35e3a',
-	statusExtinct: '#787878',
+	...PALETTE,
 };
 
-export const statusColors = {
-	none: colors.statusNone,
-	recent: colors.statusRecent,
-	stale: colors.statusStale,
-	old: colors.statusOld,
-	extinct: colors.statusExtinct,
-};
-
-export const typeColors = { 1: '#ffffff', 2: colors.blue, 3: colors.amber, 4: colors.violet };
+export const NODE_TYPE_ICONS = Object.fromEntries(Object.entries(NODE_TYPE_ICON_NAMES).map(([type, name]) => [type, `${name}-plain`]));
 
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24 };
 export const radius = { sm: 8, md: 12, lg: 20 };
 export const MIN_TOUCH = 44;
+
+export const shadow = { elevation: 8, shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 14, shadowOffset: { width: 0, height: 4 } };

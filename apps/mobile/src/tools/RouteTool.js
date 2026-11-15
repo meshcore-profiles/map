@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 	input: { minHeight: 64, textAlignVertical: 'top' },
 });
 
-const COLOR = '#2dd881';
+const COLOR = colors.green;
 
 export const RouteTool = ({ ctx }) => {
 	const { t } = useI18n();
@@ -45,7 +45,7 @@ export const RouteTool = ({ ctx }) => {
 	let segmentIndex = 0;
 
 	return (
-		<ToolPanel title={t('route:title')} onClose={onClose}>
+		<ToolPanel icon="route" title={t('route:title')} onClose={onClose}>
 			<Hint>{t('route:desc')}</Hint>
 			<Field value={input} onChangeText={setInput} placeholder={t('route:inputPlaceholder')} multiline style={styles.input} />
 			<View style={styles.actions}>

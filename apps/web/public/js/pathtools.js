@@ -2,6 +2,7 @@
 import { t } from './i18n.js';
 import { formatDistance } from '/core/geo.js';
 import { escapeHtml } from '/core/node-utils.js';
+import { PALETTE } from '/core/colors.js';
 
 export { formatDistance } from '/core/geo.js';
 export { escapeHtml, resolveNodeByQuery, findNodeNearLatLng } from '/core/node-utils.js';
@@ -23,7 +24,7 @@ export const ensurePane = (map, name, zIndex) => {
 
 const ensurePathPane = map => ensurePane(map, 'pathToolsPane', 650);
 
-export const createPathLayer = ({ map, color = '#4dabf7' }) => {
+export const createPathLayer = ({ map, color = PALETTE.blue }) => {
 	ensurePathPane(map);
 	const group = L.layerGroup().addTo(map);
 	let points = [];

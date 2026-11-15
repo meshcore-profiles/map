@@ -1,6 +1,7 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { splitRouteTokens } from '/core/route.js';
+import { PALETTE } from '/core/colors.js';
 import { createPathLayer, formatDistance, resolveNodeByQuery } from './pathtools.js';
 
 const STORAGE_KEY = 'routeToolInput';
@@ -14,7 +15,7 @@ export const initRouteTool = ({ map, getNodes, escapeHtml }) => {
 	const totalEl = document.getElementById('route-total');
 	const listEl = document.getElementById('route-result-list');
 
-	const path = createPathLayer({ map, color: '#2dd881' });
+	const path = createPathLayer({ map, color: PALETTE.green });
 
 	const renderResults = tokens => {
 		if (!tokens.length) {

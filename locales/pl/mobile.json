@@ -23,8 +23,6 @@
 		"usingCache": "Pokazuję dane zapisane na urządzeniu. Nie udało się ich odświeżyć."
 	},
 	"settings": {
-		"title": "Ustawienia",
-		"language": "Język",
 		"languageAuto": "Automatyczny",
 		"data": "Dane węzłów",
 		"updated": "Pobrano: {{time}}",
@@ -38,9 +36,7 @@
 		"lastDays": "{{count}} dni"
 	},
 	"tools": {
-		"title": "Narzędzia",
 		"picking": "Dotknij mapy...",
-		"routeDesc": "Trasa po nazwach lub początkach kluczy publicznych.",
-		"needsNetwork": "Wymaga połączenia z internetem (dane wysokościowe)."
+		"routeDesc": "Trasa po nazwach lub początkach kluczy publicznych."
 	}
 }

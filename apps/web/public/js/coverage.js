@@ -5,15 +5,14 @@ import { ensurePane, escapeHtml, formatDistance, findNodeNearLatLng, loadJson, r
 import { destinationPoint, ELEVATION_PROVIDERS, fetchElevationsChunked, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
 import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay, MAX_RANGE_M, RESOLUTIONS } from '/core/coverage.js';
 import { truncateKey } from './node-utils.js';
+import { NODE_TYPE_ICON_NAMES, PALETTE } from '/core/colors.js';
 import { updateToast } from './toast.js';
 
-const NODE_TYPE_ICON_NAMES = { 1: 'client', 2: 'repeater', 3: 'room-server', 4: 'sensor' };
-
-const COLOR_OPTICAL = '#4dabf7';
-const COLOR_FRESNEL = '#2dd881';
-const COLOR_ORIGIN = '#f2b134';
-const COLOR_BUDGET = '#99a1b5';
-const COLOR_BLOCKED = '#e01230';
+const COLOR_OPTICAL = PALETTE.blue;
+const COLOR_FRESNEL = PALETTE.green;
+const COLOR_ORIGIN = PALETTE.amber;
+const COLOR_BUDGET = PALETTE.textMuted;
+const COLOR_BLOCKED = PALETTE.red;
 
 // Lightest to darkest - the darker the tile, the higher the chance of reception.
 const GRID_SHADES = ['#d4f3b2', '#a9e6a0', '#7fd68f', '#58c47f', '#38ad6f', '#259460', '#167a50', '#0b5f3f'];

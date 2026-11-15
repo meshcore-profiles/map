@@ -24,6 +24,9 @@ export const getColourForName = (name, saturation = 60, lightness = 50) => {
 	return `hsl(${hash % 360}deg, ${saturation}%, ${lightness}%)`;
 };
 
+// First code point, not UTF-16 unit: [0] or charAt(0) would cut a surrogate pair in half (e.g. 🛰, 𝗠) and produce invalid JSON/UTF-8.
+const firstChar = text => text ? String.fromCodePoint(text.codePointAt(0)) : '';
+
 export const getNameIconLabel = name => {
 	if (typeof name !== 'string' || name.length === 0) return '';
 
@@ -31,8 +34,8 @@ export const getNameIconLabel = name => {
 	if (!match) {
 		name = name.trim();
 		const segments = name.split(' ');
-		if (segments.length === 1) return name.charAt(0);
-		return `${segments.at(0)[0]}${segments.at(-1)[0]}`;
+		if (segments.length === 1) return firstChar(name);
+		return `${firstChar(segments.at(0))}${firstChar(segments.at(-1))}`;
 	}
 
 	return match[0];

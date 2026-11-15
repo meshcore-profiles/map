@@ -151,7 +151,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 			<%= _curMeta.name %>
 		</button>
 	<% } %>
-	<a href="https://github.com/meshcore-profiles/map" id="github-link" title="<%= t('common:githubRepoTitle') %>" aria-label="<%= t('common:githubRepoTitle') %>" target="_blank" rel="noopener">
+	<a href="<%= site.githubUrl %>" id="github-link" title="<%= t('common:githubRepoTitle') %>" aria-label="<%= t('common:githubRepoTitle') %>" target="_blank" rel="noopener">
 		<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#github"></use></svg>
 	</a>
 </header>
@@ -264,7 +264,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<button type="button" class="fab fab-secondary" id="legend-toggle" title="<%= t('legend:toggleTitle') %>" aria-label="<%= t('legend:toggleTitle') %>">
 		<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#info"></use></svg>
 	</button>
-	<a class="fab" id="fab-primary" title="<%= t('map:addNodeTitle') %>" aria-label="<%= t('map:addNodeTitle') %>" target="_blank" rel="noopener" href="https://github.com/meshcore-dev/MeshCore/blob/main/docs/faq.md#512-q-how-do-i-add-a-node-to-the-meshcore-map">
+	<a class="fab" id="fab-primary" title="<%= t('map:addNodeTitle') %>" aria-label="<%= t('map:addNodeTitle') %>" target="_blank" rel="noopener" href="<%= addNodeUrl %>">
 		<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#plus"></use></svg>
 	</a>
 </div>

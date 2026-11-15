@@ -15,7 +15,7 @@ const SAMPLE_COUNT = 48;
 const CHART_WIDTH = 320;
 const CHART_HEIGHT = 120;
 const CHART_PAD = 8;
-const COLOR = '#f2b134';
+const COLOR = colors.amber;
 
 const styles = StyleSheet.create({
 	pointRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
@@ -158,7 +158,7 @@ export const TerrainTool = ({ ctx }) => {
 	}, [result]);
 
 	return (
-		<ToolPanel title={t('terrain:title')} onClose={onClose}>
+		<ToolPanel icon="terrain" title={t('terrain:title')} onClose={onClose}>
 			{unavailable ? <Hint>{t('common:toolUnavailable')}</Hint> : (
 				<>
 					<Hint>{t('terrain:desc')}</Hint>

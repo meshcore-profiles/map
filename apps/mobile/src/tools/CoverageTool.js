@@ -23,8 +23,8 @@ const styles = StyleSheet.create({
 	error: { color: colors.redBright },
 });
 
-const COLOR_OPTICAL = '#4dabf7';
-const COLOR_FRESNEL = '#2dd881';
+const COLOR_OPTICAL = colors.blue;
+const COLOR_FRESNEL = colors.green;
 const DEFAULTS = { txHeight: '7', rxHeight: '2', margin: '7', erp: '27', freq: '869.618', sf: '8', bw: '62.5', resolution: 'high' };
 
 const avg = values => values.reduce((a, b) => a + b, 0) / values.length;
@@ -38,7 +38,7 @@ const polygon = (points, color, opacity) => ({
 const originFeature = origin => ({
 	type: 'Feature',
 	geometry: { type: 'Point', coordinates: [origin.lng, origin.lat] },
-	properties: { kind: 'point', color: '#f2b134', label: origin.label ?? '' },
+	properties: { kind: 'point', color: colors.amber, label: origin.label ?? '' },
 });
 
 const rangeStats = (ranges, capM) => ({ max: Math.max(...ranges), avg: avg(ranges), min: Math.min(...ranges), clear: ranges.filter(r => r >= capM - 1).length });
@@ -160,7 +160,7 @@ export const CoverageTool = ({ ctx }) => {
 	);
 
 	return (
-		<ToolPanel title={t('coverage:title')} onClose={onClose}>
+		<ToolPanel icon="coverage" title={t('coverage:title')} onClose={onClose}>
 			{unavailable ? <Hint>{t('common:toolUnavailable')}</Hint> : (
 				<>
 					<Hint>{t('coverage:desc')}</Hint>

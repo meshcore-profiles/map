@@ -1,6 +1,7 @@
 import { t } from './i18n.js';
 import { createPathLayer, findNodeNearLatLng, formatDistance, loadJson } from './pathtools.js';
 import { truncateKey } from './node-utils.js';
+import { PALETTE } from '/core/colors.js';
 
 const STORAGE_KEY = 'measureToolPoints';
 const LABEL_MODE_STORAGE_KEY = 'measureLabelMode';
@@ -31,7 +32,7 @@ export const initMeasureTool = ({ map, setPicker, escapeHtml, getNodes, showToas
 	const labelModeBtn = document.getElementById('measure-label-mode-btn');
 	const shareBtn = document.getElementById('measure-share-btn');
 
-	const path = createPathLayer({ map, color: '#4dabf7' });
+	const path = createPathLayer({ map, color: PALETTE.blue });
 	let active = false;
 	let clearPicker = null;
 	const savedLabelMode = localStorage.getItem(LABEL_MODE_STORAGE_KEY);

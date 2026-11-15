@@ -23,8 +23,6 @@
 		"usingCache": "Showing data stored on the device. It could not be refreshed."
 	},
 	"settings": {
-		"title": "Settings",
-		"language": "Language",
 		"languageAuto": "Automatic",
 		"data": "Node data",
 		"updated": "Downloaded: {{time}}",
@@ -38,9 +36,7 @@
 		"lastDays": "{{count}} days"
 	},
 	"tools": {
-		"title": "Tools",
 		"picking": "Tap the map...",
-		"routeDesc": "Route by names or the start of public keys.",
-		"needsNetwork": "Needs an internet connection (elevation data)."
+		"routeDesc": "Route by names or the start of public keys."
 	}
 }

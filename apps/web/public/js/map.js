@@ -2,12 +2,13 @@
 import { unpack } from '../vendor/msgpackr/msgpackr.js';
 import { toCanvas as qrToCanvas } from '../vendor/qrcode/qrcode.js';
 import * as ntools from './node-utils.js';
-import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, createStatusThresholds, indexNode, prepareNode, timeAgoParts } from '/core/nodes.js';
+import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, countByType, createStatusThresholds, formatTimeAgo, indexNode, prepareNode } from '/core/nodes.js';
 import { t, tRaw, plural } from './i18n.js';
 import { initModal } from './modal.js';
 import { initNodeDeletionDialog } from './node-deletion.js';
 import { initRadioFilters } from './radio-filters.js';
 import { buildContactUrl } from '/core/contact.js';
+import { NODE_TYPE_ICON_NAMES } from '/core/colors.js';
 import { normalizeRadioPresets } from '/core/presets.js';
 import { loadRadioFilters, radioValue } from '/core/radio-filter-utils.js';
 import { buildFilterParams, parseSharedFilters } from '/core/filter-share.js';
@@ -19,7 +20,7 @@ import { initRouteTool } from './route.js';
 import { initTerrainTool } from './terrain.js';
 import { initCoverageTool } from './coverage.js';
 import { escapeHtml } from './pathtools.js';
-import { MAPTILER_HYBRID_NAME, MAPTILER_OUTDOOR_NAME, CARTO_DARK_NAME, CARTO_POSITRON_NAME, ESRI_HYBRID_NAME, esriApiKey, cartoApiKey, maptilerAvailable, getNextFallbackBaseMap, maplibreBaseMapOptions, tileBaseMaps, maplibreBaseMaps, baseMapAttributions, baseMapInfo, getBaseMapGroups, getBaseMapNames, defaultBaseMapName, DEFAULT_BASEMAP_SELECTION, resolveBaseMapName, getMaplibreBaseMapLayer } from './basemaps.js';
+import { isBaseMapMissingKey, getNextFallbackBaseMap, maplibreBaseMapOptions, tileBaseMaps, maplibreBaseMaps, baseMapAttributions, baseMapInfo, getBaseMapGroups, getBaseMapNames, defaultBaseMapName, DEFAULT_BASEMAP_SELECTION, resolveBaseMapName, getMaplibreBaseMapLayer } from './basemaps.js';
 import { showToast, updateToast, showActionToast, dismissToast } from './toast.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
@@ -48,12 +49,7 @@ const statusBadgeClass = {
 const columnOrder = ['public_key', 'link', 'inserted_date', 'updated_date', 'coords', 'preset', 'params'];
 const paramOrder = ['freq', 'bw', 'sf', 'cr'];
 
-const timeAgo = msec => {
-	const ago = timeAgoParts(msec);
-	if (!ago) return t('common:justNow');
-
-	return t('common:timeAgo', { count: ago.count, unit: plural(ago.count, tRaw(`common:timeUnits.${ago.unit}`)) });
-};
+const timeAgo = msec => formatTimeAgo(msec, { t, tRaw, plural });
 
 const getRadioParamKeys = params => paramOrder.filter(key => radioValue(params, key) !== 'unknown');
 
@@ -234,20 +230,12 @@ const getPresets = async signal => {
 };
 
 
-const basemapRequiredApiKeys = {
-	[ESRI_HYBRID_NAME]: esriApiKey,
-	[MAPTILER_HYBRID_NAME]: maptilerAvailable,
-	[MAPTILER_OUTDOOR_NAME]: maptilerAvailable,
-	[CARTO_DARK_NAME]: cartoApiKey,
-	[CARTO_POSITRON_NAME]: cartoApiKey,
-};
-
 const storedBaseMap = localStorage.getItem('baseMapSelected');
 const baseMapSelected = storedBaseMap === DEFAULT_BASEMAP_SELECTION || getBaseMapNames().includes(storedBaseMap)
 	? storedBaseMap
 	: DEFAULT_BASEMAP_SELECTION;
 
-if (storedBaseMap && storedBaseMap !== baseMapSelected && storedBaseMap in basemapRequiredApiKeys && !basemapRequiredApiKeys[storedBaseMap]) {
+if (storedBaseMap && storedBaseMap !== baseMapSelected && isBaseMapMissingKey(storedBaseMap)) {
 	showToast(t('map:basemapMissingApiKey', { name: storedBaseMap }), { status: 'info', duration: 5000 });
 }
 
@@ -424,11 +412,10 @@ void setBaseMap(baseMapSelected).catch(err => {
 	activateBaseMapFallback?.(baseMapSelected);
 });
 
-const nodeTypeIconNames = { 1: 'client', 2: 'repeater', 3: 'room-server', 4: 'sensor' };
 
 const icons = Object.fromEntries(['none', 'recent', 'stale', 'old', 'extinct'].map(color => [color,
 	Object.fromEntries([2, 3, 4].map(id => [id, L.divIcon({
-		html: `<svg width="32" height="32"><use href="/icons/node-types.svg#${nodeTypeIconNames[id]}"></use></svg>`,
+		html: `<svg width="32" height="32"><use href="/icons/node-types.svg#${NODE_TYPE_ICON_NAMES[id]}"></use></svg>`,
 		className: `svg-node-icon update-${color}`,
 		iconSize: [32, 32],
 		iconAnchor: [17, 17],
@@ -436,12 +423,12 @@ const icons = Object.fromEntries(['none', 'recent', 'stale', 'old', 'extinct'].m
 	})])),
 ]));
 
-const highlightIcons = Object.fromEntries(Object.keys(nodeTypeIconNames).map(id => [id, L.divIcon({
+const highlightIcons = Object.fromEntries(Object.keys(NODE_TYPE_ICON_NAMES).map(id => [id, L.divIcon({
 	html: `
 		<svg width="56" height="56" viewBox="0 0 56 56">
 			<circle class="highlight-marker-ping" cx="28" cy="28" r="17"></circle>
 			<circle class="highlight-marker-ring" cx="28" cy="28" r="17"></circle>
-			<use href="/icons/node-types.svg#${nodeTypeIconNames[id]}" x="12" y="12" width="32" height="32"></use>
+			<use href="/icons/node-types.svg#${NODE_TYPE_ICON_NAMES[id]}" x="12" y="12" width="32" height="32"></use>
 		</svg>
 	`,
 	className: 'svg-node-icon highlight-marker-icon',
@@ -844,12 +831,7 @@ const renderStats = () => {
 	}
 
 	const nodes = state.filteredNodes;
-	let clients = 0, repeaters = 0, roomServers = 0;
-	for (const node of nodes) {
-		if (node.type === 1) clients++;
-		else if (node.type === 2) repeaters++;
-		else if (node.type === 3) roomServers++;
-	}
+	const { clients, repeaters, roomServers } = countByType(nodes);
 
 	statsCounts.innerHTML = `
 		<span class="pointer-help" title="${t('map:totalCountTooltip')}"><span class="stats-total-label">${t('map:totalLabel')}</span><b>${nodes.length}</b></span>&nbsp;|
@@ -889,7 +871,7 @@ function renderSearchResults() {
 	if (!searchResultsEl.hidden) positionDropdown(searchResultsEl);
 	searchResultsEl.innerHTML = searchResults.map(node => `
 		<li>
-			<svg width="22" height="22"><use href="/icons/node-types.svg#${nodeTypeIconNames[node.type]}-plain"></use></svg>
+			<svg width="22" height="22"><use href="/icons/node-types.svg#${NODE_TYPE_ICON_NAMES[node.type]}-plain"></use></svg>
 			<div class="search-text">
 				<h6>${highlightString(node.adv_name, state.search)}</h6>
 				<div class="search-pkey">${highlightString(ntools.truncateKey(node.public_key), state.search)}</div>

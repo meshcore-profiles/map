@@ -1,8 +1,6 @@
+import { MS_PER_DAY, STATS_PERIOD_DAYS, nodesInsertedSince } from '/core/nodes.js';
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
-
-const msPerDay = 86400000;
-const periodDays = { '24h': 1, '7d': 7, '30d': 30 };
 
 export const initStatsModal = ({ getNodes, getRepeaters, escapeHtml, timeAgo, onFocusNode, onShowOnMap }) => {
 	const modal = initModal('stats-toggle', 'stats-overlay');
@@ -25,15 +23,8 @@ export const initStatsModal = ({ getNodes, getRepeaters, escapeHtml, timeAgo, on
 	let activePeriod = '24h';
 	let currentRepeaters = [];
 
-	const countSince = (nodes, days) => {
-		const threshold = Date.now() - days * msPerDay;
-		let count = 0;
-		for (const node of nodes) if (node.insertDate.getTime() > threshold) count++;
-		return count;
-	};
-
 	const getActiveRange = () => {
-		if (activePeriod !== 'custom') return { from: Date.now() - periodDays[activePeriod] * msPerDay, to: Date.now() };
+		if (activePeriod !== 'custom') return { from: Date.now() - STATS_PERIOD_DAYS[activePeriod] * MS_PER_DAY, to: Date.now() };
 
 		const from = rangeFromEl.value ? new Date(`${rangeFromEl.value}T00:00:00`).getTime() : -Infinity;
 		const to = rangeToEl.value ? new Date(`${rangeToEl.value}T23:59:59.999`).getTime() : Date.now();
@@ -74,7 +65,7 @@ export const initStatsModal = ({ getNodes, getRepeaters, escapeHtml, timeAgo, on
 	const render = () => {
 		const nodes = getNodes();
 		for (const [period, el] of Object.entries(chipEls)) {
-			el.textContent = countSince(nodes, periodDays[period]);
+			el.textContent = nodesInsertedSince(nodes, STATS_PERIOD_DAYS[period]).length;
 		}
 		renderList();
 	};

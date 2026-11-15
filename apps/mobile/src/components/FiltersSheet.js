@@ -5,7 +5,8 @@ import { isRadioValueSelected, RADIO_FILTER_KEYS, updateRadioSelection } from '@
 import { useI18n } from '../i18n';
 import { Button, Chip, ChipRow, Divider, Hint, Label, Stepper } from '../ui/controls';
 import { Sheet } from '../ui/Sheet';
-import { colors, spacing, typeColors } from '../theme';
+import { NODE_TYPE_COLORS } from '@meshcore-map/core/colors';
+import { colors, NODE_TYPE_ICONS, spacing } from '../theme';
 
 const styles = StyleSheet.create({
 	summary: { color: colors.textMuted },
@@ -79,7 +80,7 @@ export const FiltersSheet = ({ visible, filters, byType, radioOptions, total, on
 				<Label>{t('filters:nodeTypesLegend')}</Label>
 				<ChipRow>
 					{NODE_TYPES.map(type => (
-						<Chip key={type} label={t(`map:nodeTypes.${NODE_TYPE_KEYS[type]}`)} color={typeColors[type]} selected={draft.nodeFilter.includes(type)} onPress={() => toggleType(type)} />
+						<Chip key={type} icon={NODE_TYPE_ICONS[type]} label={t(`map:nodeTypes.${NODE_TYPE_KEYS[type]}`)} color={NODE_TYPE_COLORS[type]} selected={draft.nodeFilter.includes(type)} onPress={() => toggleType(type)} />
 					))}
 				</ChipRow>
 			</View>

@@ -1,6 +1,7 @@
 /* global L */
 import { t, tRaw, plural } from './i18n.js';
 import { escapeHtml } from './pathtools.js';
+import { PALETTE } from '/core/colors.js';
 import { defaultBaseMapName, getNextFallbackBaseMap, getMaplibreBaseMapLayer, maplibreBaseMapOptions, tileBaseMaps, baseMapAttributions } from './basemaps.js';
 
 const TYPE_ICONS = { repeater: 'repeater', roomServer: 'room-server' };
@@ -148,7 +149,7 @@ const links = cover ? [] : spanningLinks(points);
 for (const { from, to, km } of links) {
 	const a = points[from];
 	const b = points[to];
-	L.polyline([[a.a, a.o], [b.a, b.o]], { color: '#4dabf7', weight: 2, opacity: 0.85, dashArray: '6 6', interactive: false }).addTo(map);
+	L.polyline([[a.a, a.o], [b.a, b.o]], { color: PALETTE.blue, weight: 2, opacity: 0.85, dashArray: '6 6', interactive: false }).addTo(map);
 	L.marker([(a.a + b.a) / 2, (a.o + b.o) / 2], {
 		icon: L.divIcon({ html: `<span>${formatDistance(km)}</span>`, className: 'embed-distance', iconSize: null }),
 		interactive: false,
