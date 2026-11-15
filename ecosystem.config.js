@@ -1,6 +1,7 @@
 module.exports = {
 	apps: [{
 		name: 'mcmap',
+		cwd: './apps/web',
 		script: './index.js',
 
 		// Logging configuration

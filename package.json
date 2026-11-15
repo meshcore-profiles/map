@@ -12,6 +12,7 @@
   },
   "license": "MIT",
   "author": "Sefinek <contact@sefinek.net> (https://sefinek.net)",
+  "main": "apps/web/index.js",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -20,12 +21,12 @@
     "badges": "npm run badges -w apps/mobile",
     "icons": "npm run icons -w apps/mobile",
     "lint": "eslint .",
+    "m": "ncu -u --workspaces --root && npm install && npm update",
     "mobile": "npm start -w apps/mobile",
     "mobile:android": "npm run android -w apps/mobile",
     "mobile:check": "npm exec -w apps/mobile -- expo install --check",
     "mobile:export": "npm exec -w apps/mobile -- expo export --platform android",
     "mobile:ios": "npm run ios -w apps/mobile",
-    "m": "ncu -u --workspaces --root && npm install && npm update",
     "pull": "git pull origin main && git submodule update --init",
     "start": "npm start -w apps/web",
     "test": "npm test -w packages/core",
