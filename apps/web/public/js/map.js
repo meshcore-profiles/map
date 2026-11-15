@@ -2,11 +2,12 @@
 import { unpack } from '../vendor/msgpackr/msgpackr.js';
 import { toCanvas as qrToCanvas } from '../vendor/qrcode/qrcode.js';
 import * as ntools from './node-utils.js';
+import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, createStatusThresholds, indexNode, prepareNode, timeAgoParts } from '/core/nodes.js';
 import { t, tRaw, plural } from './i18n.js';
 import { initModal } from './modal.js';
 import { initNodeDeletionDialog } from './node-deletion.js';
 import { initRadioFilters } from './radio-filters.js';
-import { RADIO_FILTER_KEYS, loadRadioFilters, createRadioMatcher, radioValue } from '/core/radio-filter-utils.js';
+import { loadRadioFilters, radioValue } from '/core/radio-filter-utils.js';
 import { buildFilterParams, parseSharedFilters } from '/core/filter-share.js';
 import { initLegendPanel } from './legend.js';
 import { initStatsModal } from './stats.js';
@@ -21,51 +22,9 @@ import { showToast, updateToast, showActionToast, dismissToast } from './toast.j
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
 
-const uint8ArrayToHex = uint8arr => {
-	const hexOctets = new Array(uint8arr.length);
-	for (let i = 0; i < uint8arr.length; ++i) {
-		hexOctets[i] = ntools.byteToHex[uint8arr[i]];
-	}
-
-	return hexOctets.join('');
-};
-
 let presets = [];
 
-const nodeKeys = {
-	pk: {
-		key: 'public_key',
-		convert: val => uint8ArrayToHex(val),
-	},
-	t: {
-		key: 'type',
-	},
-	n: {
-		key: 'adv_name',
-	},
-	la: {
-		key: 'last_advert',
-	},
-	id: {
-		key: 'inserted_date',
-	},
-	ud: {
-		key: 'updated_date',
-	},
-	p: {
-		key: 'params',
-	},
-	l: {
-		key: 'link',
-	},
-	s: {
-		key: 'source',
-	},
-};
-
-const nodeTypeKeys = { '1': 'client', '2': 'repeater', '3': 'roomServer', '4': 'sensor' };
-const typeName = type => t(`map:nodeTypes.${nodeTypeKeys[type]}`);
-const contactAddableTypes = [1, 2, 3];
+const typeName = type => t(`map:nodeTypes.${NODE_TYPE_KEYS[type]}`);
 const statusDesc = status => t(`map:updateStatus.${status}`);
 
 const radioParamDesc = {
@@ -88,24 +47,10 @@ const columnOrder = ['public_key', 'link', 'inserted_date', 'updated_date', 'coo
 const paramOrder = ['freq', 'bw', 'sf', 'cr'];
 
 const timeAgo = msec => {
-	const seconds = Math.floor((Date.now() - msec) / 1000);
+	const ago = timeAgoParts(msec);
+	if (!ago) return t('common:justNow');
 
-	const units = [
-		{ key: 'year', limit: 31536000 },
-		{ key: 'month', limit: 2592000 },
-		{ key: 'day', limit: 86400 },
-		{ key: 'hour', limit: 3600 },
-		{ key: 'minute', limit: 60 },
-		{ key: 'second', limit: 1 },
-	];
-
-	for (const unit of units) {
-		const count = Math.floor(seconds / unit.limit);
-
-		if (count >= 1) return t('common:timeAgo', { count, unit: plural(count, tRaw(`common:timeUnits.${unit.key}`)) });
-	}
-
-	return t('common:justNow');
+	return t('common:timeAgo', { count: ago.count, unit: plural(ago.count, tRaw(`common:timeUnits.${ago.unit}`)) });
 };
 
 const getRadioParamKeys = params => paramOrder.filter(key => radioValue(params, key) !== 'unknown');
@@ -179,7 +124,7 @@ const columns = {
 	},
 	link: {
 		label: t('map:columns.link'),
-		value: uint8arr => `<button type="button" class="copy-link-btn" data-copy-value="meshcore://${uint8ArrayToHex(uint8arr)}">${t('map:copyLinkButton')}</button>`,
+		value: uint8arr => `<button type="button" class="copy-link-btn" data-copy-value="meshcore://${ntools.bytesToHex(uint8arr)}">${t('map:copyLinkButton')}</button>`,
 	},
 };
 
@@ -243,7 +188,7 @@ const getNodePopupHTML = node => {
 	const qrValue = `meshcore://contact/add?${contactParams.toString()}`;
 	const statusClass = statusBadgeClass[node.status] || '';
 	const shareUrl = getShareUrl(node);
-	const canAddContact = contactAddableTypes.includes(node.type);
+	const canAddContact = CONTACT_ADDABLE_TYPES.includes(node.type);
 
 	return `
 		<div class="node-header">
@@ -974,30 +919,9 @@ function renderSearchResults() {
 
 let previewKeys = null;
 
-const collectFilteredNodes = () => {
-	if (previewKeys) return state.nodes.filter(node => previewKeys.has(node.public_key));
-
-	const fromDate = new Date(state.fromDate);
-	const fromInsertDate = new Date(state.fromInsertDate);
-	const byType = state.nodesByType;
-	const matchesRadio = createRadioMatcher(state.radioFilters);
-
-	const result = [];
-	for (const type of state.nodeFilter) {
-		const typeNodes = byType[type];
-		if (!typeNodes) continue;
-
-		for (let i = 0; i < typeNodes.length; i++) {
-			const node = typeNodes[i];
-			if (node.updatedDate ? node.updatedDate <= fromDate : node.insertDate <= fromDate) continue;
-			if (node.insertDate <= fromInsertDate) continue;
-			if (!matchesRadio(node.radio)) continue;
-			result.push(node);
-		}
-	}
-
-	return result;
-};
+const collectFilteredNodes = () => previewKeys
+	? state.nodes.filter(node => previewKeys.has(node.public_key))
+	: collectFilteredNodesCore(state, state.nodesByType);
 
 const numberFormat = new Intl.NumberFormat(window.MAP_CONFIG.languageCode);
 let summaryTimer = 0;
@@ -1073,18 +997,6 @@ const clearFilters = () => {
 	applyFilters();
 };
 
-const getDaysEpochMsec = days => days * 24 * 60 * 60 * 1000;
-
-const inflateNode = node => {
-	for (const key of Object.keys(node)) {
-		if (!nodeKeys[key]) continue;
-		const convertFn = nodeKeys[key].convert;
-		node[nodeKeys[key].key] = typeof convertFn === 'function' ? convertFn(node[key]) : node[key];
-
-		delete node[key];
-	}
-};
-
 const nodesCache = {};
 let currentDownloadAbort = null;
 
@@ -1107,19 +1019,7 @@ const downloadNodes = async region => {
 		return;
 	}
 
-	const now = Date.now();
-	const extinctThreshold = now - getDaysEpochMsec(20);
-	const oldThreshold = now - getDaysEpochMsec(10);
-	const staleThreshold = now - getDaysEpochMsec(5);
-
-	const getNodeUpdateStatus = node => {
-		if (node.source[0] !== 'u') return 'none';
-		const updateEpoch = new Date(node.updated_date).getTime();
-		if (updateEpoch < extinctThreshold) return 'extinct';
-		if (updateEpoch < oldThreshold) return 'old';
-		if (updateEpoch < staleThreshold) return 'stale';
-		return 'recent';
-	};
+	const thresholds = createStatusThresholds();
 
 	const abortController = new AbortController();
 	currentDownloadAbort = abortController;
@@ -1178,8 +1078,7 @@ const downloadNodes = async region => {
 
 		const presetsPromise = getPresets(abortController.signal);
 
-		const byType = {};
-		const radioOptions = Object.fromEntries(RADIO_FILTER_KEYS.map(key => [key, new Set()]));
+		const index = createNodeIndex();
 		const CHUNK_SIZE = 2000;
 
 		for (let offset = 0; offset < nodes.length; offset += CHUNK_SIZE) {
@@ -1193,17 +1092,10 @@ const downloadNodes = async region => {
 
 			for (let i = offset; i < end; i++) {
 				const node = nodes[i];
-				inflateNode(node);
-				node.radio = {};
-				for (const key of RADIO_FILTER_KEYS) {
-					node.radio[key] = radioValue(node.params, key);
-					radioOptions[key].add(node.radio[key]);
-				}
-				const updateStatus = getNodeUpdateStatus(node);
+				prepareNode(node, thresholds);
+				indexNode(index, node);
 
-				let icon = icons[updateStatus][node.type.toString()];
-
-				(byType[node.type] ??= []).push(node);
+				let icon = icons[node.status][node.type.toString()];
 
 				if (node.type === 1) {
 					const label = ntools.getNameIconLabel(node.adv_name);
@@ -1213,12 +1105,6 @@ const downloadNodes = async region => {
 
 				const marker = node.marker = L.marker([node.lat, node.lon], { icon, title: node.adv_name });
 
-				node.status = updateStatus;
-				node.preset = node.params;
-				node.coords = `${Number(node.lat.toFixed(6))}, ${Number(node.lon.toFixed(6))}`;
-				node.lastAdvertDate = new Date(node.last_advert);
-				node.insertDate = new Date(node.inserted_date);
-				node.updatedDate = node.updated_date && new Date(node.updated_date);
 				markerToNode.set(marker, node);
 			}
 		}
@@ -1237,7 +1123,7 @@ const downloadNodes = async region => {
 
 		setLoadingStatus(t('map:ready'));
 
-		nodesCache[region] = { nodes, byType, radioOptions, dataUpdatedAt };
+		nodesCache[region] = { nodes, byType: index.byType, radioOptions: index.radioOptions, dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
 	} catch (err) {
 		if (err.name !== 'AbortError') {

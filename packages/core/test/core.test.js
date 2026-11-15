@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { haversineDistance, destinationPoint, parseLatLng, formatDistance, curvatureDrop } from '../src/geo.js';
 import { escapeHtml, truncateKey, formatBytes, resolveNodeByQuery, getNameIconLabel } from '../src/node-utils.js';
 import { radioValue, createRadioMatcher, updateRadioSelection } from '../src/radio-filter-utils.js';
+import { createDefaultFilters, collectFilteredNodes, prepareNodes, searchNodes, timeAgoParts } from '../src/nodes.js';
+import { createI18n } from '../src/i18n.js';
 import { sampleLine, analyzeLineOfSight } from '../src/los.js';
 import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay } from '../src/coverage.js';
 import { createElevationProviders, fetchElevationsChunked } from '../src/elevation-providers.js';
@@ -116,4 +118,41 @@ test('fetchElevationsChunked dzieli na paczki', async () => {
 	const out = await fetchElevationsChunked(providers, [1, 2, 3, 4, 5], 'sefinek');
 	assert.deepEqual(calls, [2, 2, 1]);
 	assert.equal(out.length, 5);
+});
+
+test('prepareNodes: inflate, status, indeksy', () => {
+	const now = Date.parse('2026-11-15T12:00:00Z');
+	const day = 86400000;
+	const iso = offsetDays => new Date(now - offsetDays * day).toISOString();
+	const raw = [
+		{ pk: new Uint8Array([1, 255]), t: 2, n: 'Repeater A', la: iso(0), id: iso(30), ud: iso(1), p: { freq: 869.618, sf: 8, cr: 5, bw: 62.5 }, s: 'u-auto', lat: 52.1, lon: 21.2 },
+		{ pk: new Uint8Array([2, 0]), t: 1, n: 'Klient', la: iso(0), id: iso(3), ud: iso(12), p: {}, s: 'u-auto', lat: 50, lon: 19 },
+		{ pk: new Uint8Array([3, 0]), t: 2, n: 'Reczny', la: iso(0), id: iso(3), ud: null, p: {}, s: 'm', lat: 51, lon: 20 },
+	];
+	const { nodes, byType, radioOptions } = prepareNodes(raw, now);
+	assert.equal(nodes[0].public_key, '01ff');
+	assert.equal(nodes[0].status, 'recent');
+	assert.equal(nodes[1].status, 'old');
+	assert.equal(nodes[2].status, 'none');
+	assert.equal(byType[2].length, 2);
+	assert.ok(radioOptions.freq.has('869') && radioOptions.freq.has('unknown'));
+
+	const filters = createDefaultFilters();
+	assert.equal(collectFilteredNodes(filters, byType).length, 3);
+	assert.equal(collectFilteredNodes({ ...filters, nodeFilter: ['1'] }, byType).length, 1);
+	assert.equal(collectFilteredNodes({ ...filters, radioFilters: { ...filters.radioFilters, freq: ['869'] } }, byType).length, 1);
+	assert.equal(collectFilteredNodes({ ...filters, fromInsertDate: iso(10).slice(0, 10) }, byType).length, 2);
+	assert.deepEqual(searchNodes(nodes, 'rep').map(n => n.adv_name), ['Repeater A', 'Reczny'].filter(n => n.toLowerCase().includes('rep')));
+});
+
+test('timeAgoParts i createI18n', () => {
+	assert.deepEqual(timeAgoParts(0, 90 * 1000), { count: 1, unit: 'minute' });
+	assert.equal(timeAgoParts(1000, 1500), null);
+
+	const bundle = { common: { timeUnits: { day: ['dzien', 'dni', 'dni'] }, hello: 'Czesc {{name}}' }, map: { a: { b: 'x' } } };
+	const { t, plural } = createI18n({ getBundle: () => bundle, getLanguage: () => 'pl' });
+	assert.equal(t('hello', { name: 'Ala' }), 'Czesc Ala');
+	assert.equal(t('map:a.b'), 'x');
+	assert.equal(t('map:missing'), 'map:missing');
+	assert.deepEqual([1, 2, 5, 12, 22].map(n => plural(n, ['a', 'b', 'c'])), ['a', 'b', 'c', 'c', 'b']);
 });

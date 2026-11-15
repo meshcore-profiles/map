@@ -1,6 +1,13 @@
 export const escapeHtml = html => html.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 
-export const byteToHex = new Array(256).fill(0).map((_, i) => i.toString(16).padStart(2, '0'));
+const byteToHex = new Array(256).fill(0).map((_, i) => i.toString(16).padStart(2, '0'));
+
+export const bytesToHex = bytes => {
+	const octets = new Array(bytes.length);
+	for (let i = 0; i < bytes.length; i++) octets[i] = byteToHex[bytes[i]];
+
+	return octets.join('');
+};
 
 const fnv1aHash = str => {
 	let hash = 0x811c9dc5n;
