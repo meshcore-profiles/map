@@ -14,10 +14,10 @@
       "@maplibre/maplibre-react-native"
     ],
     "ios": {
-      "bundleIdentifier": "com.meshcoreprofiles.map"
+      "bundleIdentifier": "com.sefinek.meshcoremap"
     },
     "android": {
-      "package": "com.meshcoreprofiles.map",
+      "package": "com.sefinek.meshcoremap",
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
