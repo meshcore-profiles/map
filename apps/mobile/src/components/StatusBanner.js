@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
 export const StatusBanner = () => {
 	const { t } = useI18n();
 	const { accent, accentBright } = useTheme();
-	const { refresh, nodes } = useNodes();
+	const { refresh, cancel, nodes } = useNodes();
 	const { phase, progress: percent, error } = useNodesStatus();
 	const showToast = useToast();
 	const usingCache = Boolean(error) && nodes.length > 0;
@@ -35,6 +35,11 @@ export const StatusBanner = () => {
 					<Text style={styles.text}>{phase === 'loading' ? t('mobile:loading.reading') : t('mobile:loading.downloading', { percent })}</Text>
 					{phase === 'downloading' && <View style={[styles.bar, { width: `${percent}%`, backgroundColor: accent }]} />}
 				</View>
+				{phase === 'downloading' && (
+					<Pressable onPress={cancel} accessibilityRole="button" hitSlop={8}>
+						<Text style={[styles.action, { color: accentBright }]}>{t('common:cancel')}</Text>
+					</Pressable>
+				)}
 			</View>
 		);
 	}
@@ -43,7 +48,7 @@ export const StatusBanner = () => {
 
 	return (
 		<View style={styles.banner} accessibilityLiveRegion="polite">
-			<Text style={styles.text}>{t('mobile:loading.failed')}</Text>
+			<Text style={styles.text}>{error.cancelled ? t('mobile:loading.cancelled') : t('mobile:loading.failed')}</Text>
 			<Pressable onPress={() => refresh({ force: true })} accessibilityRole="button" hitSlop={8}>
 				<Text style={[styles.action, { color: accentBright }]}>{t('mobile:loading.retry')}</Text>
 			</Pressable>

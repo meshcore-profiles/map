@@ -3,21 +3,15 @@
 		"noResults": "Brak wyników"
 	},
 	"region": {
-		"promptTitle": "Jaką mapę chcesz zobaczyć?",
-		"promptText": "Zakres mapy możesz później zmienić w ustawieniach. Pobrane dane są zapisywane na urządzeniu, więc możesz je przeglądać także bez internetu.",
 		"title": "Zakres mapy",
-		"desc": "Mapa globalna pokazuje węzły z całego świata, a polska tylko te z Polski.",
-		"pl": "Tylko Polska",
-		"all": "Cały świat",
-		"plDesc": "Węzły tylko z Polski. Mniej danych do pobrania ({{size}}).",
-		"allDesc": "Węzły z całego świata. Więcej danych do pobrania ({{size}}).",
-		"sizeUnknown": "rozmiar nieznany"
+		"desc": "Mapa globalna pokazuje węzły z całego świata, a polska tylko te z Polski."
 	},
 	"loading": {
 		"reading": "Wczytywanie zapisanych danych...",
 		"downloading": "Pobieranie danych węzłów... {{percent}}%",
 		"failed": "Nie udało się pobrać danych. Sprawdź połączenie z internetem.",
-		"retry": "Ponów"
+		"retry": "Ponów",
+		"cancelled": "Pobieranie anulowane."
 	},
 	"offline": {
 		"usingCache": "Nie udało się odświeżyć danych. Wyświetlane są dane zapisane na urządzeniu."

@@ -19,7 +19,7 @@ const TOOL_FABS = [
 ];
 
 // Round buttons in the bottom right corner (tools, basemap, add node) and the loading status next to them.
-export const MapControls = ({ region, features, toolsOpen, onToggleTools, onOpenTool, onOpenBasemap }) => {
+export const MapControls = ({ region, features, toolsOpen, onToggleTools, onOpenTool, onOpenBasemap, onOpenLegend }) => {
 	const { t } = useI18n();
 	const insets = useSafeAreaInsets();
 	const bottom = insets.bottom + spacing.md;
@@ -31,6 +31,7 @@ export const MapControls = ({ region, features, toolsOpen, onToggleTools, onOpen
 					<Fab key={tool.id} icon={tool.icon} label={t(tool.title)} onPress={() => onOpenTool(tool.id)} />
 				))}
 				<Fab icon={toolsOpen ? 'close' : 'wrench'} label={t('mobile:tools.title')} onPress={onToggleTools} />
+				<Fab icon="info" label={t('legend:toggleTitle')} onPress={onOpenLegend} />
 				<Fab icon="layers" label={t('map:basemapToggleTitle')} onPress={onOpenBasemap} />
 				<Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(SITES[region].addNodeUrl)} />
 			</View>

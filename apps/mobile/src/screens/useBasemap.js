@@ -12,7 +12,7 @@ export const useBasemap = ({ config, settings, update }) => {
 	const { t } = useI18n();
 	const showToast = useToast();
 
-	const basemaps = useMemo(() => createBasemaps(config?.basemaps, settings.region ?? 'all'), [config, settings.region]);
+	const basemaps = useMemo(() => createBasemaps(config?.basemaps, settings.region), [config, settings.region]);
 	const selectedName = basemaps.resolve(settings.basemap);
 	const activeName = basemaps.byName(selectedName) ? selectedName : basemaps.defaultName;
 	const activeBasemap = basemaps.byName(activeName);

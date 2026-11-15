@@ -4,11 +4,16 @@ import { formatTimeAgo, nodesInsertedSince, STATS_PERIOD_DAYS } from '@meshcore-
 import { useI18n } from '../i18n';
 import { useTheme } from '../state/ThemeContext';
 import { colors, MIN_TOUCH, radius, spacing } from '../theme';
-import { Button, Chip, ChipRow } from '../ui/controls';
+import { Button, Chip, ChipRow, Field } from '../ui/controls';
 import { Icon } from '../ui/Icon';
 import { Sheet } from '../ui/Sheet';
 
 const MAX_LISTED = 200;
+const DAY_MS = 86400000;
+const PERIODS = [...Object.keys(STATS_PERIOD_DAYS), 'custom'];
+
+// A day typed as YYYY-MM-DD, or NaN while the text is not a date yet.
+const parseDay = text => (/^\d{4}-\d{2}-\d{2}$/).test(text) ? Date.parse(text) : NaN;
 
 const styles = StyleSheet.create({
 	chips: { flexDirection: 'row', gap: spacing.sm },
@@ -19,6 +24,8 @@ const styles = StyleSheet.create({
 	rowText: { flex: 1 },
 	name: { color: colors.text, fontSize: 15 },
 	ago: { color: colors.textMuted, fontSize: 12 },
+	range: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+	rangeField: { flex: 1 },
 	empty: { color: colors.textMuted, paddingVertical: spacing.md },
 });
 
@@ -27,13 +34,21 @@ export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, o
 	const { t, tRaw, plural } = useI18n();
 	const { accentBright } = useTheme();
 	const [period, setPeriod] = useState('24h');
+	const [range, setRange] = useState({ from: '', to: '' });
 
 	const counts = useMemo(() => (visible ? Object.fromEntries(Object.entries(STATS_PERIOD_DAYS).map(([key, days]) => [key, nodesInsertedSince(nodes, days).length])) : {}), [visible, nodes]);
 	const recent = useMemo(() => {
 		if (!visible) return [];
 
-		return nodesInsertedSince(repeaters, STATS_PERIOD_DAYS[period]).sort((a, b) => b.insertDate - a.insertDate);
-	}, [visible, repeaters, period]);
+		if (period !== 'custom') return nodesInsertedSince(repeaters, STATS_PERIOD_DAYS[period]).sort((a, b) => b.insertDate - a.insertDate);
+
+		const from = parseDay(range.from);
+		const to = parseDay(range.to);
+		// The end day counts as a whole day; an unset bound leaves that side open.
+		return repeaters
+			.filter(node => (Number.isNaN(from) || node.insertDate.getTime() >= from) && (Number.isNaN(to) || node.insertDate.getTime() < to + DAY_MS))
+			.sort((a, b) => b.insertDate - a.insertDate);
+	}, [visible, repeaters, period, range]);
 
 	const ago = date => formatTimeAgo(date.getTime(), { t, tRaw, plural });
 
@@ -48,8 +63,14 @@ export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, o
 				))}
 			</View>
 			<ChipRow>
-				{Object.keys(STATS_PERIOD_DAYS).map(key => <Chip key={key} label={key} selected={period === key} onPress={() => setPeriod(key)} />)}
+				{PERIODS.map(key => <Chip key={key} label={key === 'custom' ? t('stats:range') : key} selected={period === key} onPress={() => setPeriod(key)} />)}
 			</ChipRow>
+			{period === 'custom' && (
+				<View style={styles.range}>
+					<View style={styles.rangeField}><Field value={range.from} onChangeText={from => setRange(current => ({ ...current, from }))} placeholder="YYYY-MM-DD" maxLength={10} accessibilityLabel={t('stats:fromDateAria')} /></View>
+					<View style={styles.rangeField}><Field value={range.to} onChangeText={to => setRange(current => ({ ...current, to }))} placeholder="YYYY-MM-DD" maxLength={10} accessibilityLabel={t('stats:toDateAria')} /></View>
+				</View>
+			)}
 			{recent.length === 0 && <Text style={styles.empty}>{t('stats:noRepeatersInPeriod')}</Text>}
 			{recent.slice(0, MAX_LISTED).map(node => (
 				<Pressable key={node.public_key} style={styles.row} onPress={() => onSelectNode(node)} accessibilityRole="button">

@@ -108,3 +108,49 @@ export const computeCoverage = ({ origin, elevations, bearings, samplesPerRay, s
 
 	return rayResults;
 };
+
+// Lightest to darkest - the darker the tile, the higher the chance of reception.
+export const GRID_SHADES = ['#d4f3b2', '#a9e6a0', '#7fd68f', '#58c47f', '#38ad6f', '#259460', '#167a50', '#0b5f3f'];
+const GRID_ALPHA_MIN = 0.3;
+const GRID_ALPHA_MAX = 0.85;
+const GRID_FULL_MARGIN_DB = 60;
+const GRID_MIN_SCORE = 0.06;
+
+export const gridAlpha = level => GRID_ALPHA_MIN + (GRID_ALPHA_MAX - GRID_ALPHA_MIN) * (level / (GRID_SHADES.length - 1));
+
+// Reception chance on a square grid around the origin (side = 2 * capM), as a shade level (index into GRID_SHADES) per cell.
+// Cell ranges are interpolated between the two nearest rays, so cells between rays are estimates.
+// Returns { cells, items: [{ px, py, level }] }; py = 0 is the northern row, px = 0 the western column.
+export const buildCoverageGrid = ({ rayResults, capM, linkBudgetRangeM, cellTargetM = 90, maxCells = 560 }) => {
+	const bearings = rayResults.length;
+	const cells = Math.min(maxCells, Math.ceil((capM * 2) / cellTargetM));
+	const cellM = (capM * 2) / cells;
+	const bearingStep = 360 / bearings;
+	const items = [];
+
+	for (let py = 0; py < cells; py++) {
+		for (let px = 0; px < cells; px++) {
+			const dx = (px + 0.5 - cells / 2) * cellM;
+			const dy = (cells / 2 - py - 0.5) * cellM;
+			const dist = Math.hypot(dx, dy);
+			if (dist > capM) continue;
+
+			const position = (((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360) / bearingStep;
+			const lower = Math.floor(position);
+			const frac = position - lower;
+			const a = rayResults[lower % bearings], b = rayResults[(lower + 1) % bearings];
+			const fresnelRange = a.fresnelRange * (1 - frac) + b.fresnelRange * frac;
+			const opticalRange = a.opticalRange * (1 - frac) + b.opticalRange * frac;
+
+			const terrainFactor = dist <= fresnelRange ? 1 : dist <= opticalRange ? 0.5 : 0;
+			if (!terrainFactor) continue;
+
+			// Link margin left over at this distance (free-space loss only), so the shade fades smoothly with distance.
+			const marginDb = 20 * Math.log10(linkBudgetRangeM / Math.max(dist, 1));
+			const score = Math.max(GRID_MIN_SCORE, terrainFactor * Math.min(1, Math.max(0, marginDb) / GRID_FULL_MARGIN_DB));
+			items.push({ px, py, level: Math.min(GRID_SHADES.length - 1, Math.floor(score * GRID_SHADES.length)) });
+		}
+	}
+
+	return { cells, items };
+};

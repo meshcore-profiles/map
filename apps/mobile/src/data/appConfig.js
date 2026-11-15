@@ -60,6 +60,6 @@ export const useAppConfig = () => {
 
 export const createProviders = sefinekApi => createElevationProviders({ getSefinekApi: () => sefinekApi, pack, unpack, fetchImpl: apiFetch });
 
-export const getElevations = (sefinekApi, points) => fetchElevations(createProviders(sefinekApi), points, 'sefinek');
+export const getElevations = (sefinekApi, points, source = 'sefinek') => fetchElevations(createProviders(sefinekApi), points, source);
 
-export const getElevationsChunked = (sefinekApi, points, onProgress) => fetchElevationsChunked(createProviders(sefinekApi), points, 'sefinek', onProgress);
+export const getElevationsChunked = (sefinekApi, points, onProgress, source = 'sefinek') => fetchElevationsChunked(createProviders(sefinekApi), points, source, onProgress);

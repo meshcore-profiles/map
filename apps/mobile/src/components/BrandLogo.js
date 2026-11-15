@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
 // The site's logo at the start of the search bar.
 export const BrandLogo = () => {
 	const { settings } = useSettings();
-	const { logo, icon192, mobileLogo } = SITES[settings.region ?? 'all'];
+	const { logo, icon192, mobileLogo } = SITES[settings.region];
 	// The header logo, or the PNG icon when that is an SVG (React Native cannot draw SVG images).
 	const source = mobileLogo ?? (logo.endsWith('.svg') ? icon192 : logo);
 	const uri = source.startsWith('/') ? `${API_BASE}${source}` : source;

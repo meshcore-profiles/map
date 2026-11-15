@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay, MAX_RANGE_M, RESOLUTIONS } from '@meshcore-map/core/coverage';
-import { formatDistance } from '@meshcore-map/core/geo';
+import { destinationPoint, formatDistance } from '@meshcore-map/core/geo';
 import { getElevationsChunked, loadRadioPresets } from '../data/appConfig';
 import { useI18n } from '../i18n';
-import { Button, Chip, ChipRow, Field, Hint, Label, SegmentedControl, Stat } from '../ui/controls';
+import { Button, Chip, ChipRow, Field, Hint, Label, Stat } from '../ui/controls';
 import { ToolPanel } from '../ui/ToolPanel';
 import { colors, spacing } from '../theme';
+import { coverageTileFeatures } from './coverageTiles';
 import { boundsOf } from './pathFeatures';
 import { PointField } from './PointField';
 import { describePoint, pointFromText } from './points';
 import { useMapPicker } from './useMapPicker';
+import { useShareLink } from './useShareLink';
 
 const styles = StyleSheet.create({
 	grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
@@ -24,6 +26,8 @@ const styles = StyleSheet.create({
 
 const COLOR_OPTICAL = colors.blue;
 const COLOR_FRESNEL = colors.green;
+const BANDWIDTHS = [7.8, 10.4, 15.6, 20.8, 31.25, 41.7, 62.5, 125, 250, 500];
+const RESOLUTION_LABELS = { fast: 'coverage:resolutionFast', standard: 'coverage:resolutionStandard', high: 'coverage:resolutionHigh' };
 const DEFAULTS = { txHeight: '7', rxHeight: '2', margin: '7', erp: '27', freq: '869.618', sf: '8', bw: '62.5', resolution: 'high' };
 
 const avg = values => values.reduce((a, b) => a + b, 0) / values.length;
@@ -40,11 +44,18 @@ const originFeature = origin => ({
 	properties: { kind: 'point', color: colors.amber, label: origin.label ?? '' },
 });
 
+// Dashed circle at the link budget range, drawn only when the budget (not the 30 km cap) limits the coverage.
+const budgetRing = (origin, rangeM) => ({
+	type: 'Feature',
+	geometry: { type: 'LineString', coordinates: Array.from({ length: 73 }, (_, i) => destinationPoint(origin, (i % 72) * 5, rangeM)).map(p => [p.lng, p.lat]) },
+	properties: { kind: 'line', color: colors.textMuted, width: 1.5 },
+});
+
 const rangeStats = (ranges, capM) => ({ max: Math.max(...ranges), avg: avg(ranges), min: Math.min(...ranges), clear: ranges.filter(r => r >= capM - 1).length });
 
 export const CoverageTool = ({ ctx }) => {
 	const { t } = useI18n();
-	const { nodes, config, setOverlay, setPicker, fitTo, onClose } = ctx;
+	const { nodes, config, elevationSource, coverageStyle, defaultRadio, setOverlay, setPicker, fitTo, onClose } = ctx;
 	const [origin, setOrigin] = useState(null);
 	const [text, setText] = useState('');
 	const [picking, setPicking] = useState(false);
@@ -54,16 +65,28 @@ export const CoverageTool = ({ ctx }) => {
 	const [progress, setProgress] = useState(null);
 	const [error, setError] = useState(null);
 	const [summary, setSummary] = useState(null);
+	const share = useShareLink();
 
 	const setField = key => value => setForm(current => ({ ...current, [key]: value }));
 
+	// The site's default preset (like the website) applies once the list arrives.
 	useEffect(() => {
-		loadRadioPresets().then(list => setPresets(list)).catch(err => console.error('Failed to load radio presets:', err));
-	}, []);
+		loadRadioPresets().then(list => {
+			setPresets(list);
+			const preset = list.find(item => item.name === defaultRadio && item.params.freq);
+			if (preset) setForm(current => ({ ...current, freq: String(preset.params.freq), sf: String(preset.params.sf), bw: String(preset.params.bw) }));
+		}).catch(err => console.error('Failed to load radio presets:', err));
+	}, [defaultRadio]);
 
-	useMapPicker(setPicker, picking, point => {
+	// A picked node brings its own radio settings, as on the website.
+	const applyPoint = point => {
 		setOrigin(point);
 		setText(describePoint(point));
+		if (point.radio?.freq) setForm(current => ({ ...current, freq: String(point.radio.freq), sf: String(point.radio.sf ?? current.sf), bw: String(point.radio.bw ?? current.bw) }));
+	};
+
+	useMapPicker(setPicker, picking, point => {
+		applyPoint(point);
 		setPicking(false);
 	});
 
@@ -71,7 +94,7 @@ export const CoverageTool = ({ ctx }) => {
 
 	const syncFromText = () => {
 		const point = pointFromText(text, nodes);
-		if (point) setOrigin(point);
+		if (point) applyPoint(point);
 	};
 
 	const applyPreset = preset => {
@@ -106,16 +129,21 @@ export const CoverageTool = ({ ctx }) => {
 		setProgress(null);
 		try {
 			const allPoints = [origin, ...buildRayPoints(origin, bearings, samplesPerRay, searchRangeM)];
-			const elevations = await getElevationsChunked(config.sefinekApi, allPoints, (current, total) => total > 1 && setProgress({ current, total }));
+			const elevations = await getElevationsChunked(config.sefinekApi, allPoints, (current, total) => total > 1 && setProgress({ current, total }), elevationSource);
 			const rays = computeCoverage({ origin, elevations, bearings, samplesPerRay, searchRangeM, txHeight, rxHeight, freqMHz, margin, linkBudgetRangeM });
 
 			const opticalRing = rays.map(r => r.opticalPoint);
 			const fresnelRing = rays.map(r => r.fresnelPoint);
-			setOverlay([polygon(opticalRing, COLOR_OPTICAL, 0.18), polygon(fresnelRing, COLOR_FRESNEL, 0.32), originFeature(origin)]);
+			const tiles = coverageStyle === 'tiles';
+			const layer = tiles
+				? coverageTileFeatures({ origin, rayResults: rays, capM: searchRangeM, linkBudgetRangeM })
+				: [polygon(opticalRing, COLOR_OPTICAL, 0.18), polygon(fresnelRing, COLOR_FRESNEL, 0.32)];
+			setOverlay([...layer, ...(linkBudgetRangeM < MAX_RANGE_M ? [budgetRing(origin, linkBudgetRangeM)] : []), originFeature(origin)]);
 			fitTo(boundsOf(opticalRing));
 
 			setSummary({
 				budget: linkBudgetRangeM,
+				tiles,
 				optical: rangeStats(rays.map(r => r.opticalRange), searchRangeM),
 				fresnel: rangeStats(rays.map(r => r.fresnelRange), searchRangeM),
 				bearings,
@@ -176,26 +204,29 @@ export const CoverageTool = ({ ctx }) => {
 						{numberField('txHeight', t('coverage:txHeight'))}
 						{numberField('rxHeight', t('coverage:rxHeight'))}
 						{numberField('freq', t('coverage:frequency'))}
-						{numberField('bw', t('coverage:bandwidth'))}
 						{numberField('sf', t('coverage:spreadingFactor'))}
 						{numberField('erp', t('coverage:erp'))}
 						{numberField('margin', t('coverage:terrainMargin'))}
 					</View>
 					<Hint>{t('coverage:linkBudgetRange', { range: formatDistance(budget) })}</Hint>
+					<Label>{t('coverage:bandwidth')}</Label>
+					<ChipRow>
+						{BANDWIDTHS.map(bw => <Chip key={bw} label={String(bw)} selected={Number(form.bw) === bw} onPress={() => setField('bw')(String(bw))} />)}
+					</ChipRow>
 					<Label>{t('coverage:resolution')}</Label>
-					<SegmentedControl
-						value={form.resolution}
-						onChange={setField('resolution')}
-						options={[{ value: 'fast', label: String(RESOLUTIONS.fast) }, { value: 'standard', label: String(RESOLUTIONS.standard) }, { value: 'high', label: String(RESOLUTIONS.high) }]}
-					/>
+					<ChipRow>
+						{Object.keys(RESOLUTION_LABELS).map(key => <Chip key={key} label={t(RESOLUTION_LABELS[key])} selected={form.resolution === key} onPress={() => setField('resolution')(key)} />)}
+					</ChipRow>
 					<Hint>{t('coverage:estimate', { points: estimate })}</Hint>
 					{error && <Text style={styles.error}>{error}</Text>}
 					<View style={styles.actions}>
 						<Button style={styles.action} label={busy ? (progress ? t('coverage:fetchingElevationProgress', progress) : t('coverage:fetchingElevation')) : t('coverage:compute')} disabled={busy} onPress={compute} />
+						{summary && origin && <Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} onPress={() => share(`coverage=${[origin.lat.toFixed(5), origin.lng.toFixed(5), form.txHeight, form.rxHeight, form.freq, form.resolution, form.margin, form.erp, form.sf, form.bw].join(',')}`)} />}
 						<Button style={styles.action} variant="ghost" label={t('common:clear')} onPress={reset} />
 					</View>
 					{summary && (
 						<>
+							{summary.tiles && <Hint>{t('coverage:legendChance')}</Hint>}
 							<Text style={styles.section}>{t('coverage:fresnelCriterion')}</Text>
 							<View style={styles.stats}>
 								<Stat label={t('coverage:maxRangeLabel')} value={formatDistance(summary.fresnel.max)} />

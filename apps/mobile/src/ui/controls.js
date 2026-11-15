@@ -38,6 +38,10 @@ const styles = StyleSheet.create({
 	section: { gap: spacing.md, padding: spacing.lg, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: 'rgba(148, 166, 204, 0.05)' },
 	sectionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 	sectionTitle: { flex: 1, color: colors.text, fontSize: 17, fontWeight: '700' },
+	option: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.chip },
+	optionText: { flex: 1, gap: 2 },
+	optionLabel: { color: colors.text, fontSize: 15 },
+	optionInfo: { color: colors.textMuted, fontSize: 12, lineHeight: 16 },
 	divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
 });
 
@@ -141,6 +145,21 @@ export const Stat = ({ label, value, tone }) => (
 		<Text style={[styles.statValue, tone === 'bad' && { color: colors.redBright }, tone === 'good' && { color: colors.green }]}>{value}</Text>
 	</View>
 );
+
+// A selectable row with an optional description (basemaps, elevation source).
+export const Option = ({ label, info, selected, onPress }) => {
+	const { accent, accentBright } = useTheme();
+
+	return (
+		<Pressable style={[styles.option, selected && { borderColor: accentBright, backgroundColor: `${accent}33` }]} onPress={onPress} accessibilityRole="radio" accessibilityState={{ selected }}>
+			<View style={styles.optionText}>
+				<Text style={styles.optionLabel}>{label}</Text>
+				{info ? <Text style={styles.optionInfo}>{info}</Text> : null}
+			</View>
+			{selected && <Icon name="check" size={20} color={accentBright} />}
+		</Pressable>
+	);
+};
 
 export const Divider = () => <View style={styles.divider} />;
 

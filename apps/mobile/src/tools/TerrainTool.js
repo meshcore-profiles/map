@@ -12,6 +12,7 @@ import { boundsOf, buildPathFeatures } from './pathFeatures';
 import { PointField } from './PointField';
 import { describePoint, pointFromText } from './points';
 import { useMapPicker } from './useMapPicker';
+import { useShareLink } from './useShareLink';
 
 const SAMPLE_COUNT = 48;
 const CHART_WIDTH = 320;
@@ -62,14 +63,15 @@ const ElevationProfile = ({ result }) => {
 
 export const TerrainTool = ({ ctx }) => {
 	const { t } = useI18n();
-	const { nodes, config, setOverlay, setPicker, fitTo, onClose } = ctx;
+	const { nodes, config, elevationSource, setOverlay, setPicker, fitTo, onClose } = ctx;
 	const [points, setPoints] = useState({ a: null, b: null });
 	const [texts, setTexts] = useState({ a: '', b: '' });
-	const [heights, setHeights] = useState({ a: '2', b: '2' });
+	const [heights, setHeights] = useState({ a: '7', b: '2' });
 	const [picking, setPicking] = useState(null);
 	const [busy, setBusy] = useState(false);
 	const [result, setResult] = useState(null);
 	const [error, setError] = useState(null);
+	const share = useShareLink();
 
 	const setPoint = (key, point) => {
 		setPoints(current => ({ ...current, [key]: point }));
@@ -103,7 +105,7 @@ export const TerrainTool = ({ ctx }) => {
 		setError(null);
 		try {
 			const samplePoints = sampleLine(points.a, points.b, SAMPLE_COUNT);
-			const elevations = await getElevations(config.sefinekApi, samplePoints);
+			const elevations = await getElevations(config.sefinekApi, samplePoints, elevationSource);
 			const analysis = analyzeLineOfSight({ pointA: points.a, samplePoints, elevations, heightA: Number(heights.a) || 0, heightB: Number(heights.b) || 0 });
 			setResult({ ...analysis, elevations });
 			fitTo(boundsOf([points.a, points.b]));
@@ -157,6 +159,7 @@ export const TerrainTool = ({ ctx }) => {
 					{error && <Text style={styles.error}>{error}</Text>}
 					<View style={styles.actions}>
 						<Button style={styles.action} label={busy ? t('terrain:fetchingElevation') : t('terrain:analyze')} disabled={busy} onPress={analyze} />
+						<Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} disabled={!points.a || !points.b} onPress={() => share(`terrain=${points.a.lat.toFixed(5)},${points.a.lng.toFixed(5)},${heights.a};${points.b.lat.toFixed(5)},${points.b.lng.toFixed(5)},${heights.b}`)} />
 						<Button style={styles.action} variant="ghost" label={t('common:clear')} onPress={reset} />
 					</View>
 					{summary && (

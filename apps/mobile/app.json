@@ -4,15 +4,49 @@
     "slug": "meshcore-map",
     "version": "0.1.0",
     "orientation": "portrait",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "plugins": ["@maplibre/maplibre-react-native"],
-    "ios": { "bundleIdentifier": "com.meshcoreprofiles.map" },
+    "plugins": [
+      "@maplibre/maplibre-react-native"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.meshcoreprofiles.map"
+    },
     "android": {
       "package": "com.meshcoreprofiles.map",
-      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-foreground.png", "backgroundImage": "./assets/adaptive-background.png" }
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-foreground.png",
+        "backgroundImage": "./assets/adaptive-background.png"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": false,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "map.meshcoreprofiles.com"
+            },
+            {
+              "scheme": "https",
+              "host": "mapa.meshcorepolska.org"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
-    "extra": { "apiBase": "https://map.meshcoreprofiles.com", "sefinekApi": "https://api.sefinek.net" }
+    "extra": {
+      "apiBase": "https://map.meshcoreprofiles.com",
+      "sefinekApi": "https://api.sefinek.net"
+    },
+    "scheme": "meshcoremap"
   }
 }

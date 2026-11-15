@@ -3,21 +3,15 @@
 		"noResults": "No results"
 	},
 	"region": {
-		"promptTitle": "Which map do you want to see?",
-		"promptText": "You can change the map scope later in settings. Downloaded data is saved on your device, so you can also browse it offline.",
 		"title": "Map scope",
-		"desc": "The global map shows nodes worldwide, while the Poland-only map shows just those in Poland.",
-		"pl": "Poland only",
-		"all": "Worldwide",
-		"plDesc": "Only nodes in Poland. Smaller download ({{size}}).",
-		"allDesc": "All nodes worldwide. Larger download ({{size}}).",
-		"sizeUnknown": "size unknown"
+		"desc": "The global map shows nodes worldwide, while the Poland-only map shows just those in Poland."
 	},
 	"loading": {
 		"reading": "Loading saved data...",
 		"downloading": "Downloading node data... {{percent}}%",
 		"failed": "Could not download the data. Check your internet connection.",
-		"retry": "Retry"
+		"retry": "Retry",
+		"cancelled": "Download cancelled."
 	},
 	"offline": {
 		"usingCache": "Could not refresh the data. Showing data saved on your device."

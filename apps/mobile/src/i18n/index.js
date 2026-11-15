@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo } from 'react';
 import { createI18n } from '@meshcore-map/core/i18n';
 import { useSettings } from '../state/SettingsContext';
+import { deviceLocale } from './deviceLocale';
 
 // The repo-root locales/ directory is shared with the website (the same files feed the server-side i18next); mobile.json holds the app-only strings.
 import plCommon from '../../../../locales/pl/common.json';
@@ -13,6 +14,8 @@ import plCoverage from '../../../../locales/pl/coverage.json';
 import plStats from '../../../../locales/pl/stats.json';
 import plSettings from '../../../../locales/pl/settings.json';
 import plMobile from '../../../../locales/pl/mobile.json';
+import plLegend from '../../../../locales/pl/legend.json';
+import plChangelog from '../../../../locales/pl/changelog.json';
 import enCommon from '../../../../locales/en/common.json';
 import enMap from '../../../../locales/en/map.json';
 import enFilters from '../../../../locales/en/filters.json';
@@ -23,17 +26,18 @@ import enCoverage from '../../../../locales/en/coverage.json';
 import enStats from '../../../../locales/en/stats.json';
 import enSettings from '../../../../locales/en/settings.json';
 import enMobile from '../../../../locales/en/mobile.json';
+import enLegend from '../../../../locales/en/legend.json';
+import enChangelog from '../../../../locales/en/changelog.json';
 
 const BUNDLES = {
-	pl: { common: plCommon, map: plMap, filters: plFilters, measure: plMeasure, route: plRoute, terrain: plTerrain, coverage: plCoverage, stats: plStats, settings: plSettings, mobile: plMobile },
-	en: { common: enCommon, map: enMap, filters: enFilters, measure: enMeasure, route: enRoute, terrain: enTerrain, coverage: enCoverage, stats: enStats, settings: enSettings, mobile: enMobile },
+	pl: { common: plCommon, map: plMap, filters: plFilters, measure: plMeasure, route: plRoute, terrain: plTerrain, coverage: plCoverage, stats: plStats, settings: plSettings, mobile: plMobile, legend: plLegend, changelog: plChangelog },
+	en: { common: enCommon, map: enMap, filters: enFilters, measure: enMeasure, route: enRoute, terrain: enTerrain, coverage: enCoverage, stats: enStats, settings: enSettings, mobile: enMobile, legend: enLegend, changelog: enChangelog },
 };
 
 export const resolveLanguage = preference => {
 	if (preference === 'pl' || preference === 'en') return preference;
 
-	const locale = Intl.DateTimeFormat().resolvedOptions().locale ?? 'en';
-	return locale.toLowerCase().startsWith('pl') ? 'pl' : 'en';
+	return deviceLocale().toLowerCase().startsWith('pl') ? 'pl' : 'en';
 };
 
 const I18nContext = createContext(null);

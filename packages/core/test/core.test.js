@@ -5,8 +5,10 @@ import { escapeHtml, truncateKey, formatBytes, resolveNodeByQuery, getNameIconLa
 import { radioValue, createRadioMatcher, updateRadioSelection } from '../src/radio-filter-utils.js';
 import { createDefaultFilters, collectFilteredNodes, prepareNodes, searchNodes, timeAgoParts } from '../src/nodes.js';
 import { createI18n } from '../src/i18n.js';
+import { regionForLocale } from '../src/sites.js';
+import { parseMapLink } from '../src/links.js';
 import { sampleLine, analyzeLineOfSight } from '../src/los.js';
-import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay } from '../src/coverage.js';
+import { buildCoverageGrid, buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay, GRID_SHADES } from '../src/coverage.js';
 import { createElevationProviders, fetchElevationsChunked } from '../src/elevation-providers.js';
 import { buildFilterParams, parseSharedFilters } from '../src/filter-share.js';
 
@@ -146,6 +148,40 @@ test('prepareNodes: inflate, status, indeksy', () => {
 	assert.equal(collectFilteredNodes({ ...filters, radioFilters: { ...filters.radioFilters, freq: ['869'] } }, byType).length, 1);
 	assert.equal(collectFilteredNodes({ ...filters, fromInsertDate: iso(10).slice(0, 10) }, byType).length, 2);
 	assert.deepEqual(searchNodes(nodes, 'rep').map(n => n.adv_name), ['Repeater A', 'Reczny'].filter(n => n.toLowerCase().includes('rep')));
+});
+
+test('buildCoverageGrid: komorki tylko w zasiegu, ciemniejsze blizej nadajnika, symetria polnoc-poludnie', () => {
+	const rayResults = Array.from({ length: 36 }, (_, i) => ({ bearingDeg: i * 10, opticalRange: 1000, fresnelRange: 1000 }));
+	const { cells, items } = buildCoverageGrid({ rayResults, capM: 1000, linkBudgetRangeM: 1000, cellTargetM: 100 });
+
+	assert.equal(cells, 20);
+	assert.ok(items.length > 0 && items.every(item => item.level >= 0 && item.level < GRID_SHADES.length));
+	assert.ok(!items.some(item => item.px === 0 && item.py === 0), 'naroze poza zasiegiem');
+
+	const levelAt = (px, py) => items.find(item => item.px === px && item.py === py)?.level;
+	assert.ok(levelAt(10, 10) > levelAt(10, 1), 'blisko srodka ciemniej niz przy krawedzi');
+	assert.equal(levelAt(10, 1), levelAt(10, 18));
+
+	const blocked = rayResults.map(ray => ({ ...ray, opticalRange: 0, fresnelRange: 0 }));
+	assert.equal(buildCoverageGrid({ rayResults: blocked, capM: 1000, linkBudgetRangeM: 1000, cellTargetM: 100 }).items.length, 0);
+});
+
+test('parseMapLink: wezel po kluczu albo widok, reszta ignorowana', () => {
+	const key = 'abababababababababababababababababababababababababababababababab';
+	assert.deepEqual(parseMapLink(`https://map.meshcoreprofiles.com/?node=${key.toUpperCase()}`), { node: key });
+	assert.deepEqual(parseMapLink(`meshcoremap://open?x=1&node=${key}#top`), { node: key });
+	assert.deepEqual(parseMapLink('https://x.test/?lat=52.1&lon=21.2&zoom=12'), { view: { lat: 52.1, lon: 21.2, zoom: 12 } });
+	assert.deepEqual(parseMapLink('https://x.test/?lat=52.1&lon=21.2'), { view: { lat: 52.1, lon: 21.2, zoom: null } });
+	assert.equal(parseMapLink('https://x.test/?node=zzz'), null);
+	assert.equal(parseMapLink('https://x.test/?lat=95&lon=21'), null);
+	assert.equal(parseMapLink('https://x.test/'), null);
+	assert.equal(parseMapLink(undefined), null);
+});
+
+test('regionForLocale: region telefonu wybiera zakres mapy jak host wybiera strone', () => {
+	const cases = { 'pl-PL': 'pl', 'en-PL': 'pl', pl_PL: 'pl', pl: 'pl', 'pl-Latn-PL': 'pl', 'en-US': 'all', 'pl-DE': 'all', en: 'all', 'de-DE': 'all', 'en-u-ca-gregory': 'all', 'pl-u-ca-gregory': 'pl', '': 'all' };
+	for (const [tag, expected] of Object.entries(cases)) assert.equal(regionForLocale(tag), expected, tag);
+	assert.equal(regionForLocale(undefined), 'all');
 });
 
 test('searchNodes: kolejnosc alfabetyczna, limit i dopasowanie po kluczu jak przy pelnym sortowaniu', () => {

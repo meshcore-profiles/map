@@ -5,9 +5,16 @@ import { useI18n } from '../i18n';
 import { useNodes, useNodesStatus } from '../state/NodesContext';
 import { useSettings } from '../state/SettingsContext';
 import { useRegionSwitch } from '../state/useRegionSwitch';
-import { Button, Divider, Hint, Section, SegmentedControl, SwitchRow } from '../ui/controls';
+import { ELEVATION_SOURCES } from '../storage/settings';
+import { Button, Divider, Hint, Option, Section, SegmentedControl, SwitchRow } from '../ui/controls';
 import { Sheet } from '../ui/Sheet';
 import { colors } from '../theme';
+
+const ELEVATION_KEYS = {
+	'sefinek': ['settings:elevationSefinek', 'settings:elevationSefinekDesc'],
+	'open-elevation': ['settings:elevationOpenElevation', 'settings:elevationOpenElevationDesc'],
+	'open-meteo': ['settings:elevationOpenMeteo', 'settings:elevationOpenMeteoDesc'],
+};
 
 const styles = StyleSheet.create({
 	value: { color: colors.text, fontSize: 16 },
@@ -32,6 +39,21 @@ export const SettingsSheet = ({ visible, onClose }) => {
 				<Hint>{t('mobile:region.desc')}</Hint>
 				<Divider />
 				<SwitchRow label={t('mobile:settings.rotateTilt')} description={t('mobile:settings.rotateTiltDesc')} value={settings.rotateTilt} onValueChange={rotateTilt => update({ rotateTilt })} />
+				<SwitchRow label={t('settings:closeFiltersLabel')} description={t('settings:closeFiltersDesc')} value={settings.closeFiltersOnApply} onValueChange={closeFiltersOnApply => update({ closeFiltersOnApply })} />
+			</Section>
+
+			<Section title={t('settings:elevationSourceLabel')} icon="terrain">
+				{ELEVATION_SOURCES.map(source => <Option key={source} label={t(ELEVATION_KEYS[source][0])} info={t(ELEVATION_KEYS[source][1])} selected={settings.elevationSource === source} onPress={() => update({ elevationSource: source })} />)}
+				<Hint>{t('settings:elevationDesc')}</Hint>
+			</Section>
+
+			<Section title={t('settings:coverageStyleLabel')} icon="coverage">
+				<SegmentedControl
+					value={settings.coverageStyle}
+					onChange={coverageStyle => update({ coverageStyle })}
+					options={[{ value: 'tiles', label: t('settings:coverageStyleTiles') }, { value: 'lines', label: t('settings:coverageStyleLines') }]}
+				/>
+				<Hint>{t('settings:coverageStyleDesc')}</Hint>
 			</Section>
 
 			<Section title={t('common:langLabel')} icon="info">

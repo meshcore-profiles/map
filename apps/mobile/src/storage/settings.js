@@ -1,14 +1,22 @@
 import { DEFAULT_BASEMAP_SELECTION } from '@meshcore-map/core/basemaps';
 import { createDefaultFilters } from '@meshcore-map/core/nodes';
+import { regionForLocale } from '@meshcore-map/core/sites';
+import { deviceLocale } from '../i18n/deviceLocale';
 import { readJson, writeJson } from './files';
 
 const FILE = 'settings.json';
 
+// Same options as the website's settings (the providers live in core/elevation-providers).
+export const ELEVATION_SOURCES = ['sefinek', 'open-elevation', 'open-meteo'];
+
 export const createDefaultSettings = () => ({
-	region: null,
+	region: regionForLocale(deviceLocale()),
 	language: 'auto',
 	basemap: DEFAULT_BASEMAP_SELECTION,
 	rotateTilt: false,
+	closeFiltersOnApply: true,
+	elevationSource: 'sefinek',
+	coverageStyle: 'tiles',
 	filters: createDefaultFilters(),
 });
 
@@ -18,10 +26,14 @@ const sanitize = saved => {
 	const filters = { ...defaults.filters, ...saved?.filters };
 
 	return {
-		region: saved?.region === 'all' || saved?.region === 'pl' ? saved.region : null,
+		// First launch (or an unusable value): the scope follows the device region, like each site defaults to its own.
+		region: saved?.region === 'all' || saved?.region === 'pl' ? saved.region : defaults.region,
 		language: ['auto', 'pl', 'en'].includes(saved?.language) ? saved.language : 'auto',
 		basemap: typeof saved?.basemap === 'string' && saved.basemap ? saved.basemap : DEFAULT_BASEMAP_SELECTION,
 		rotateTilt: saved?.rotateTilt === true,
+		closeFiltersOnApply: saved?.closeFiltersOnApply !== false,
+		elevationSource: ELEVATION_SOURCES.includes(saved?.elevationSource) ? saved.elevationSource : 'sefinek',
+		coverageStyle: saved?.coverageStyle === 'lines' ? 'lines' : 'tiles',
 		filters: {
 			...filters,
 			radioFilters: { ...defaults.filters.radioFilters, ...filters.radioFilters },

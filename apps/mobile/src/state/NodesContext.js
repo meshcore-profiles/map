@@ -60,6 +60,14 @@ export const NodesProvider = ({ children }) => {
 		}
 	}, [region]);
 
+	// Stops a running download; without a cached copy the status banner then offers a retry.
+	const cancel = useCallback(() => {
+		abortRef.current?.abort();
+		setProgress(0);
+		setError(Object.assign(new Error('Download cancelled'), { cancelled: true }));
+		setPhase(current => current === 'downloading' ? 'error' : 'ready');
+	}, []);
+
 	useEffect(() => {
 		if (!ready) return undefined;
 
@@ -72,7 +80,7 @@ export const NodesProvider = ({ children }) => {
 	const filterKey = JSON.stringify([nodeFilter, radioFilters, fromDate, fromInsertDate]);
 	const filtered = useMemo(() => collectFilteredNodes({ nodeFilter, radioFilters, fromDate, fromInsertDate }, data.byType), [filterKey, data.byType]);
 
-	const value = useMemo(() => ({ ...data, filtered, refresh }), [data, filtered, refresh]);
+	const value = useMemo(() => ({ ...data, filtered, refresh, cancel }), [data, filtered, refresh, cancel]);
 	const status = useMemo(() => ({ phase, progress, error }), [phase, progress, error]);
 
 	return (

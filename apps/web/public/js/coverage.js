@@ -3,7 +3,7 @@ import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { ensurePane, escapeHtml, formatDistance, findNodeNearLatLng, loadJson, resolveNodeByQuery } from './pathtools.js';
 import { destinationPoint, ELEVATION_PROVIDERS, fetchElevationsChunked, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
-import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay, MAX_RANGE_M, RESOLUTIONS } from '/core/coverage.js';
+import { buildCoverageGrid, buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay, GRID_SHADES, gridAlpha, MAX_RANGE_M, RESOLUTIONS } from '/core/coverage.js';
 import { truncateKey } from './node-utils.js';
 import { NODE_TYPE_ICON_NAMES, PALETTE } from '/core/colors.js';
 import { updateToast } from './toast.js';
@@ -14,14 +14,8 @@ const COLOR_ORIGIN = PALETTE.amber;
 const COLOR_BUDGET = PALETTE.textMuted;
 const COLOR_BLOCKED = PALETTE.red;
 
-// Lightest to darkest - the darker the tile, the higher the chance of reception.
-const GRID_SHADES = ['#d4f3b2', '#a9e6a0', '#7fd68f', '#58c47f', '#38ad6f', '#259460', '#167a50', '#0b5f3f'];
-const GRID_ALPHA_MIN = 0.3;
-const GRID_ALPHA_MAX = 0.85;
 const GRID_CELL_TARGET_M = 90;
 const GRID_MAX_CELLS = 560;
-const GRID_FULL_MARGIN_DB = 60;
-const GRID_MIN_SCORE = 0.06;
 
 const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
 
@@ -299,44 +293,18 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 	}));
 
 	// One pixel per cell; the overlay is drawn with pixelated scaling so every cell shows as a square.
-	// Cell ranges are interpolated between the two nearest rays, so tiles between rays are estimates.
 	const buildGridImage = (rayResults, capM, linkBudgetRangeM) => {
-		const bearings = rayResults.length;
-		const cells = Math.min(GRID_MAX_CELLS, Math.ceil((capM * 2) / GRID_CELL_TARGET_M));
-		const cellM = (capM * 2) / cells;
-		const bearingStep = 360 / bearings;
+		const { cells, items } = buildCoverageGrid({ rayResults, capM, linkBudgetRangeM, cellTargetM: GRID_CELL_TARGET_M, maxCells: GRID_MAX_CELLS });
 
 		const canvas = document.createElement('canvas');
 		canvas.width = cells;
 		canvas.height = cells;
 		const ctx = canvas.getContext('2d');
 
-		for (let py = 0; py < cells; py++) {
-			for (let px = 0; px < cells; px++) {
-				const dx = (px + 0.5 - cells / 2) * cellM;
-				const dy = (cells / 2 - py - 0.5) * cellM;
-				const dist = Math.hypot(dx, dy);
-				if (dist > capM) continue;
-
-				const position = (((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360) / bearingStep;
-				const lower = Math.floor(position);
-				const frac = position - lower;
-				const a = rayResults[lower % bearings], b = rayResults[(lower + 1) % bearings];
-				const fresnelRange = a.fresnelRange * (1 - frac) + b.fresnelRange * frac;
-				const opticalRange = a.opticalRange * (1 - frac) + b.opticalRange * frac;
-
-				const terrainFactor = dist <= fresnelRange ? 1 : dist <= opticalRange ? 0.5 : 0;
-				if (!terrainFactor) continue;
-
-				// Link margin left over at this distance (free-space loss only), so the shade fades smoothly with distance.
-				const marginDb = 20 * Math.log10(linkBudgetRangeM / Math.max(dist, 1));
-				const score = Math.max(GRID_MIN_SCORE, terrainFactor * Math.min(1, Math.max(0, marginDb) / GRID_FULL_MARGIN_DB));
-
-				const level = Math.min(GRID_SHADES.length - 1, Math.floor(score * GRID_SHADES.length));
-				ctx.globalAlpha = GRID_ALPHA_MIN + (GRID_ALPHA_MAX - GRID_ALPHA_MIN) * (level / (GRID_SHADES.length - 1));
-				ctx.fillStyle = GRID_SHADES[level];
-				ctx.fillRect(px, py, 1, 1);
-			}
+		for (const { px, py, level } of items) {
+			ctx.globalAlpha = gridAlpha(level);
+			ctx.fillStyle = GRID_SHADES[level];
+			ctx.fillRect(px, py, 1, 1);
 		}
 
 		return canvas.toDataURL();

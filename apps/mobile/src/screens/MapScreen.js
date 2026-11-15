@@ -1,20 +1,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Camera, Map as MapView } from '@maplibre/maplibre-react-native';
+import { SITES, toMaplibreView } from '@meshcore-map/core/sites';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BasemapSheet } from '../components/BasemapSheet';
 import { FiltersSheet } from '../components/FiltersSheet';
+import { LegendSheet } from '../components/LegendSheet';
 import { MapControls } from '../components/MapControls';
 import { NodeLayer } from '../components/NodeLayer';
 import { NodeSheet } from '../components/NodeSheet';
 import { OverlayLayer } from '../components/OverlayLayer';
-import { RegionPrompt } from '../components/RegionPrompt';
 import { SettingsSheet } from '../components/SettingsSheet';
 import { StatsSheet } from '../components/StatsSheet';
 import { TopBar } from '../components/TopBar';
 import { DEFAULT_VIEW } from '../config';
 import { useAppConfig } from '../data/appConfig';
 import { useNodes } from '../state/NodesContext';
+import { useMapLink } from '../state/useMapLink';
 import { useSettings } from '../state/SettingsContext';
 import { CoverageTool } from '../tools/CoverageTool';
 import { MeasureTool } from '../tools/MeasureTool';
@@ -40,7 +42,7 @@ export const MapScreen = () => {
 	const { settings, ready, update } = useSettings();
 	const { nodes, byType, radioOptions, filtered } = useNodes();
 	const config = useAppConfig();
-	const region = settings.region ?? 'all';
+	const { region } = settings;
 
 	const cameraRef = useRef(null);
 	const sourceRef = useRef(null);
@@ -50,31 +52,34 @@ export const MapScreen = () => {
 	const [toolId, setToolId] = useState(null);
 	const [toolsOpen, setToolsOpen] = useState(false);
 	const [overlay, setOverlay] = useState(null);
-	// Counts successful style loads. The native side drops layers that were queued for a style which never loaded (e.g. 403 before a fallback), so the layers mount only after a style is ready and are rebuilt for each new one.
-	const [styleEpoch, setStyleEpoch] = useState(0);
+	const [link, setLink] = useState(null);
+	// The style that finished loading last and the number of successful loads. The native side drops layers that were queued for a style which never loaded (e.g. 403 before a fallback), so the layers mount only after a style is ready and are rebuilt for each new one.
+	const [loadedStyle, setLoadedStyle] = useState({ style: null, epoch: 0 });
 
 	const { basemaps, mapStyle, handleStyleFailed } = useBasemap({ config, settings, update });
+	const mapStyleRef = useRef(mapStyle);
+	mapStyleRef.current = mapStyle;
+	// The layers belong to the style that loaded last. Once the style prop changes they are unmounted in that same render, before the native side swaps styles; removing their images from the new style afterwards only logs warnings.
+	const styleEpoch = loadedStyle.style === mapStyle ? loadedStyle.epoch : 0;
 	const { savedCamera, handleRegionDidChange } = useSavedCamera();
 	const mapReady = ready && savedCamera !== undefined;
 
 	const repeaters = useMemo(() => byType[2] ?? [], [byType]);
 	const byKey = useMemo(() => new Map(nodes.map(node => [node.public_key, node])), [nodes]);
 
-	// The camera jumps to the region's default view on the first choice and when narrowing to Poland; widening to all nodes keeps the current view.
-	// On launch the saved view wins over the default one.
+	// The camera jumps to the default view when the user narrows the map to Poland; widening to all nodes keeps the current view.
+	// The launch view (the saved one, else the region's default) is the Camera's initialViewState, so the first run only records the region.
 	const previousRegion = useRef(null);
 	useEffect(() => {
-		if (!mapReady || !settings.region) return;
+		if (!mapReady) return;
 
 		const previous = previousRegion.current;
-		previousRegion.current = settings.region;
-		if (previous === settings.region) return;
-		if (!previous && savedCamera) return;
-		if (previous && settings.region === 'all') return;
+		previousRegion.current = region;
+		if (!previous || previous === region || region === 'all') return;
 
-		const view = DEFAULT_VIEW[settings.region];
+		const view = DEFAULT_VIEW[region];
 		cameraRef.current?.flyTo({ center: view.center, zoom: view.zoom, padding: NO_PADDING, duration: 800 });
-	}, [mapReady, settings.region, savedCamera]);
+	}, [mapReady, region]);
 
 	useEffect(() => {
 		if (!settings.rotateTilt) cameraRef.current?.easeTo({ bearing: 0, pitch: 0, duration: 300 });
@@ -87,7 +92,7 @@ export const MapScreen = () => {
 
 	const closeSheet = useCallback(() => setSheet(null), []);
 	const clearSelection = useCallback(() => setSelected(null), []);
-	const handleStyleLoaded = useCallback(() => setStyleEpoch(epoch => epoch + 1), []);
+	const handleStyleLoaded = useCallback(() => setLoadedStyle(current => ({ style: mapStyleRef.current, epoch: current.epoch + 1 })), []);
 	const setPicker = useCallback(handlers => {
 		pickerRef.current = handlers;
 	}, []);
@@ -140,9 +145,28 @@ export const MapScreen = () => {
 		else setSelected(null);
 	}, []);
 
+	// A link waits until the map is ready and, for a node, until that node is in the loaded data (it may still be downloading).
+	useMapLink(setLink);
+	useEffect(() => {
+		if (!link || !mapReady) return;
+
+		if (link.node) {
+			const node = byKey.get(link.node);
+			if (!node) return;
+
+			showNode(node);
+		} else {
+			const { center, zoom } = toMaplibreView({ lat: link.view.lat, lon: link.view.lon, zoom: link.view.zoom ?? 13 });
+			cameraRef.current?.flyTo({ center, zoom, padding: NO_PADDING, duration: 800 });
+		}
+
+		setLink(null);
+	}, [link, mapReady, byKey, showNode]);
+
 	const closeTool = useCallback(() => setToolId(null), []);
 	const toggleTools = useCallback(() => setToolsOpen(open => !open), []);
 	const openBasemapSheet = useCallback(() => setSheet('basemap'), []);
+	const openLegendSheet = useCallback(() => setSheet('legend'), []);
 
 	const openTool = useCallback(id => {
 		setSelected(null);
@@ -152,15 +176,15 @@ export const MapScreen = () => {
 
 	const applyFilters = useCallback(filters => {
 		update({ filters });
-		setSheet(null);
-	}, [update]);
+		if (settings.closeFiltersOnApply) setSheet(null);
+	}, [update, settings.closeFiltersOnApply]);
 
 	const selectBasemap = useCallback(name => {
 		update({ basemap: name });
 		setSheet(null);
 	}, [update]);
 
-	const toolContext = useMemo(() => ({ nodes, config, setOverlay, setPicker, fitTo, onClose: closeTool }), [nodes, config, setPicker, fitTo, closeTool]);
+	const toolContext = useMemo(() => ({ nodes, config, elevationSource: settings.elevationSource, coverageStyle: settings.coverageStyle, defaultRadio: SITES[region].defaultRadio, setOverlay, setPicker, fitTo, onClose: closeTool }), [nodes, config, settings.elevationSource, settings.coverageStyle, region, setPicker, fitTo, closeTool]);
 	const ActiveTool = toolId ? TOOLS[toolId] : null;
 	const view = DEFAULT_VIEW[region];
 
@@ -177,7 +201,7 @@ export const MapScreen = () => {
 			<TopBar nodes={filtered} filters={settings.filters} onSelectNode={showNode} onOpenSheet={setSheet} />
 
 			{!ActiveTool && !selected && (
-				<MapControls region={region} features={config?.features} toolsOpen={toolsOpen} onToggleTools={toggleTools} onOpenTool={openTool} onOpenBasemap={openBasemapSheet} />
+				<MapControls region={region} features={config?.features} toolsOpen={toolsOpen} onToggleTools={toggleTools} onOpenTool={openTool} onOpenBasemap={openBasemapSheet} onOpenLegend={openLegendSheet} />
 			)}
 
 			{ActiveTool && <ActiveTool ctx={toolContext} />}
@@ -189,8 +213,8 @@ export const MapScreen = () => {
 			)}
 			<StatsSheet visible={sheet === 'stats'} onClose={closeSheet} nodes={nodes} repeaters={repeaters} onSelectNode={selectNodeFromStats} onShowOnMap={showRepeaters} />
 			<BasemapSheet visible={sheet === 'basemap'} onClose={closeSheet} basemaps={basemaps} selection={settings.basemap} onSelect={selectBasemap} />
+			<LegendSheet visible={sheet === 'legend'} onClose={closeSheet} />
 			<SettingsSheet visible={sheet === 'settings'} onClose={closeSheet} />
-			<RegionPrompt visible={ready && !settings.region} />
 		</View>
 	);
 };

@@ -6,6 +6,7 @@ export const SITES = {
 	pl: {
 		region: 'pl',
 		defaultRegion: 'pl',
+		defaultRadio: 'EU/UK (Narrow)',
 		defaultView: { lat: 52.1537, lon: 19.3250, zoom: 7 },
 		mapLanguage: 'pl',
 		maptilerHybridMapId: '01a04259-c91e-7408-8c84-e27953c48bf2',
@@ -20,6 +21,7 @@ export const SITES = {
 	all: {
 		region: 'all',
 		defaultRegion: 'all',
+		defaultRadio: 'USA/Canada (Recommended)',
 		defaultView: { lat: 29.9836, lon: 7.0313, zoom: 3 },
 		mapLanguage: 'local',
 		maptilerHybridMapId: '01a04275-e76d-714c-a0c9-bcd41ea874cd',
@@ -34,3 +36,14 @@ export const SITES = {
 
 // Leaflet counts zoom levels for 256 px tiles and MapLibre for 512 px ones, so the same view is one level lower there.
 export const toMaplibreView = ({ lat, lon, zoom }) => ({ center: [lon, lat], zoom: zoom - 1 });
+
+// Map scope for a device locale tag ("pl-PL", "en_PL", "pl"): Poland for the PL region (or a bare Polish language), the worldwide map otherwise.
+// Like the two sites, which each default to one scope; here the device region picks it.
+export const regionForLocale = tag => {
+	const [language, ...subtags] = String(tag ?? '').split(/[-_]/);
+	const extension = subtags.findIndex(subtag => subtag.length === 1);
+	const region = (extension === -1 ? subtags : subtags.slice(0, extension)).find(subtag => (/^[A-Za-z]{2}$/).test(subtag));
+
+	if (region) return region.toUpperCase() === 'PL' ? 'pl' : 'all';
+	return language.toLowerCase() === 'pl' ? 'pl' : 'all';
+};

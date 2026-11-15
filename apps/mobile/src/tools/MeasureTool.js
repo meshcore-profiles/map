@@ -8,6 +8,7 @@ import { ToolPanel } from '../ui/ToolPanel';
 import { colors, spacing } from '../theme';
 import { buildPathFeatures } from './pathFeatures';
 import { useMapPicker } from './useMapPicker';
+import { useShareLink } from './useShareLink';
 
 const styles = StyleSheet.create({
 	total: { color: colors.text, fontSize: 24, fontWeight: '700' },
@@ -19,23 +20,34 @@ const styles = StyleSheet.create({
 });
 
 const COLOR = colors.blue;
+// How a node's point is labelled: its name, or the first 1-3 bytes of its public key (as in repeater path hashes), or a short key.
+const LABEL_MODES = ['name', '1', '2', '3', 'mid'];
 
 export const MeasureTool = ({ ctx }) => {
 	const { t } = useI18n();
 	const { setOverlay, setPicker, onClose } = ctx;
 	const [points, setPoints] = useState([]);
+	const [labelMode, setLabelMode] = useState('name');
+	const share = useShareLink();
 
 	useMapPicker(setPicker, true, point => setPoints(current => [...current, point]));
 
 	useEffect(() => () => setOverlay(null), [setOverlay]);
 
+	const labelOf = (point, index) => {
+		if (labelMode === 'mid' && point.key) return truncateKey(point.key, 6);
+		if (labelMode !== 'name' && point.key) return point.key.slice(0, Number(labelMode) * 2);
+
+		return point.label ?? t('common:pointFallback', { n: index + 1 });
+	};
+
 	useEffect(() => {
-		setOverlay(buildPathFeatures(points, { color: COLOR, labelFor: (p, i) => String(p.label ?? t('common:pointFallback', { n: i + 1 })) }));
-	}, [points, setOverlay, t]);
+		setOverlay(buildPathFeatures(points, { color: COLOR, labelFor: (p, i) => String(labelOf(p, i)) }));
+	}, [points, labelMode, setOverlay, t]);
 
 	const segments = useMemo(() => points.slice(1).map((to, i) => ({ from: points[i], to, distance: haversineDistance(points[i], to) })), [points]);
 	const total = segments.reduce((sum, s) => sum + s.distance, 0);
-	const nameOf = (p, i) => p.label ?? (p.key ? truncateKey(p.key) : t('common:pointFallback', { n: i + 1 }));
+	const nameOf = (p, i) => labelMode === 'name' && !p.label && p.key ? truncateKey(p.key) : labelOf(p, i);
 
 	return (
 		<ToolPanel icon="ruler" title={t('measure:title')} onClose={onClose}>
@@ -49,8 +61,12 @@ export const MeasureTool = ({ ctx }) => {
 				</View>
 			))}
 			<View style={styles.actions}>
+				<Button style={styles.action} variant="secondary" label={t(`measure:labelModes.${labelMode === 'name' ? 'name' : labelMode === 'mid' ? 'mid' : `bytes${labelMode}`}`)} onPress={() => setLabelMode(mode => LABEL_MODES[(LABEL_MODES.indexOf(mode) + 1) % LABEL_MODES.length])} />
 				<Button style={styles.action} variant="secondary" label={t('measure:undo')} disabled={points.length === 0} onPress={() => setPoints(current => current.slice(0, -1))} />
 				<Button style={styles.action} variant="ghost" label={t('common:clear')} disabled={points.length === 0} onPress={() => setPoints([])} />
+			</View>
+			<View style={styles.actions}>
+				<Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} disabled={points.length === 0} onPress={() => share(`measure=${points.map(p => `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`).join(';')}`)} />
 			</View>
 		</ToolPanel>
 	);
