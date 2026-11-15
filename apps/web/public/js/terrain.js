@@ -1,7 +1,8 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { createPathLayer, findNodeNearLatLng, formatDistance, loadJson, resolveNodeByQuery } from './pathtools.js';
-import { curvatureDrop, ELEVATION_PROVIDERS, fetchElevations, haversineDistance, interpolate, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
+import { analyzeLineOfSight, clearanceAt, sampleLine } from '/core/los.js';
+import { ELEVATION_PROVIDERS, fetchElevations, haversineDistance, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
 
 const SAMPLE_COUNT = 48;
 
@@ -38,9 +39,7 @@ const buildChartSvg = ({ samples, distances, total, elevA, elevB, obstructed }) 
 
 	const obstructionDots = samples.map((e, i) => {
 		const d = distances[i];
-		const sightAt = elevA + (elevB - elevA) * (d / total);
-		const drop = curvatureDrop(d, total);
-		if ((e - drop) <= sightAt) return '';
+		if (clearanceAt({ elevation: e, d, total, elevA, elevB }) >= 0) return '';
 		return `<circle cx="${x(d).toFixed(1)}" cy="${y(e).toFixed(1)}" r="3.2" fill="${COLOR_RED_BRIGHT}" />`;
 	}).join('');
 
@@ -266,22 +265,9 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 		const loadingToast = showToast(t('terrain:fetchingElevation'), { duration: 0, status: 'loading' });
 
 		try {
-			const samplePoints = new Array(SAMPLE_COUNT).fill(0).map((_, i) => interpolate(points.a, points.b, i / (SAMPLE_COUNT - 1)));
+			const samplePoints = sampleLine(points.a, points.b, SAMPLE_COUNT);
 			const elevations = await fetchElevations(samplePoints, 'sefinek');
-			const distances = samplePoints.map(p => haversineDistance(points.a, p));
-
-			const elevA = elevations[0] + heightA;
-			const elevB = elevations[elevations.length - 1] + heightB;
-
-			let obstructed = false;
-			let worstClearance = Infinity;
-			for (let i = 1; i < elevations.length - 1; i++) {
-				const sightAt = elevA + (elevB - elevA) * (distances[i] / total);
-				const drop = curvatureDrop(distances[i], total);
-				const clearance = sightAt - (elevations[i] - drop);
-				if (clearance < worstClearance) worstClearance = clearance;
-				if (clearance < 0) obstructed = true;
-			}
+			const { distances, elevA, elevB, obstructed, worstClearance } = analyzeLineOfSight({ pointA: points.a, samplePoints, elevations, heightA, heightB });
 
 			const chartSvg = buildChartSvg({ samples: elevations, distances, total, elevA, elevB, obstructed });
 

@@ -2,22 +2,11 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { ensurePane, escapeHtml, formatDistance, findNodeNearLatLng, loadJson, resolveNodeByQuery } from './pathtools.js';
-import { curvatureDrop, destinationPoint, ELEVATION_PROVIDERS, fetchElevations, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
+import { destinationPoint, ELEVATION_PROVIDERS, fetchElevationsChunked, parseLatLng, requireFeature, requireSefinekElevationSource } from './elevation.js';
+import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSamplesPerRay, MAX_RANGE_M, RESOLUTIONS } from '/core/coverage.js';
 import { truncateKey } from './node-utils.js';
 import { updateToast } from './toast.js';
 
-const SPEED_OF_LIGHT = 299792458;
-const FRESNEL_CLEARANCE_FACTOR = 0.6;
-const MAX_TOTAL_POINTS = 9000;
-
-const SAMPLE_SPACING_TARGET = 300;
-const MIN_SAMPLES_PER_RAY = 20;
-const MAX_SAMPLES_PER_RAY = 60;
-const DEFAULT_CHUNK_SIZE = 100;
-
-const MAX_RANGE_M = 30000;
-
-const RESOLUTIONS = { fast: 36, standard: 72, high: 144 };
 const NODE_TYPE_ICON_NAMES = { 1: 'client', 2: 'repeater', 3: 'room-server', 4: 'sensor' };
 
 const COLOR_OPTICAL = '#4dabf7';
@@ -34,30 +23,6 @@ const GRID_CELL_TARGET_M = 90;
 const GRID_MAX_CELLS = 560;
 const GRID_FULL_MARGIN_DB = 60;
 const GRID_MIN_SCORE = 0.06;
-
-// Approximate LoRa (SX127x/SX126x-class) receiver sensitivity at BW=125kHz, from common
-// Semtech datasheet figures. Scaled to other bandwidths via the noise-bandwidth relationship.
-// No confirmed SF5 figure (SX126x-only, not in the SX127x table this is based on, and no
-// MeshCore preset actually uses it) - falls back to SF6 as the closest known value.
-const SENSITIVITY_125K_DBM = { 6: -118, 7: -123, 8: -126, 9: -129, 10: -132, 11: -133, 12: -136 };
-const LINK_FADE_MARGIN_DB = 10;
-
-const computeSamplesPerRay = (rangeM, bearings) => {
-	let samples = Math.min(MAX_SAMPLES_PER_RAY, Math.max(MIN_SAMPLES_PER_RAY, Math.round(rangeM / SAMPLE_SPACING_TARGET)));
-	if (bearings * samples > MAX_TOTAL_POINTS) samples = Math.max(MIN_SAMPLES_PER_RAY, Math.floor(MAX_TOTAL_POINTS / bearings));
-	return samples;
-};
-
-// Free-space path loss + LoRa sensitivity budget -> a single max range (same in every
-// direction, since it doesn't depend on terrain). The per-bearing terrain range is then
-// capped by this, so the shown polygon reflects whichever limit is tighter.
-const computeLinkBudgetRangeM = (erpDbm, freqMHz, sf, bwKHz) => {
-	const sensitivity125 = SENSITIVITY_125K_DBM[sf] ?? SENSITIVITY_125K_DBM[6];
-	const sensitivity = sensitivity125 + 10 * Math.log10((bwKHz * 1000) / 125000);
-	const budgetDb = erpDbm - sensitivity - LINK_FADE_MARGIN_DB;
-	const rangeKm = 10 ** ((budgetDb - 20 * Math.log10(freqMHz) - 32.44) / 20);
-	return Math.max(0, rangeKm * 1000);
-};
 
 const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
 
@@ -338,9 +303,9 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 	// Cell ranges are interpolated between the two nearest rays, so tiles between rays are estimates.
 	const buildGridImage = (rayResults, capM, linkBudgetRangeM) => {
 		const bearings = rayResults.length;
-		const bearingStep = 360 / bearings;
 		const cells = Math.min(GRID_MAX_CELLS, Math.ceil((capM * 2) / GRID_CELL_TARGET_M));
 		const cellM = (capM * 2) / cells;
+		const bearingStep = 360 / bearings;
 
 		const canvas = document.createElement('canvas');
 		canvas.width = cells;
@@ -509,48 +474,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		resultEl.hidden = false;
 	};
 
-	const computeRayRanges = (elevations, base, samplesPerRay, distances, elevA, rxHeight, lambda, margin, linkBudgetRangeM) => {
-		let opticalStopped = false, fresnelStopped = false;
-		let opticalRange = distances[samplesPerRay - 1];
-		let fresnelRange = distances[samplesPerRay - 1];
-
-		for (let i = 0; i < samplesPerRay && (!opticalStopped || !fresnelStopped); i++) {
-			const total = distances[i];
-			const elevB = elevations[base + i] + rxHeight;
-
-			let opticalOkHere = true, fresnelOkHere = true;
-			for (let j = 0; j < i; j++) {
-				const dj = distances[j];
-				const sightAt = elevA + (elevB - elevA) * (dj / total);
-				const drop = curvatureDrop(dj, total);
-				const clearance = sightAt - drop - elevations[base + j] + margin;
-
-				if (clearance < 0) {
-					opticalOkHere = false;
-					fresnelOkHere = false;
-					break;
-				}
-
-				const required = FRESNEL_CLEARANCE_FACTOR * Math.sqrt(lambda * dj * (total - dj) / total);
-				if (clearance < required) fresnelOkHere = false;
-			}
-
-			if (!opticalStopped) {
-				if (opticalOkHere) { opticalRange = total; }
-				else { opticalStopped = true; opticalRange = i > 0 ? distances[i - 1] : 0; }
-			}
-			if (!fresnelStopped) {
-				if (fresnelOkHere) { fresnelRange = total; }
-				else { fresnelStopped = true; fresnelRange = i > 0 ? distances[i - 1] : 0; }
-			}
-		}
-
-		return {
-			opticalRange: Math.min(opticalRange, linkBudgetRangeM),
-			fresnelRange: Math.min(fresnelRange, linkBudgetRangeM),
-		};
-	};
-
 	computeBtn.addEventListener('click', async () => {
 		if (!origin) {
 			showToast(t('coverage:selectPoint'), { status: 'error' });
@@ -576,58 +499,19 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		const bearings = RESOLUTIONS[resolutionSelect.value] || RESOLUTIONS.high;
 		const searchRangeM = Math.min(MAX_RANGE_M, linkBudgetRangeM);
 		const samplesPerRay = computeSamplesPerRay(searchRangeM, bearings);
-		const bearingStep = 360 / bearings;
 
 		computeBtn.disabled = true;
 		const loadingToast = showToast(t('coverage:fetchingElevation'), { duration: 0, status: 'loading' });
 
 		try {
-			const rayPoints = [];
-			for (let b = 0; b < bearings; b++) {
-				const bearingDeg = b * bearingStep;
-				for (let i = 1; i <= samplesPerRay; i++) {
-					rayPoints.push(destinationPoint(origin, bearingDeg, (i / samplesPerRay) * searchRangeM));
-				}
-			}
+			const allPoints = [origin, ...buildRayPoints(origin, bearings, samplesPerRay, searchRangeM)];
+			const elevations = await fetchElevationsChunked(allPoints, 'sefinek', (current, total) => {
+				if (total > 1) updateToast(loadingToast, t('coverage:fetchingElevationProgress', { current, total }), { duration: 0, status: 'loading' });
+			});
 
-			const allPoints = [origin, ...rayPoints];
-			const elevations = new Array(allPoints.length);
-			const chunkSize = ELEVATION_PROVIDERS.sefinek.maxBatchSize || DEFAULT_CHUNK_SIZE;
-			const chunkCount = Math.ceil(allPoints.length / chunkSize);
-
-			for (let c = 0; c < chunkCount; c++) {
-				const start = c * chunkSize;
-				const end = Math.min(start + chunkSize, allPoints.length);
-				if (chunkCount > 1) updateToast(loadingToast, t('coverage:fetchingElevationProgress', { current: c + 1, total: chunkCount }), { duration: 0, status: 'loading' });
-				const chunkElevations = await fetchElevations(allPoints.slice(start, end), 'sefinek');
-				for (let k = 0; k < chunkElevations.length; k++) elevations[start + k] = chunkElevations[k];
-			}
-
-			const elevA = elevations[0] + txHeight;
-			const lambda = SPEED_OF_LIGHT / (freqMHz * 1e6);
-
-			const distances = new Array(samplesPerRay);
-			for (let i = 0; i < samplesPerRay; i++) distances[i] = ((i + 1) / samplesPerRay) * searchRangeM;
-
-			const opticalRanges = [], fresnelRanges = [];
-			const rayResults = [];
-
-			for (let b = 0; b < bearings; b++) {
-				const base = 1 + b * samplesPerRay;
-
-				const { opticalRange, fresnelRange } = computeRayRanges(elevations, base, samplesPerRay, distances, elevA, rxHeight, lambda, margin, linkBudgetRangeM);
-
-				opticalRanges.push(opticalRange);
-				fresnelRanges.push(fresnelRange);
-				const bearingDeg = b * bearingStep;
-				rayResults.push({
-					bearingDeg,
-					opticalRange,
-					fresnelRange,
-					opticalPoint: destinationPoint(origin, bearingDeg, opticalRange),
-					fresnelPoint: destinationPoint(origin, bearingDeg, fresnelRange),
-				});
-			}
+			const rayResults = computeCoverage({ origin, elevations, bearings, samplesPerRay, searchRangeM, txHeight, rxHeight, freqMHz, margin, linkBudgetRangeM });
+			const opticalRanges = rayResults.map(r => r.opticalRange);
+			const fresnelRanges = rayResults.map(r => r.fresnelRange);
 
 			renderLayer(rayResults, linkBudgetRangeM);
 			renderSummary(opticalRanges, fresnelRanges, linkBudgetRangeM);
