@@ -1,4 +1,4 @@
-process.loadEnvFile(`${__dirname}/.env`);
+process.loadEnvFile(`${__dirname}/../../.env`);
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');

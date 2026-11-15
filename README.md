@@ -36,10 +36,10 @@ A test version of the configurator is currently available only to members of the
 git clone --recurse-submodules https://github.com/meshcore-profiles/map.git mapa.meshcorepolska.org
 cd mapa.meshcorepolska.org
 npm install
-cp apps/web/.env.example apps/web/.env
+cp .env.example .env
 ```
 
-Then fill in the MongoDB (`MONGODB_URL`) and Redis (`REDIS_HOST`, `REDIS_PASSWD`) credentials in the created `apps/web/.env` file.
+Then fill in the MongoDB (`MONGODB_URL`) and Redis (`REDIS_HOST`, `REDIS_PASSWD`) credentials in the created `.env` file.
 The `SITE_MODE` variable lets you force the Polish (`poland`) or global (`global`) version regardless of the domain - by default (`auto`) it's chosen based on the request host.
 
 Set `ESRI_API_KEY` to an ArcGIS Location Platform API key with the Basemap styles privilege to enable Esri Hybrid (World Imagery with vector labels). Roads and their labels appear from Leaflet zoom 12; borders and place labels retain the provider's zoom ranges. Restrict the key to your site's referrers. The `Default` basemap selects Esri Hybrid when this key is configured, otherwise MapTiler Hybrid when `MAPTILER_API_KEY` is configured, or OpenStreetMap when neither key is configured. A user's explicit basemap selection is preserved.
