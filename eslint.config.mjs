@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
-	{ ignores: ['apps/web/public/vendor/**', '**/node_modules/**'] },
+	{ ignores: ['apps/web/public/vendor/**', '**/node_modules/**', 'apps/mobile/.expo/**'] },
 	js.configs.recommended,
 	{
 		languageOptions: {
@@ -61,6 +61,13 @@ export default [
 	{
 		files: ['packages/**/*.js'],
 		languageOptions: { sourceType: 'module' },
+	},
+	{
+		files: ['apps/mobile/**/*.js'],
+		languageOptions: {
+			sourceType: 'module',
+			parserOptions: { ecmaFeatures: { jsx: true } },
+		},
 	},
 	{
 		files: ['apps/web/public/**/*.js'],

@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "MeshCore Map",
+    "slug": "meshcore-map",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": ["@maplibre/maplibre-react-native"],
+    "ios": { "bundleIdentifier": "com.meshcoreprofiles.map" },
+    "android": { "package": "com.meshcoreprofiles.map" },
+    "extra": { "apiBase": "https://map.meshcoreprofiles.com" }
+  }
+}

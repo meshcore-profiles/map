@@ -8,6 +8,8 @@ One codebase serves **two public sites**, chosen by request host (`config/sites.
 
 Comment language: **backend** (`index.js`, `services/`, `routes/`, `middlewares/`, `utils/`, `database/`, `config/`) in English, **frontend** (`public/`) in Polish. UI text is i18n-ed (see below).
 
+`apps/mobile` is an Expo (React Native, plain JS) app on MapLibre Native; it reuses `@meshcore-map/core` and the same `/api/v1/nodes` API (`app.json` -> `extra.apiBase`). It needs a dev build (MapLibre is not in Expo Go). `npx expo export --platform android|ios` in `apps/mobile` verifies that Metro bundles it. `npm audit` reports moderate minimatch findings via `@expo/fingerprint` (dev tooling only; `npm ci --omit=dev -w apps/web` on prod does not install it).
+
 ## Commands
 
 - Clone with `--recurse-submodules` (or `git submodule update --init`); `apps/web/global/` is a submodule.

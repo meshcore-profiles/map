@@ -17,21 +17,21 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "npm start -w apps/web",
     "lint": "eslint .",
     "m": "ncu -u --workspaces --root && npm install && npm update",
     "pull": "git pull origin main && git submodule update --init",
-    "update": "npm run pull && npm ci --omit=dev -w apps/web && pm2 restart mcmap",
-    "test": "npm test -w packages/core"
+    "start": "npm start -w apps/web",
+    "test": "npm test -w packages/core",
+    "update": "npm run pull && npm ci --omit=dev -w apps/web && pm2 restart mcmap"
   },
   "allowScripts": {
     "msgpackr-extract@3.0.7": true
   },
-  "engines": {
-    "node": ">=20.19.0"
-  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "globals": "^17.14.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
   }
 }
