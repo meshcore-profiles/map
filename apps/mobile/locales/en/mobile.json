@@ -1,0 +1,46 @@
+{
+	"search": {
+		"noResults": "No results"
+	},
+	"region": {
+		"promptTitle": "Which map do you want to see?",
+		"promptText": "You can change this later in settings. Data is stored on the device, so the map also works offline.",
+		"title": "Map scope",
+		"desc": "The global map shows nodes from all over the world, the Polish one only those in Poland.",
+		"pl": "Poland only",
+		"all": "Worldwide",
+		"plDesc": "Only nodes in Poland. Smaller download ({{size}}).",
+		"allDesc": "All nodes worldwide. Larger download ({{size}}).",
+		"sizeUnknown": "size unknown"
+	},
+	"loading": {
+		"reading": "Loading saved data...",
+		"downloading": "Downloading nodes... {{percent}}%",
+		"failed": "Could not download the data. Check your internet connection.",
+		"retry": "Retry"
+	},
+	"offline": {
+		"usingCache": "Showing data stored on the device. It could not be refreshed."
+	},
+	"settings": {
+		"title": "Settings",
+		"language": "Language",
+		"languageAuto": "Automatic",
+		"data": "Node data",
+		"updated": "Downloaded: {{time}}",
+		"neverUpdated": "No data downloaded yet",
+		"nodesCount": "Stored offline: {{count}} nodes",
+		"refresh": "Refresh data",
+		"version": "Version {{version}}"
+	},
+	"filters": {
+		"anyTime": "Any time",
+		"lastDays": "{{count}} days"
+	},
+	"tools": {
+		"title": "Tools",
+		"picking": "Tap the map...",
+		"routeDesc": "Route by names or the start of public keys.",
+		"needsNetwork": "Needs an internet connection (elevation data)."
+	}
+}

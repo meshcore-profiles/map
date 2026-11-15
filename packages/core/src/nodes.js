@@ -11,7 +11,7 @@ const STALE_DAYS = 5;
 const OLD_DAYS = 10;
 const EXTINCT_DAYS = 20;
 
-// Skrocone klucze z API (msgpack) -> pelne nazwy pol.
+// Shortened keys from the API (msgpack) -> full field names.
 const NODE_KEYS = {
 	pk: { key: 'public_key', convert: bytesToHex },
 	t: { key: 'type' },
@@ -40,7 +40,7 @@ export const createStatusThresholds = (now = Date.now()) => ({
 	extinct: now - EXTINCT_DAYS * DAY_MS,
 });
 
-// Status liczy sie tylko dla wezlow z automatycznego zrodla (source zaczyna sie od "u").
+// Status only applies to nodes from an automatic source (source starts with "u").
 export const getNodeUpdateStatus = (node, thresholds) => {
 	if (node.source[0] !== 'u') return 'none';
 
@@ -137,7 +137,7 @@ const TIME_UNITS = [
 	{ key: 'second', limit: 1 },
 ];
 
-// Zwraca { count, unit } albo null gdy mniej niz sekunda - tlumaczenie nalezy do wywolujacego.
+// Returns { count, unit } or null when under a second; translating it is up to the caller.
 export const timeAgoParts = (msec, now = Date.now()) => {
 	const seconds = Math.floor((now - msec) / 1000);
 

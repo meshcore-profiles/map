@@ -1,0 +1,46 @@
+{
+	"search": {
+		"noResults": "Brak wyników"
+	},
+	"region": {
+		"promptTitle": "Jaką mapę chcesz zobaczyć?",
+		"promptText": "Wybór można później zmienić w ustawieniach. Dane zapisują się na urządzeniu, więc mapa działa też bez internetu.",
+		"title": "Zakres mapy",
+		"desc": "Mapa globalna pokazuje węzły z całego świata, a polska tylko te z Polski.",
+		"pl": "Tylko Polska",
+		"all": "Cały świat",
+		"plDesc": "Tylko węzły w Polsce. Mniejsza paczka danych ({{size}}).",
+		"allDesc": "Wszystkie węzły na świecie. Większa paczka danych ({{size}}).",
+		"sizeUnknown": "rozmiar nieznany"
+	},
+	"loading": {
+		"reading": "Wczytywanie zapisanych danych...",
+		"downloading": "Pobieranie węzłów... {{percent}}%",
+		"failed": "Nie udało się pobrać danych. Sprawdź połączenie z internetem.",
+		"retry": "Ponów"
+	},
+	"offline": {
+		"usingCache": "Pokazuję dane zapisane na urządzeniu. Nie udało się ich odświeżyć."
+	},
+	"settings": {
+		"title": "Ustawienia",
+		"language": "Język",
+		"languageAuto": "Automatyczny",
+		"data": "Dane węzłów",
+		"updated": "Pobrano: {{time}}",
+		"neverUpdated": "Dane nie zostały jeszcze pobrane",
+		"nodesCount": "Zapisane offline: {{count}} węzłów",
+		"refresh": "Odśwież dane",
+		"version": "Wersja {{version}}"
+	},
+	"filters": {
+		"anyTime": "Dowolnie",
+		"lastDays": "{{count}} dni"
+	},
+	"tools": {
+		"title": "Narzędzia",
+		"picking": "Dotknij mapy...",
+		"routeDesc": "Trasa po nazwach lub początkach kluczy publicznych.",
+		"needsNetwork": "Wymaga połączenia z internetem (dane wysokościowe)."
+	}
+}

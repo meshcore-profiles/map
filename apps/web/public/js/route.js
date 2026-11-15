@@ -1,10 +1,9 @@
 import { t } from './i18n.js';
 import { initModal } from './modal.js';
+import { splitRouteTokens } from '/core/route.js';
 import { createPathLayer, formatDistance, resolveNodeByQuery } from './pathtools.js';
 
 const STORAGE_KEY = 'routeToolInput';
-
-const splitTokens = raw => raw.split(/[\n,>]+/).map(token => token.trim()).filter(Boolean);
 
 export const initRouteTool = ({ map, getNodes, escapeHtml }) => {
 	const modal = initModal('route-toggle', 'route-overlay');
@@ -40,7 +39,7 @@ export const initRouteTool = ({ map, getNodes, escapeHtml }) => {
 
 	const drawRoute = () => {
 		const nodes = getNodes();
-		const tokens = splitTokens(inputEl.value).map(raw => ({ raw, node: resolveNodeByQuery(raw, nodes) }));
+		const tokens = splitRouteTokens(inputEl.value).map(raw => ({ raw, node: resolveNodeByQuery(raw, nodes) }));
 
 		path.setPoints(tokens.filter(token => token.node).map(token => ({ lat: token.node.lat, lng: token.node.lon, label: token.node.adv_name })));
 		renderResults(tokens);

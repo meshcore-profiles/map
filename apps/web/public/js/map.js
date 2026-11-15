@@ -7,6 +7,8 @@ import { t, tRaw, plural } from './i18n.js';
 import { initModal } from './modal.js';
 import { initNodeDeletionDialog } from './node-deletion.js';
 import { initRadioFilters } from './radio-filters.js';
+import { buildContactUrl } from '/core/contact.js';
+import { normalizeRadioPresets } from '/core/presets.js';
 import { loadRadioFilters, radioValue } from '/core/radio-filter-utils.js';
 import { buildFilterParams, parseSharedFilters } from '/core/filter-share.js';
 import { initLegendPanel } from './legend.js';
@@ -180,12 +182,7 @@ const getNodePopupHTML = node => {
 	const userActionUrl = encodeURI(localStorage.getItem('userActionUrl') || '');
 	const userActionLabel = localStorage.getItem('userActionLabel') || '';
 	const userActionAnchor = userActionUrl ? `<a target="_blank" rel="noopener noreferrer" href="https://${userActionUrl}?nodes=${node.public_key}">${userActionLabel}</a>` : '';
-	const contactParams = new URLSearchParams({
-		name: node.adv_name,
-		public_key: node.public_key,
-		type: node.type,
-	});
-	const qrValue = `meshcore://contact/add?${contactParams.toString()}`;
+	const qrValue = buildContactUrl(node);
 	const statusClass = statusBadgeClass[node.status] || '';
 	const shareUrl = getShareUrl(node);
 	const canAddContact = CONTACT_ADDABLE_TYPES.includes(node.type);
@@ -226,16 +223,7 @@ const getPresets = async signal => {
 	const res = await fetch('/api/v1/radio-presets', { signal });
 	if (!res.ok) throw new Error(`Radio presets request failed (${res.status})`);
 
-	presets = (await res.json()).data.map(p => ({
-		name: p.title,
-		desc: p.description,
-		params: {
-			freq: Number(p.frequency),
-			bw: Number(p.bandwidth),
-			sf: Number(p.spreadingFactor),
-			cr: Number(p.codingRate),
-		},
-	}));
+	presets = normalizeRadioPresets((await res.json()).data);
 
 	presets.unshift({
 		name: t('map:allPresetsOption'),

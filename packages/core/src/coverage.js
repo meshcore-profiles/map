@@ -10,9 +10,10 @@ const SAMPLE_SPACING_TARGET = 300;
 const MIN_SAMPLES_PER_RAY = 20;
 const MAX_SAMPLES_PER_RAY = 60;
 
-// Przyblizona czulosc odbiornika LoRa (klasa SX127x/SX126x) przy BW=125kHz, wg typowych wartosci z kart Semtech.
-// Dla innych szerokosci pasma skalowana przez zaleznosc szerokosci szumowej.
-// Brak potwierdzonej wartosci dla SF5 (tylko SX126x, zaden preset MeshCore go nie uzywa) - fallback do SF6.
+// Approximate LoRa (SX127x/SX126x-class) receiver sensitivity at BW=125kHz, from common
+// Semtech datasheet figures. Scaled to other bandwidths via the noise-bandwidth relationship.
+// No confirmed SF5 figure (SX126x-only, not in the SX127x table this is based on, and no
+// MeshCore preset actually uses it) - falls back to SF6 as the closest known value.
 const SENSITIVITY_125K_DBM = { 6: -118, 7: -123, 8: -126, 9: -129, 10: -132, 11: -133, 12: -136 };
 const LINK_FADE_MARGIN_DB = 10;
 
@@ -22,8 +23,9 @@ export const computeSamplesPerRay = (rangeM, bearings) => {
 	return samples;
 };
 
-// Free-space path loss + budzet czulosci LoRa -> jeden maksymalny zasieg (taki sam w kazdym kierunku,
-// bo nie zalezy od terenu). Zasieg terenowy per kierunek jest potem przez niego ograniczany.
+// Free-space path loss + LoRa sensitivity budget -> a single max range (same in every
+// direction, since it does not depend on terrain). The per-bearing terrain range is then
+// capped by this, so the result reflects whichever limit is tighter.
 export const computeLinkBudgetRangeM = (erpDbm, freqMHz, sf, bwKHz) => {
 	const sensitivity125 = SENSITIVITY_125K_DBM[sf] ?? SENSITIVITY_125K_DBM[6];
 	const sensitivity = sensitivity125 + 10 * Math.log10((bwKHz * 1000) / 125000);
@@ -84,7 +86,7 @@ export const computeRayRanges = (elevations, base, samplesPerRay, distances, ele
 	};
 };
 
-// elevations[0] to wysokosc punktu origin, dalej kolejno promienie (bearings * samplesPerRay) jak w buildRayPoints.
+// elevations[0] is the origin point, followed by the rays (bearings * samplesPerRay) in the order produced by buildRayPoints.
 export const computeCoverage = ({ origin, elevations, bearings, samplesPerRay, searchRangeM, txHeight, rxHeight, freqMHz, margin, linkBudgetRangeM }) => {
 	const bearingStep = 360 / bearings;
 	const elevA = elevations[0] + txHeight;

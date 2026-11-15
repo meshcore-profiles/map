@@ -6,13 +6,13 @@ const fetchFromLookupApi = (fetchImpl, url, points) => fetchImpl(url, {
 	body: JSON.stringify({ locations: points.map(p => ({ latitude: p.lat, longitude: p.lng })) }),
 });
 
-// Platforma dostarcza: getSefinekApi (adres backendu), pack/unpack (msgpackr) i opcjonalnie fetch.
-// Nasz backend (w odroznieniu od zewnetrznych providerow) przyjmuje cala paczke w jednym zadaniu msgpack,
-// wiec maxBatchSize ogranicza ja tylko twardym limitem serwera.
+// The platform supplies getSefinekApi (backend address), pack/unpack (msgpackr) and optionally fetch.
+// Our own backend (unlike the third-party providers below) accepts a single msgpack-encoded
+// request for the whole batch, so maxBatchSize only bounds it via the server's own hard cap.
 export const createElevationProviders = ({ getSefinekApi, pack, unpack, fetchImpl = (...args) => fetch(...args) }) => ({
 	sefinek: {
 		label: 'Sefinek API',
-		maxBatchSize: 20000, // zgodne z MAX_LOCATIONS_MSGPACK serwera - caly batch coverage miesci sie w jednym zadaniu
+		maxBatchSize: 20000, // matches the server's MAX_LOCATIONS_MSGPACK - always fits a whole coverage batch in one request
 		fetch: async points => {
 			const base = getSefinekApi();
 			if (!base) throw new Error('Sefinek API address is not configured.');
@@ -27,7 +27,7 @@ export const createElevationProviders = ({ getSefinekApi, pack, unpack, fetchImp
 
 			const data = unpack(new Uint8Array(await res.arrayBuffer()));
 			const elevations = data.results.map(r => r.elevation);
-			// API odpowiada 200 z null dla punktow, ktorych nie rozwiazalo; traktowanie ich jako 0 udawaloby plaski teren.
+			// The API answers 200 with null for points it could not resolve; treating them as 0 would fake a flat terrain.
 			if (elevations.length !== points.length || !elevations.every(Number.isFinite)) throw new Error('Sefinek API returned incomplete elevation data.');
 
 			return elevations;

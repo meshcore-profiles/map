@@ -4,7 +4,7 @@ export const sampleLine = (a, b, count) => Array.from({ length: count }, (_, i) 
 
 export const sightLineAt = (elevA, elevB, d, total) => elevA + (elevB - elevA) * (d / total);
 
-// Dodatnia wartosc = wolna linia widzenia nad terenem (z poprawka na krzywizne Ziemi).
+// Positive value = line of sight clears the terrain (with Earth curvature correction).
 export const clearanceAt = ({ elevation, d, total, elevA, elevB }) => sightLineAt(elevA, elevB, d, total) - (elevation - curvatureDrop(d, total));
 
 export const analyzeLineOfSight = ({ pointA, samplePoints, elevations, heightA = 0, heightB = 0 }) => {

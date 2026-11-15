@@ -1,6 +1,6 @@
 const PLACEHOLDER = /\{\{(\w+)}}/g;
 
-// Wybor formy liczby mnogiej: pl ma trzy formy, reszta dwie.
+// Plural form selection: Polish has three forms, every other language two.
 export const pluralForm = (language, count, forms) => {
 	if (language === 'pl' && forms.length >= 3) {
 		if (count === 1) return forms[0];
@@ -15,7 +15,7 @@ export const pluralForm = (language, count, forms) => {
 	return count === 1 ? forms[0] : forms[1];
 };
 
-// getBundle zwraca { namespace: {...} }, getLanguage kod jezyka. Oba sa wolane przy kazdym uzyciu, wiec jezyk mozna zmieniac w locie.
+// getBundle returns { namespace: {...} }, getLanguage a language code. Both are called on every lookup, so the language can change at runtime.
 export const createI18n = ({ getBundle, getLanguage }) => {
 	const resolve = key => {
 		const [ns, path] = key.includes(':') ? key.split(':') : ['common', key];

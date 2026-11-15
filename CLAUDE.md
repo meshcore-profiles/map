@@ -8,7 +8,9 @@ One codebase serves **two public sites**, chosen by request host (`config/sites.
 
 Comment language: **backend** (`index.js`, `services/`, `routes/`, `middlewares/`, `utils/`, `database/`, `config/`) in English, **frontend** (`public/`) in Polish. UI text is i18n-ed (see below).
 
-`apps/mobile` is an Expo (React Native, plain JS) app on MapLibre Native; it reuses `@meshcore-map/core` and the same `/api/v1/nodes` API (`app.json` -> `extra.apiBase`). It needs a dev build (MapLibre is not in Expo Go). `npx expo export --platform android|ios` in `apps/mobile` verifies that Metro bundles it. `npm audit` reports moderate minimatch findings via `@expo/fingerprint` (dev tooling only; `npm ci --omit=dev -w apps/web` on prod does not install it).
+`apps/mobile` is an Expo (React Native, plain JS) app on MapLibre Native. It reuses `@meshcore-map/core` and the same API as the web (`/api/v1/nodes?region=pl|all`, `/radio-presets`, plus `/api/v1/app-config` with the feature switches and the elevation API address). It needs a dev build (MapLibre is not in Expo Go); `npx expo export --platform android|ios` in `apps/mobile` only verifies that Metro bundles it. Structure: `src/state` (settings, nodes), `src/data` (offline cache of the msgpack payload in the document directory, app config), `src/components` (map layers, bottom sheets), `src/tools` (measure, route, terrain, coverage), `src/ui` (primitives), `src/i18n`.
+Translations come from `apps/web/locales` (imported by relative path) plus the mobile-only `apps/mobile/locales/{pl,en}/mobile.json` (identical key sets). The first launch asks for the map scope (`settings.region`: `all` worldwide or `pl` Poland only, same split as the two sites). Styles go above the components (the `no-use-before-define` rule applies). `npm audit` reports moderate minimatch findings via `@expo/fingerprint` (dev tooling only; `npm ci --omit=dev -w apps/web` on prod does not install it).
+Comment language: `packages/core` and `apps/mobile` use English (only `apps/web/public` keeps Polish comments, see above).
 
 ## Commands
 

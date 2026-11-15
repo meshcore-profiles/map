@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate } = require('../global/services/nodeCache.js');
 const getRadioPresets = require('../services/radioPresets.js');
+const features = require('../config/features.js');
 const StatsDaily = require('../global/database/models/statsDaily.model.js');
 
 const MAX_HISTORY_DAYS = 365;
@@ -23,6 +24,12 @@ router.get('/nodes', async (req, res) => {
 		console.error(err);
 		res.status(500).json({ success: false, status: 500, message: req.t('error:internalServerError') });
 	}
+});
+
+// Konfiguracja dla klienta mobilnego (to samo, co strona dostaje we window.MAP_CONFIG).
+router.get('/app-config', (req, res) => {
+	res.set('Cache-Control', 'public, max-age=300');
+	res.json({ success: true, status: 200, message: 'OK', data: { features, sefinekApi: process.env.SEFINEK_API || null } });
 });
 
 router.get('/radio-presets', async (req, res) => {
