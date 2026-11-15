@@ -10,20 +10,23 @@ import { useI18n } from '../i18n';
 import { useSettings } from '../state/SettingsContext';
 import { useTheme } from '../state/ThemeContext';
 import { colors, NODE_TYPE_ICONS, spacing } from '../theme';
-import { Button, Chip, ChipRow, Divider, Field, Hint, Label, Stepper } from '../ui/controls';
+import { Button, Chip, ChipRow, Collapsible, Divider, Field, Heading, Hint, Stepper } from '../ui/controls';
+import { Icon } from '../ui/Icon';
 import { Sheet } from '../ui/Sheet';
 import { useToast } from '../ui/Toast';
 
 const styles = StyleSheet.create({
-	summary: { color: colors.textMuted },
+	top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
+	summary: { flex: 1, color: colors.textMuted, fontSize: 14 },
+	link: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: spacing.xs },
+	linkText: { fontSize: 14, fontWeight: '600' },
 	footer: { flexDirection: 'row', gap: spacing.sm },
 	footerButton: { flex: 1 },
 	section: { gap: spacing.sm },
-	groupHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-	groupTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-	count: { color: colors.textMuted, fontSize: 13 },
-	bulk: { flexDirection: 'row', gap: spacing.md },
+	bulk: { flexDirection: 'row', gap: spacing.lg },
 	bulkText: { fontSize: 14, fontWeight: '600', paddingVertical: spacing.xs },
+	zoomRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+	zoomLabel: { color: colors.text, fontSize: 16 },
 });
 
 const RADIO_LABEL_KEYS = { freq: 'frequency', sf: 'sf', cr: 'cr', bw: 'bw' };
@@ -49,8 +52,7 @@ const DateFilter = ({ label, value, onChange }) => {
 	};
 
 	return (
-		<View style={styles.section}>
-			<Label>{label}</Label>
+		<Collapsible title={label} summary={value || t('mobile:filters.anyTime')}>
 			<ChipRow>
 				{DAY_PRESETS.map(days => (
 					<Chip
@@ -62,32 +64,27 @@ const DateFilter = ({ label, value, onChange }) => {
 				))}
 			</ChipRow>
 			<Field value={text} onChangeText={edit} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" maxLength={10} accessibilityLabel={label} />
-		</View>
+		</Collapsible>
 	);
 };
 
-// One radio parameter (frequency, SF, CR, BW): value chips with a counter and All / None shortcuts.
-// `values` are all options (the counter), `shown` the ones left after a search.
+// One radio parameter (frequency, SF, CR, BW). Closed it only says what is selected; open it lists the values with All / None shortcuts.
+// `values` are all options, `shown` the ones left after a search.
 const RadioGroup = ({ title, values, shown, selection, search, hint, onToggle, onSelectAll, onSelectNone }) => {
 	const { t } = useI18n();
 	const { accentBright } = useTheme();
 	const selected = values.filter(value => isRadioValueSelected(selection, value)).length;
+	const summary = selected === values.length ? t('filters:selectAll') : selected === 0 ? t('filters:selectNone') : `${selected}/${values.length}`;
 
 	return (
-		<View style={styles.section}>
-			<View style={styles.groupHead}>
-				<View style={styles.groupTitle}>
-					<Label>{title}</Label>
-					<Text style={styles.count}>{`${selected}/${values.length}`}</Text>
-				</View>
-				<View style={styles.bulk}>
-					<Pressable onPress={onSelectAll} disabled={selected === values.length} hitSlop={6} accessibilityRole="button">
-						<Text style={[styles.bulkText, { color: accentBright, opacity: selected === values.length ? 0.4 : 1 }]}>{t('filters:selectAll')}</Text>
-					</Pressable>
-					<Pressable onPress={onSelectNone} disabled={selected === 0} hitSlop={6} accessibilityRole="button">
-						<Text style={[styles.bulkText, { color: accentBright, opacity: selected === 0 ? 0.4 : 1 }]}>{t('filters:selectNone')}</Text>
-					</Pressable>
-				</View>
+		<Collapsible title={title} summary={summary}>
+			<View style={styles.bulk}>
+				<Pressable onPress={onSelectAll} disabled={selected === values.length} hitSlop={6} accessibilityRole="button">
+					<Text style={[styles.bulkText, { color: accentBright, opacity: selected === values.length ? 0.4 : 1 }]}>{t('filters:selectAll')}</Text>
+				</Pressable>
+				<Pressable onPress={onSelectNone} disabled={selected === 0} hitSlop={6} accessibilityRole="button">
+					<Text style={[styles.bulkText, { color: accentBright, opacity: selected === 0 ? 0.4 : 1 }]}>{t('filters:selectNone')}</Text>
+				</Pressable>
 			</View>
 			{search}
 			{shown.length === 0 && values.length > 0 ? <Hint>{t('filters:noFrequencies')}</Hint> : (
@@ -98,7 +95,7 @@ const RadioGroup = ({ title, values, shown, selection, search, hint, onToggle, o
 				</ChipRow>
 			)}
 			{hint}
-		</View>
+		</Collapsible>
 	);
 };
 
@@ -106,6 +103,7 @@ const RadioGroup = ({ title, values, shown, selection, search, hint, onToggle, o
 export const FiltersSheet = ({ visible, filters, byType, radioOptions, total, onApply, onClose }) => {
 	const { t } = useI18n();
 	const showToast = useToast();
+	const { accentBright } = useTheme();
 	const { settings } = useSettings();
 	const [draft, setDraft] = useState(filters);
 	const [freqQuery, setFreqQuery] = useState('');
@@ -148,11 +146,16 @@ export const FiltersSheet = ({ visible, filters, byType, radioOptions, total, on
 				</View>
 			)}
 		>
-			<Text style={styles.summary}>{t('filters:summary', { matching: matching.toLocaleString(), total: total.toLocaleString() })}</Text>
-			<Button variant="secondary" icon="link" label={t('filters:shareTitle')} onPress={copyLink} />
+			<View style={styles.top}>
+				<Text style={styles.summary}>{t('filters:summary', { matching: matching.toLocaleString(), total: total.toLocaleString() })}</Text>
+				<Pressable style={styles.link} onPress={copyLink} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('filters:shareTitle')}>
+					<Icon name="link" size={16} color={accentBright} />
+					<Text style={[styles.linkText, { color: accentBright }]}>{t('common:share')}</Text>
+				</Pressable>
+			</View>
 
 			<View style={styles.section}>
-				<Label>{t('filters:nodeTypesLegend')}</Label>
+				<Heading>{t('filters:nodeTypesLegend')}</Heading>
 				<ChipRow>
 					{NODE_TYPES.map(type => (
 						<Chip key={type} icon={NODE_TYPE_ICONS[type]} label={t(`map:nodeTypes.${NODE_TYPE_KEYS[type]}`)} color={NODE_TYPE_COLORS[type]} selected={draft.nodeFilter.includes(type)} onPress={() => toggleType(type)} />
@@ -161,35 +164,39 @@ export const FiltersSheet = ({ visible, filters, byType, radioOptions, total, on
 			</View>
 
 			<Divider />
-			<Label>{t('filters:radioTitle')}</Label>
-			{RADIO_FILTER_KEYS.map(key => {
-				const values = sortValues(radioOptions[key] ?? []);
-				const isFreq = key === 'freq';
+			<View style={styles.section}>
+				<Heading>{t('filters:radioTitle')}</Heading>
+				{RADIO_FILTER_KEYS.map(key => {
+					const values = sortValues(radioOptions[key] ?? []);
+					const isFreq = key === 'freq';
 
-				return (
-					<RadioGroup
-						key={key}
-						title={t(`filters:${RADIO_LABEL_KEYS[key]}`)}
-						values={values}
-						shown={isFreq ? searchFrequencies(values) : values}
-						selection={draft.radioFilters[key]}
-						search={isFreq ? <Field value={freqQuery} onChangeText={setFreqQuery} placeholder={t('filters:searchFrequency')} keyboardType="numeric" accessibilityLabel={t('filters:searchFrequency')} /> : null}
-						hint={isFreq ? <Hint>{t('filters:unknownHint')}</Hint> : null}
-						onToggle={value => toggleRadio(key, value)}
-						onSelectAll={() => setRadio(key, null)}
-						onSelectNone={() => setRadio(key, [])}
-					/>
-				);
-			})}
-
-			<Divider />
-			<Label>{t('filters:datesTitle')}</Label>
-			<DateFilter label={t('filters:lastUpdate')} value={draft.fromDate} onChange={fromDate => setDraft(current => ({ ...current, fromDate }))} />
-			<DateFilter label={t('filters:added')} value={draft.fromInsertDate} onChange={fromInsertDate => setDraft(current => ({ ...current, fromInsertDate }))} />
+					return (
+						<RadioGroup
+							key={key}
+							title={t(`filters:${RADIO_LABEL_KEYS[key]}`)}
+							values={values}
+							shown={isFreq ? searchFrequencies(values) : values}
+							selection={draft.radioFilters[key]}
+							search={isFreq ? <Field value={freqQuery} onChangeText={setFreqQuery} placeholder={t('filters:searchFrequency')} keyboardType="numeric" accessibilityLabel={t('filters:searchFrequency')} /> : null}
+							hint={isFreq ? <Hint>{t('filters:unknownHint')}</Hint> : null}
+							onToggle={value => toggleRadio(key, value)}
+							onSelectAll={() => setRadio(key, null)}
+							onSelectNone={() => setRadio(key, [])}
+						/>
+					);
+				})}
+			</View>
 
 			<Divider />
 			<View style={styles.section}>
-				<Label>{t('filters:clusteringZoom')}</Label>
+				<Heading>{t('filters:datesTitle')}</Heading>
+				<DateFilter label={t('filters:lastUpdate')} value={draft.fromDate} onChange={fromDate => setDraft(current => ({ ...current, fromDate }))} />
+				<DateFilter label={t('filters:added')} value={draft.fromInsertDate} onChange={fromInsertDate => setDraft(current => ({ ...current, fromInsertDate }))} />
+			</View>
+
+			<Divider />
+			<View style={styles.zoomRow}>
+				<Text style={styles.zoomLabel}>{t('filters:clusteringZoom')}</Text>
 				<Stepper label={t('filters:clusteringZoom')} min={10} max={17} value={draft.clusteringZoom} onChange={clusteringZoom => setDraft(current => ({ ...current, clusteringZoom }))} />
 			</View>
 		</Sheet>

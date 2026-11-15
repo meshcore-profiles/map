@@ -10,7 +10,6 @@ import { Sheet } from '../ui/Sheet';
 
 const MAX_LISTED = 200;
 const DAY_MS = 86400000;
-const PERIODS = [...Object.keys(STATS_PERIOD_DAYS), 'custom'];
 
 // A day typed as YYYY-MM-DD, or NaN while the text is not a date yet.
 const parseDay = text => (/^\d{4}-\d{2}-\d{2}$/).test(text) ? Date.parse(text) : NaN;
@@ -18,7 +17,7 @@ const parseDay = text => (/^\d{4}-\d{2}-\d{2}$/).test(text) ? Date.parse(text) :
 const styles = StyleSheet.create({
 	chips: { flexDirection: 'row', gap: spacing.sm },
 	chip: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: spacing.sm, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.chip },
-	chipLabel: { color: colors.textMuted, fontFamily: 'monospace', fontSize: 14, textTransform: 'uppercase' },
+	chipLabel: { color: colors.textMuted, fontFamily: 'monospace', fontSize: 14 },
 	chipValue: { fontSize: 20, fontWeight: '700' },
 	row: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xs },
 	rowText: { flex: 1 },
@@ -29,7 +28,7 @@ const styles = StyleSheet.create({
 	empty: { color: colors.textMuted, paddingVertical: spacing.md },
 });
 
-// New nodes and repeaters in a period, like the website's statistics modal (without the custom date range).
+// New nodes per period and the repeaters added in the selected one (a preset or a custom date range), like the website's statistics modal.
 export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, onShowOnMap }) => {
 	const { t, tRaw, plural } = useI18n();
 	const { accentBright } = useTheme();
@@ -56,14 +55,20 @@ export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, o
 		<Sheet visible={visible} title={t('stats:title')} onClose={onClose} footer={<Button variant="secondary" label={t('stats:showOnMap')} disabled={!recent.length} onPress={() => onShowOnMap(recent)} />}>
 			<View style={styles.chips}>
 				{Object.keys(STATS_PERIOD_DAYS).map(key => (
-					<View key={key} style={styles.chip}>
+					<Pressable
+						key={key}
+						style={[styles.chip, period === key && { borderColor: accentBright, backgroundColor: `${accentBright}22` }]}
+						onPress={() => setPeriod(key)}
+						accessibilityRole="button"
+						accessibilityState={{ selected: period === key }}
+					>
 						<Text style={styles.chipLabel}>{key}</Text>
-						<Text style={[styles.chipValue, { color: accentBright }]}>{counts[key] ?? 0}</Text>
-					</View>
+						<Text style={[styles.chipValue, { color: accentBright }]}>{(counts[key] ?? 0).toLocaleString()}</Text>
+					</Pressable>
 				))}
 			</View>
 			<ChipRow>
-				{PERIODS.map(key => <Chip key={key} label={key === 'custom' ? t('stats:range') : key} selected={period === key} onPress={() => setPeriod(key)} />)}
+				<Chip label={t('stats:range')} selected={period === 'custom'} onPress={() => setPeriod(period === 'custom' ? '24h' : 'custom')} />
 			</ChipRow>
 			{period === 'custom' && (
 				<View style={styles.range}>

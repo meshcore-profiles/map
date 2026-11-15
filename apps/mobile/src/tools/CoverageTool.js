@@ -4,7 +4,7 @@ import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSample
 import { destinationPoint, formatDistance } from '@meshcore-map/core/geo';
 import { getElevationsChunked, loadRadioPresets } from '../data/appConfig';
 import { useI18n } from '../i18n';
-import { Button, Chip, ChipRow, Field, Hint, Label, Stat } from '../ui/controls';
+import { Button, Chip, ChipRow, ChipScroll, Field, Heading, Hint, Stat } from '../ui/controls';
 import { ToolPanel } from '../ui/ToolPanel';
 import { colors, spacing } from '../theme';
 import { coverageTileFeatures } from './coverageTiles';
@@ -180,7 +180,7 @@ export const CoverageTool = ({ ctx }) => {
 		<ToolPanel icon="coverage" title={t('coverage:title')} onClose={onClose}>
 			{unavailable ? <Hint>{t('common:toolUnavailable')}</Hint> : (
 				<>
-					<Hint>{t('coverage:desc')}</Hint>
+					{!origin && <Hint>{t('coverage:desc')}</Hint>}
 					<PointField
 						value={text}
 						placeholder={t('coverage:nodeNamePlaceholder')}
@@ -192,12 +192,12 @@ export const CoverageTool = ({ ctx }) => {
 					/>
 					{presets.length > 0 && (
 						<>
-							<Label>{t('coverage:preset')}</Label>
-							<ChipRow>
+							<Heading>{t('coverage:preset')}</Heading>
+							<ChipScroll>
 								{presets.filter(p => p.params.freq).map(p => (
 									<Chip key={p.name} label={p.name} selected={Number(form.freq) === p.params.freq && Number(form.sf) === p.params.sf && Number(form.bw) === p.params.bw} onPress={() => applyPreset(p)} />
 								))}
-							</ChipRow>
+							</ChipScroll>
 						</>
 					)}
 					<View style={styles.grid}>
@@ -209,11 +209,11 @@ export const CoverageTool = ({ ctx }) => {
 						{numberField('margin', t('coverage:terrainMargin'))}
 					</View>
 					<Hint>{t('coverage:linkBudgetRange', { range: formatDistance(budget) })}</Hint>
-					<Label>{t('coverage:bandwidth')}</Label>
-					<ChipRow>
+					<Heading>{t('coverage:bandwidth')}</Heading>
+					<ChipScroll>
 						{BANDWIDTHS.map(bw => <Chip key={bw} label={String(bw)} selected={Number(form.bw) === bw} onPress={() => setField('bw')(String(bw))} />)}
-					</ChipRow>
-					<Label>{t('coverage:resolution')}</Label>
+					</ChipScroll>
+					<Heading>{t('coverage:resolution')}</Heading>
 					<ChipRow>
 						{Object.keys(RESOLUTION_LABELS).map(key => <Chip key={key} label={t(RESOLUTION_LABELS[key])} selected={form.resolution === key} onPress={() => setField('resolution')(key)} />)}
 					</ChipRow>

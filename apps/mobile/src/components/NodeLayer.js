@@ -64,8 +64,18 @@ const IS_CLIENT = ['==', ['get', 'type'], 1];
 const CLIENTS = ['all', ['!', CLUSTERS], IS_CLIENT];
 const ICONS = ['all', ['!', CLUSTERS], ['!=', ['get', 'icon'], '']];
 
+// MapLibre Native's own point_count_abbreviated prints fractions such as "40.877000k", so the abbreviation is built here: 999, 1.2K, 41K, 1.5M.
+const COUNT = ['get', 'point_count'];
+const tenths = divisor => ['/', ['round', ['/', COUNT, divisor / 10]], 10];
+const CLUSTER_COUNT_LABEL = ['case',
+	['>=', COUNT, 1000000], ['concat', ['to-string', tenths(1000000)], 'M'],
+	['>=', COUNT, 10000], ['concat', ['to-string', ['round', ['/', COUNT, 1000]]], 'K'],
+	['>=', COUNT, 1000], ['concat', ['to-string', tenths(1000)], 'K'],
+	['to-string', COUNT],
+];
+
 const CLUSTER_LABEL_LAYOUT = {
-	'text-field': ['get', 'point_count_abbreviated'],
+	'text-field': CLUSTER_COUNT_LABEL,
 	'text-font': ['Noto Sans Bold'],
 	'text-size': 13,
 	'text-allow-overlap': true,

@@ -4,72 +4,89 @@ import * as Clipboard from 'expo-clipboard';
 import { NODE_TYPE_COLORS, STATUS_COLORS } from '@meshcore-map/core/colors';
 import { buildContactUrl } from '@meshcore-map/core/contact';
 import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, formatTimeAgo } from '@meshcore-map/core/nodes';
+import { truncateKey } from '@meshcore-map/core/node-utils';
 import { API_BASE } from '../config';
 import { useI18n } from '../i18n';
-import { Button, Divider } from '../ui/controls';
-import { Icon } from '../ui/Icon';
 import { useTheme } from '../state/ThemeContext';
-import { DockedSheet } from '../ui/Sheet';
 import { colors, NODE_TYPE_ICONS, radius, spacing } from '../theme';
+import { Button } from '../ui/controls';
+import { Icon } from '../ui/Icon';
+import { DockedSheet } from '../ui/Sheet';
 
 const styles = StyleSheet.create({
-	badges: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-	badge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.chip, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 6 },
+	meta: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap' },
+	metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+	metaText: { color: colors.textMuted, fontSize: 14 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	badgeText: { color: colors.text, fontSize: 13 },
-	row: { gap: 2 },
-	rowLabel: { color: colors.textMuted, fontSize: 12 },
-	rowValue: { color: colors.text, fontSize: 15 },
-	mono: { fontFamily: 'monospace', fontSize: 13 },
-	rowHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-	copy: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: spacing.xs },
-	copyText: { fontSize: 13, fontWeight: '600' },
+	separator: { color: colors.borderStrong, fontSize: 14 },
+	fresh: { gap: 2 },
+	freshMain: { color: colors.text, fontSize: 17, fontWeight: '600' },
+	freshSub: { color: colors.textMuted, fontSize: 13 },
+	radio: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+	radioChip: { backgroundColor: colors.chip, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 6 },
+	radioText: { color: colors.text, fontSize: 13, fontVariant: ['tabular-nums'] },
+	key: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.bg, borderRadius: radius.sm, paddingLeft: spacing.md, minHeight: 44 },
+	keyText: { flex: 1, color: colors.text, fontFamily: 'monospace', fontSize: 13 },
+	copy: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 	actions: { flexDirection: 'row', gap: spacing.sm },
 	action: { flex: 1 },
 });
 
-const RADIO_ORDER = ['freq', 'bw', 'sf', 'cr'];
-const RADIO_UNITS = { freq: ' MHz', bw: ' kHz', sf: '', cr: '' };
+// Radio parameters as short chips: frequency and bandwidth carry a unit, spreading factor and coding rate are labelled with their usual abbreviations.
+const RADIO_FORMATS = {
+	freq: value => `${value} MHz`,
+	bw: value => `${value} kHz`,
+	sf: value => `SF${value}`,
+	cr: value => `CR ${value}`,
+};
 
-const Row = ({ label, value, mono, copyLabel, copied, onCopy }) => {
-	const { accentBright } = useTheme();
+const Meta = ({ node }) => {
+	const { t } = useI18n();
 
 	return (
-		<View style={styles.row}>
-			<View style={styles.rowHead}>
-				<Text style={styles.rowLabel}>{label}</Text>
-				{onCopy && (
-					<Pressable onPress={onCopy} hitSlop={8} accessibilityRole="button" accessibilityLabel={copyLabel}>
-						<View style={styles.copy}>
-							<Icon name={copied ? 'check' : 'copy'} size={15} color={accentBright} />
-							<Text style={[styles.copyText, { color: accentBright }]}>{copyLabel}</Text>
-						</View>
-					</Pressable>
-				)}
+		<View style={styles.meta}>
+			<View style={styles.metaItem}>
+				<Icon name={NODE_TYPE_ICONS[node.type]} size={16} color={NODE_TYPE_COLORS[node.type]} />
+				<Text style={styles.metaText}>{t(`map:nodeTypes.${NODE_TYPE_KEYS[node.type]}`)}</Text>
 			</View>
-			<Text style={[styles.rowValue, mono && styles.mono]} selectable>{value}</Text>
+			<Text style={styles.separator}>/</Text>
+			<View style={styles.metaItem}>
+				<View style={[styles.dot, { backgroundColor: STATUS_COLORS[node.status] }]} />
+				<Text style={styles.metaText}>{t(`map:updateStatus.${node.status}`)}</Text>
+			</View>
+		</View>
+	);
+};
+
+// How fresh the node's data is: the update time when the node reports one, otherwise when it was added.
+const Freshness = ({ node }) => {
+	const { t, tRaw, plural } = useI18n();
+	const date = node.updatedDate || node.insertDate;
+	const label = node.updatedDate ? t('map:columns.updatedDate') : t('map:columns.insertedDate');
+
+	return (
+		<View style={styles.fresh}>
+			<Text style={styles.freshMain}>{`${label} ${formatTimeAgo(date.getTime(), { t, tRaw, plural })}`}</Text>
+			<Text style={styles.freshSub}>{date.toLocaleString()}</Text>
 		</View>
 	);
 };
 
 const NodePanel = ({ node, visible, onClose, onExited }) => {
-	const { t, tRaw, plural } = useI18n();
-	const [copied, setCopied] = useState(null);
+	const { t } = useI18n();
+	const { accentBright } = useTheme();
+	const [copied, setCopied] = useState(false);
 
 	useEffect(() => {
-		setCopied(null);
+		setCopied(false);
 	}, [node.public_key]);
 
-	const copy = async (id, value) => {
-		await Clipboard.setStringAsync(value);
-		setCopied(id);
+	const radio = Object.keys(RADIO_FORMATS).filter(key => node.radio[key] !== 'unknown');
+
+	const copyKey = async () => {
+		await Clipboard.setStringAsync(node.public_key);
+		setCopied(true);
 	};
-	const copyLabel = (id, label) => copied === id ? t('common:copiedToClipboard') : label;
-
-	const ago = date => formatTimeAgo(date.getTime(), { t, tRaw, plural });
-	const dateLine = date => `${date.toLocaleString()} (${ago(date)})`;
-
-	const radioKeys = RADIO_ORDER.filter(key => node.radio[key] !== 'unknown');
 
 	const share = () => Share.share({ message: `${node.adv_name}\n${API_BASE}/?node=${node.public_key}` });
 
@@ -94,25 +111,23 @@ const NodePanel = ({ node, visible, onClose, onExited }) => {
 				</View>
 			)}
 		>
-			<View style={styles.badges}>
-				<View style={styles.badge}>
-					<Icon name={NODE_TYPE_ICONS[node.type]} size={16} color={NODE_TYPE_COLORS[node.type]} />
-					<Text style={styles.badgeText}>{t(`map:nodeTypes.${NODE_TYPE_KEYS[node.type]}`)}</Text>
+			<Meta node={node} />
+			<Freshness node={node} />
+			{radio.length > 0 && (
+				<View style={styles.radio}>
+					{radio.map(key => (
+						<View key={key} style={styles.radioChip} accessible accessibilityLabel={`${t(`map:radioParams.${key}`)}: ${node.params[key]}`}>
+							<Text style={styles.radioText}>{RADIO_FORMATS[key](node.params[key])}</Text>
+						</View>
+					))}
 				</View>
-				<View style={styles.badge}>
-					<View style={[styles.dot, { backgroundColor: STATUS_COLORS[node.status] }]} />
-					<Text style={styles.badgeText}>{t(`map:updateStatus.${node.status}`)}</Text>
+			)}
+			<Pressable style={styles.key} onPress={copyKey} accessibilityRole="button" accessibilityLabel={t('map:copyPublicKey')}>
+				<Text style={styles.keyText} numberOfLines={1}>{truncateKey(node.public_key, 12)}</Text>
+				<View style={styles.copy}>
+					<Icon name={copied ? 'check' : 'copy'} size={18} color={copied ? colors.green : accentBright} />
 				</View>
-			</View>
-			<Divider />
-			<Row label={t('map:columns.publicKey')} value={node.public_key} mono copyLabel={copyLabel('key', t('map:copyPublicKey'))} copied={copied === 'key'} onCopy={() => copy('key', node.public_key)} />
-			<Row label={t('map:columns.coords')} value={node.coords} copyLabel={copyLabel('coords', t('map:copyCoords'))} copied={copied === 'coords'} onCopy={() => copy('coords', node.coords)} />
-			<Row label={t('map:columns.insertedDate')} value={dateLine(node.insertDate)} />
-			{node.updatedDate && <Row label={t('map:columns.updatedDate')} value={dateLine(node.updatedDate)} />}
-			<Row
-				label={t('map:columns.params')}
-				value={radioKeys.length ? radioKeys.map(key => `${t(`map:radioParams.${key}`)}: ${node.params[key]}${RADIO_UNITS[key]}`).join('\n') : t('map:noRadioData')}
-			/>
+			</Pressable>
 		</DockedSheet>
 	);
 };

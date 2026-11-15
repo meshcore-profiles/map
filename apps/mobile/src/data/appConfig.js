@@ -37,8 +37,22 @@ const withDefaults = data => ({ ...DEFAULT_CONFIG, ...data, features: { ...DEFAU
 
 let configPromise = null;
 
+// The saved copy is used at once and refreshed in the background (changed keys apply on the next launch), so the map never waits for the network.
 export const loadAppConfig = () => {
-	configPromise ??= loadWithCache('/api/v1/app-config', CONFIG_FILE).then(withDefaults).catch(err => {
+	configPromise ??= (async () => {
+		const cached = await readJson(CONFIG_FILE);
+		const fresh = getJson('/api/v1/app-config').then(async data => {
+			await writeJson(CONFIG_FILE, data);
+			return data;
+		});
+
+		if (cached) {
+			fresh.catch(err => console.warn('App config not refreshed:', err.message));
+			return withDefaults(cached);
+		}
+
+		return withDefaults(await fresh);
+	})().catch(err => {
 		console.warn('App config unavailable, using built-in defaults:', err.message);
 		return DEFAULT_CONFIG;
 	});

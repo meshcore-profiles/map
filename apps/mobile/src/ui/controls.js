@@ -1,4 +1,6 @@
-import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '../state/ThemeContext';
 import { colors, MIN_TOUCH, radius, spacing } from '../theme';
 import { Icon } from './Icon';
@@ -12,22 +14,23 @@ const styles = StyleSheet.create({
 	disabled: { opacity: 0.45 },
 	buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 	ghostText: { color: colors.text },
-	chip: { minHeight: 36, paddingHorizontal: spacing.md, borderRadius: 18, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.chip, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
-	chipText: { color: colors.text, fontSize: 15 },
-	chipTextSelected: { color: '#fff', fontWeight: '700' },
-	chipTextOnColor: { color: '#0b0e14', fontWeight: '700' },
+	chip: { minHeight: 34, paddingHorizontal: 14, borderRadius: 17, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
+	chipText: { color: colors.textMuted, fontSize: 14 },
+	chipTextSelected: { color: colors.text, fontWeight: '600' },
 	chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+	chipScroll: { gap: spacing.sm, paddingRight: spacing.lg },
 	label: { color: colors.text, fontSize: 16, fontWeight: '600' },
 	hint: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
 	field: { gap: spacing.xs },
+	fieldLabel: { color: colors.textMuted, fontSize: 13 },
 	input: { minHeight: MIN_TOUCH, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, color: colors.text, paddingHorizontal: spacing.md, backgroundColor: colors.bg },
 	switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: MIN_TOUCH },
 	switchText: { flex: 1, gap: 4 },
 	switchLabel: { color: colors.text, fontSize: 16, fontWeight: '600' },
 	segmented: { flexDirection: 'row', borderRadius: radius.md, backgroundColor: colors.bg, padding: 3 },
-	segment: { flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm },
+	segment: { flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm, borderWidth: 1, borderColor: 'transparent' },
 	segmentText: { color: colors.textMuted, fontWeight: '600', fontSize: 15 },
-	segmentTextSelected: { color: '#fff' },
+	segmentTextSelected: { color: colors.text },
 	stepper: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: spacing.sm },
 	stepButton: { width: MIN_TOUCH, height: MIN_TOUCH, borderRadius: radius.sm, backgroundColor: colors.chip, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
 	stepText: { color: colors.text, fontSize: 22 },
@@ -35,9 +38,12 @@ const styles = StyleSheet.create({
 	stat: { flexGrow: 1, flexBasis: '30%', backgroundColor: colors.bg, borderRadius: radius.sm, padding: spacing.md, gap: 2 },
 	statLabel: { color: colors.textMuted, fontSize: 13 },
 	statValue: { color: colors.text, fontSize: 17, fontWeight: '700' },
-	section: { gap: spacing.md, padding: spacing.lg, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: 'rgba(148, 166, 204, 0.05)' },
-	sectionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-	sectionTitle: { flex: 1, color: colors.text, fontSize: 17, fontWeight: '700' },
+	section: { gap: spacing.md },
+	heading: { color: colors.textMuted, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8 },
+	collapseHead: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+	collapseTitle: { flex: 1, color: colors.text, fontSize: 16 },
+	collapseSummary: { color: colors.textMuted, fontSize: 14 },
+	collapseBody: { gap: spacing.md, paddingBottom: spacing.md },
 	option: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.chip },
 	optionText: { flex: 1, gap: 2 },
 	optionLabel: { color: colors.text, fontSize: 15 },
@@ -64,7 +70,7 @@ export const Button = ({ label, onPress, variant = 'primary', disabled, style, i
 };
 
 export const Chip = ({ label, selected, onPress, color, icon }) => {
-	const { accent } = useTheme();
+	const { accent, accentBright } = useTheme();
 	const fill = color ?? accent;
 
 	return (
@@ -72,13 +78,18 @@ export const Chip = ({ label, selected, onPress, color, icon }) => {
 			onPress={onPress}
 			accessibilityRole="checkbox"
 			accessibilityState={{ checked: selected }}
-			style={[styles.chip, selected && { backgroundColor: fill, borderColor: fill }]}
+			style={[styles.chip, selected && { backgroundColor: `${fill}26`, borderColor: `${fill}99` }]}
 		>
-			{icon && <Icon name={icon} size={16} color={selected ? (color ? '#0b0e14' : '#fff') : colors.textMuted} />}
-			<Text style={[styles.chipText, selected && (color ? styles.chipTextOnColor : styles.chipTextSelected)]}>{label}</Text>
+			{icon && <Icon name={icon} size={16} color={selected ? (color ?? accentBright) : colors.textMuted} />}
+			<Text style={[styles.chipText, selected && styles.chipTextSelected]}>{label}</Text>
 		</Pressable>
 	);
 };
+
+// One scrollable line of chips, for long lists (radio presets) that would otherwise fill the panel.
+export const ChipScroll = ({ children }) => (
+	<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipScroll} keyboardShouldPersistTaps="handled">{children}</ScrollView>
+);
 
 export const ChipRow = ({ children }) => <View style={styles.chipRow}>{children}</View>;
 
@@ -88,7 +99,7 @@ export const Hint = ({ children, style }) => <Text style={[styles.hint, style]}>
 
 export const Field = ({ label, style, ...props }) => (
 	<View style={styles.field}>
-		{label && <Label>{label}</Label>}
+		{label && <Text style={styles.fieldLabel}>{label}</Text>}
 		<TextInput placeholderTextColor={colors.textMuted} autoCorrect={false} autoCapitalize="none" {...props} style={[styles.input, style]} />
 	</View>
 );
@@ -102,7 +113,7 @@ export const SwitchRow = ({ label, value, onValueChange, description }) => {
 				<Text style={styles.switchLabel}>{label}</Text>
 				{description && <Hint>{description}</Hint>}
 			</View>
-			<Switch value={value} onValueChange={onValueChange} trackColor={{ true: accent }} accessibilityLabel={label} />
+			<Switch value={value} onValueChange={onValueChange} trackColor={{ false: colors.borderStrong, true: accent }} thumbColor={value ? '#fff' : colors.textMuted} ios_backgroundColor={colors.borderStrong} accessibilityLabel={label} />
 		</View>
 	);
 };
@@ -121,7 +132,7 @@ export const SegmentedControl = ({ options, value, onChange }) => {
 						onPress={() => onChange(option.value)}
 						accessibilityRole="radio"
 						accessibilityState={{ selected }}
-						style={[styles.segment, selected && { backgroundColor: accent }]}
+						style={[styles.segment, selected && { backgroundColor: `${accent}33`, borderColor: accent }]}
 					>
 						<Text style={[styles.segmentText, selected && styles.segmentTextSelected]}>{option.label}</Text>
 					</Pressable>
@@ -163,18 +174,30 @@ export const Option = ({ label, info, selected, onPress }) => {
 
 export const Divider = () => <View style={styles.divider} />;
 
-export const Section = ({ title, icon, children }) => {
-	const { accentBright } = useTheme();
+// Small uppercase caption above a group of controls.
+export const Heading = ({ children }) => <Text style={styles.heading} accessibilityRole="header">{children}</Text>;
+
+export const Section = ({ title, children }) => (
+	<View style={styles.section}>
+		{title && <Heading>{title}</Heading>}
+		{children}
+	</View>
+);
+
+// A row that opens its content on tap: the title on the left, a short summary of the current value and a chevron on the right.
+export const Collapsible = ({ title, summary, children }) => {
+	const [open, setOpen] = useState(false);
 
 	return (
-		<View style={styles.section}>
-			{title && (
-				<View style={styles.sectionHeading}>
-					{icon && <Icon name={icon} size={20} color={accentBright} />}
-					<Text style={styles.sectionTitle} accessibilityRole="header">{title}</Text>
-				</View>
-			)}
-			{children}
+		<View>
+			<Pressable style={styles.collapseHead} onPress={() => setOpen(current => !current)} accessibilityRole="button" accessibilityState={{ expanded: open }}>
+				<Text style={styles.collapseTitle}>{title}</Text>
+				<Text style={styles.collapseSummary}>{summary}</Text>
+				<Svg width={16} height={16} viewBox="0 0 24 24" style={open ? { transform: [{ rotate: '180deg' }] } : null}>
+					<Path d="M6 9l6 6 6-6" fill="none" stroke={colors.textMuted} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+				</Svg>
+			</Pressable>
+			{open && <View style={styles.collapseBody}>{children}</View>}
 		</View>
 	);
 };

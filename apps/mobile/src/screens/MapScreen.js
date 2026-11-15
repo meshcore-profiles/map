@@ -31,6 +31,8 @@ import { useSavedCamera } from './useSavedCamera';
 const styles = StyleSheet.create({
 	root: { flex: 1, backgroundColor: colors.bg },
 	map: { flex: 1 },
+	// The native map is light until its style loads; this keeps the dark app background in the meantime.
+	curtain: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.bg },
 });
 
 const NO_PADDING = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -62,7 +64,8 @@ export const MapScreen = () => {
 	// The layers belong to the style that loaded last. Once the style prop changes they are unmounted in that same render, before the native side swaps styles; removing their images from the new style afterwards only logs warnings.
 	const styleEpoch = loadedStyle.style === mapStyle ? loadedStyle.epoch : 0;
 	const { savedCamera, handleRegionDidChange } = useSavedCamera();
-	const mapReady = ready && savedCamera !== undefined;
+	// The map waits for the app config (it carries the basemap keys) and for a style that is known to load, so it never starts on an empty or the wrong one.
+	const mapReady = ready && savedCamera !== undefined && config !== null && mapStyle !== null;
 
 	const repeaters = useMemo(() => byType[2] ?? [], [byType]);
 	const byKey = useMemo(() => new Map(nodes.map(node => [node.public_key, node])), [nodes]);
@@ -89,6 +92,10 @@ export const MapScreen = () => {
 	const nodePadding = useMemo(() => ({ top: 0, left: 0, right: 0, bottom: windowHeight * DOCKED_MAX_HEIGHT }), [windowHeight]);
 	const flyToNode = useCallback(node => cameraRef.current?.flyTo({ center: [node.lon, node.lat], zoom: 14, padding: nodePadding, duration: 800 }), [nodePadding]);
 	const fitTo = useCallback(bounds => cameraRef.current?.fitBounds(bounds, { padding: { top: insets.top + 130, bottom: 360, left: 40, right: 40 }, duration: 600 }), [insets.top]);
+
+	// Stable references: a new object on every render would be pushed to the native map again each time.
+	const attributionPosition = useMemo(() => ({ left: 8, bottom: insets.bottom + 8 }), [insets.bottom]);
+	const compassPosition = useMemo(() => ({ top: insets.top + 140, right: 12 }), [insets.top]);
 
 	const closeSheet = useCallback(() => setSheet(null), []);
 	const clearSelection = useCallback(() => setSelected(null), []);
@@ -191,12 +198,13 @@ export const MapScreen = () => {
 	return (
 		<View style={styles.root}>
 			{mapReady && (
-				<MapView style={styles.map} mapStyle={mapStyle} onDidFinishLoadingStyle={handleStyleLoaded} touchRotate={settings.rotateTilt} touchPitch={settings.rotateTilt} onPress={handleMapPress} onRegionDidChange={handleRegionDidChange} onDidFailLoadingMap={handleStyleFailed}>
+				<MapView style={styles.map} mapStyle={mapStyle} logo={false} attributionPosition={attributionPosition} compass={settings.rotateTilt} compassPosition={compassPosition} onDidFinishLoadingStyle={handleStyleLoaded} touchRotate={settings.rotateTilt} touchPitch={settings.rotateTilt} onPress={handleMapPress} onRegionDidChange={handleRegionDidChange} onDidFailLoadingMap={handleStyleFailed}>
 					<Camera ref={cameraRef} initialViewState={savedCamera ?? { center: view.center, zoom: view.zoom }} />
 					{styleEpoch > 0 && <NodeLayer key={styleEpoch} scope={styleEpoch} nodes={filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />}
 					{styleEpoch > 0 && overlay && <OverlayLayer key={styleEpoch} scope={styleEpoch} features={overlay} />}
 				</MapView>
 			)}
+			{mapReady && styleEpoch === 0 && <View pointerEvents="none" style={styles.curtain} />}
 
 			<TopBar nodes={filtered} filters={settings.filters} onSelectNode={showNode} onOpenSheet={setSheet} />
 

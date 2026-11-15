@@ -6,7 +6,7 @@ import { NODE_STATUSES, NODE_TYPE_KEYS, NODE_TYPES } from '@meshcore-map/core/no
 import { useI18n } from '../i18n';
 import { useNodes } from '../state/NodesContext';
 import { colors, NODE_TYPE_ICONS, spacing } from '../theme';
-import { Button, Divider, Label } from '../ui/controls';
+import { Button, Divider, Heading } from '../ui/controls';
 import { Icon } from '../ui/Icon';
 import { Sheet } from '../ui/Sheet';
 
@@ -51,7 +51,7 @@ export const LegendSheet = ({ visible, onClose }) => {
 			) : (
 				<>
 					<View style={styles.group}>
-						<Label>{t('legend:typeTitle')}</Label>
+						<Heading>{t('legend:typeTitle')}</Heading>
 						{NODE_TYPES.map(type => (
 							<View key={type} style={styles.row}>
 								<Icon name={NODE_TYPE_ICONS[type]} size={22} color={NODE_TYPE_COLORS[type]} />
@@ -61,7 +61,7 @@ export const LegendSheet = ({ visible, onClose }) => {
 					</View>
 					<Divider />
 					<View style={styles.group}>
-						<Label>{t('legend:mapTitle')}</Label>
+						<Heading>{t('legend:mapTitle')}</Heading>
 						{NODE_STATUSES.map(status => (
 							<View key={status} style={styles.row}>
 								<View style={[styles.dot, { backgroundColor: STATUS_COLORS[status] }]} />
@@ -70,7 +70,7 @@ export const LegendSheet = ({ visible, onClose }) => {
 						))}
 					</View>
 					<Divider />
-					<Text style={styles.meta}>{`${t('legend:siteVersion')}${Constants.expoConfig?.version ?? ''}`}</Text>
+					<Text style={styles.meta}>{t('mobile:settings.version', { version: Constants.expoConfig?.version ?? '' })}</Text>
 					<Text style={styles.meta}>{`${t('legend:dataUpdate')}${fetchedAt ? new Date(fetchedAt).toLocaleString() : '-'}`}</Text>
 					<Button variant="secondary" label={t('legend:changelogButton')} onPress={() => setChangelog(true)} />
 				</>

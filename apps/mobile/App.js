@@ -12,8 +12,8 @@ import { ToastProvider } from './src/ui/Toast';
 
 installMapRequestHeaders();
 
-// A rejected basemap style is handled by the fallback chain; the red dev toast would only cover the buttons in the bottom corner.
-LogBox.ignoreLogs(['loading style failed']);
+// A rejected basemap style is handled by the fallback chain; the dev toast for it would only cover the buttons in the bottom corner.
+LogBox.ignoreLogs(['loading style failed', 'Basemap "']);
 
 export default function App() {
 	return (
