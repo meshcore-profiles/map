@@ -1,4 +1,6 @@
-import { Alert, Linking, Share, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { buildContactUrl } from '@meshcore-map/core/contact';
 import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, timeAgoParts } from '@meshcore-map/core/nodes';
 import { API_BASE } from '../config';
@@ -16,6 +18,8 @@ const styles = StyleSheet.create({
 	rowLabel: { color: colors.textMuted, fontSize: 12 },
 	rowValue: { color: colors.text, fontSize: 15 },
 	mono: { fontFamily: 'monospace', fontSize: 13 },
+	rowHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+	copy: { color: colors.blue, fontSize: 13, fontWeight: '600', paddingVertical: spacing.xs },
 	actions: { flexDirection: 'row', gap: spacing.sm },
 	action: { flex: 1 },
 });
@@ -23,16 +27,30 @@ const styles = StyleSheet.create({
 const RADIO_ORDER = ['freq', 'bw', 'sf', 'cr'];
 const RADIO_UNITS = { freq: ' MHz', bw: ' kHz', sf: '', cr: '' };
 
-const Row = ({ label, value, mono }) => (
-	<View style={styles.row} accessible>
-		<Text style={styles.rowLabel}>{label}</Text>
+const Row = ({ label, value, mono, copyLabel, onCopy }) => (
+	<View style={styles.row}>
+		<View style={styles.rowHead}>
+			<Text style={styles.rowLabel}>{label}</Text>
+			{onCopy && (
+				<Pressable onPress={onCopy} hitSlop={8} accessibilityRole="button" accessibilityLabel={copyLabel}>
+					<Text style={styles.copy}>{copyLabel}</Text>
+				</Pressable>
+			)}
+		</View>
 		<Text style={[styles.rowValue, mono && styles.mono]} selectable>{value}</Text>
 	</View>
 );
 
 export const NodeSheet = ({ node, onClose }) => {
 	const { t, tRaw, plural } = useI18n();
+	const [copied, setCopied] = useState(null);
 	if (!node) return null;
+
+	const copy = async (id, value) => {
+		await Clipboard.setStringAsync(value);
+		setCopied(id);
+	};
+	const copyLabel = (id, label) => copied === id ? t('common:copiedToClipboard') : label;
 
 	const ago = date => {
 		const parts = timeAgoParts(date.getTime());
@@ -64,8 +82,8 @@ export const NodeSheet = ({ node, onClose }) => {
 				</View>
 			</View>
 			<Divider />
-			<Row label={t('map:columns.publicKey')} value={node.public_key} mono />
-			<Row label={t('map:columns.coords')} value={node.coords} />
+			<Row label={t('map:columns.publicKey')} value={node.public_key} mono copyLabel={copyLabel('key', t('map:copyPublicKey'))} onCopy={() => copy('key', node.public_key)} />
+			<Row label={t('map:columns.coords')} value={node.coords} copyLabel={copyLabel('coords', t('map:copyCoords'))} onCopy={() => copy('coords', node.coords)} />
 			<Row label={t('map:columns.insertedDate')} value={dateLine(node.insertDate)} />
 			{node.updatedDate && <Row label={t('map:columns.updatedDate')} value={dateLine(node.updatedDate)} />}
 			<Row

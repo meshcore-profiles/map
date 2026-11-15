@@ -2,3 +2,5 @@ node_modules
 .env
 .expo
 apps/mobile/dist
+apps/mobile/android
+apps/mobile/ios

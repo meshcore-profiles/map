@@ -1,5 +1,5 @@
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useInsets } from '../hooks/useInsets';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, MIN_TOUCH, radius, spacing } from '../theme';
 import { useI18n } from '../i18n';
 
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 // Bottom sheet in a native Modal - dismissed by tapping the backdrop or the Back button.
 export const Sheet = ({ visible, title, onClose, children, footer }) => {
 	const { t } = useI18n();
-	const insets = useInsets();
+	const insets = useSafeAreaInsets();
 
 	return (
 		<Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>

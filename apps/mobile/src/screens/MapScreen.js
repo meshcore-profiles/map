@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Camera, Map as MapView } from '@maplibre/maplibre-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createDefaultFilters } from '@meshcore-map/core/nodes';
 import { FiltersSheet } from '../components/FiltersSheet';
 import { NodeLayer } from '../components/NodeLayer';
@@ -13,7 +14,6 @@ import { StatusBanner } from '../components/StatusBanner';
 import { ToolsSheet } from '../components/ToolsSheet';
 import { DEFAULT_VIEW, MAP_STYLE } from '../config';
 import { useAppConfig } from '../data/appConfig';
-import { useInsets } from '../hooks/useInsets';
 import { useI18n } from '../i18n';
 import { useNodes } from '../state/NodesContext';
 import { useSettings } from '../state/SettingsContext';
@@ -49,7 +49,7 @@ const filtersActive = filters => {
 
 export const MapScreen = () => {
 	const { t } = useI18n();
-	const insets = useInsets();
+	const insets = useSafeAreaInsets();
 	const { settings, ready, update } = useSettings();
 	const { nodes, byType, radioOptions, filtered } = useNodes();
 	const config = useAppConfig();

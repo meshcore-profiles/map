@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle, Line, Polygon } from 'react-native-svg';
 import { formatDistance, haversineDistance, parseLatLng } from '@meshcore-map/core/geo';
 import { analyzeLineOfSight, clearanceAt, sampleLine } from '@meshcore-map/core/los';
 import { resolveNodeByQuery } from '@meshcore-map/core/node-utils';
@@ -11,7 +12,9 @@ import { colors, radius, spacing } from '../theme';
 import { boundsOf, buildPathFeatures } from './pathFeatures';
 
 const SAMPLE_COUNT = 48;
-const CHART_HEIGHT = 110;
+const CHART_WIDTH = 320;
+const CHART_HEIGHT = 120;
+const CHART_PAD = 8;
 const COLOR = '#f2b134';
 
 const styles = StyleSheet.create({
@@ -23,8 +26,7 @@ const styles = StyleSheet.create({
 	actions: { flexDirection: 'row', gap: spacing.sm },
 	action: { flex: 1 },
 	stats: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-	chart: { height: CHART_HEIGHT, flexDirection: 'row', alignItems: 'flex-end', gap: 1, backgroundColor: colors.bg, borderRadius: radius.sm, padding: spacing.xs },
-	bar: { flex: 1, minHeight: 2 },
+	chart: { backgroundColor: colors.bg, borderRadius: radius.sm, overflow: 'hidden' },
 	legend: { flexDirection: 'row', justifyContent: 'space-between' },
 	legendText: { color: colors.textMuted, fontWeight: '700' },
 	error: { color: colors.redBright },
@@ -35,13 +37,26 @@ const ElevationProfile = ({ result }) => {
 	const lo = Math.min(...elevations, elevA, elevB);
 	const hi = Math.max(...elevations, elevA, elevB);
 	const span = Math.max(hi - lo, 1);
+	const plotW = CHART_WIDTH - 2 * CHART_PAD;
+	const plotH = CHART_HEIGHT - 2 * CHART_PAD;
+	const x = d => CHART_PAD + (d / total) * plotW;
+	const y = e => CHART_PAD + plotH - ((e - lo) / span) * plotH;
+
+	const terrain = elevations.map((e, i) => `${x(distances[i]).toFixed(1)},${y(e).toFixed(1)}`).join(' ');
+	const area = `${x(0)},${CHART_PAD + plotH} ${terrain} ${x(total)},${CHART_PAD + plotH}`;
+	const blocked = result.obstructed;
 
 	return (
 		<View style={styles.chart} accessibilityRole="image">
-			{elevations.map((elevation, i) => {
-				const blocked = clearanceAt({ elevation, d: distances[i], total, elevA, elevB }) < 0;
-				return <View key={i} style={[styles.bar, { height: ((elevation - lo) / span) * (CHART_HEIGHT - 8) + 2, backgroundColor: blocked ? colors.redBright : colors.textMuted }]} />;
-			})}
+			<Svg width="100%" height={CHART_HEIGHT} viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}>
+				<Polygon points={area} fill={colors.textMuted} fillOpacity={0.2} stroke={colors.textMuted} strokeWidth={1.5} />
+				<Line x1={x(0)} y1={y(elevA)} x2={x(total)} y2={y(elevB)} stroke={blocked ? colors.redBright : colors.green} strokeWidth={2} strokeDasharray="5 4" />
+				{elevations.map((elevation, i) => clearanceAt({ elevation, d: distances[i], total, elevA, elevB }) < 0 && (
+					<Circle key={i} cx={x(distances[i])} cy={y(elevation)} r={3} fill={colors.redBright} />
+				))}
+				<Circle cx={x(0)} cy={y(elevA)} r={4.5} fill={colors.blue} />
+				<Circle cx={x(total)} cy={y(elevB)} r={4.5} fill={colors.red} />
+			</Svg>
 		</View>
 	);
 };

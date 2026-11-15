@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useInsets } from '../hooks/useInsets';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useI18n } from '../i18n';
 import { colors, MIN_TOUCH, radius, spacing } from '../theme';
 
@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
 // Tool panel docked at the bottom - unlike Sheet it does not block the map, so points can still be picked.
 export const ToolPanel = ({ title, onClose, children }) => {
 	const { t } = useI18n();
-	const insets = useInsets();
+	const insets = useSafeAreaInsets();
 	const { height } = useWindowDimensions();
 
 	return (
