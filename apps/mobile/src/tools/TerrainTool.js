@@ -79,7 +79,6 @@ export const TerrainTool = ({ ctx }) => {
 		setResult(null);
 	};
 
-	// Picking A moves on to B, picking B ends the selection.
 	useMapPicker(setPicker, picking !== null, point => {
 		setPoint(picking, point);
 		setPicking(current => current === 'a' ? 'b' : null);

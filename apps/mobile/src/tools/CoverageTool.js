@@ -69,7 +69,6 @@ export const CoverageTool = ({ ctx }) => {
 
 	const setField = key => value => setForm(current => ({ ...current, [key]: value }));
 
-	// The site's default preset (like the website) applies once the list arrives.
 	useEffect(() => {
 		loadRadioPresets().then(list => {
 			setPresets(list);
@@ -78,7 +77,6 @@ export const CoverageTool = ({ ctx }) => {
 		}).catch(err => console.error('Failed to load radio presets:', err));
 	}, [defaultRadio]);
 
-	// A picked node brings its own radio settings, as on the website.
 	const applyPoint = point => {
 		setOrigin(point);
 		setText(describePoint(point));

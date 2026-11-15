@@ -25,7 +25,6 @@ const filtersActive = filters => {
 		|| Object.values(filters.radioFilters).some(selection => selection !== null);
 };
 
-// Search, filters and settings buttons with the quick chips underneath.
 export const TopBar = memo(({ nodes, filters, onSelectNode, onOpenSheet }) => {
 	const { t } = useI18n();
 	const { accentBright } = useTheme();

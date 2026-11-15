@@ -16,7 +16,9 @@ const languageNegotiation = (req, res, next) => {
 		const rest = { ...req.query };
 		delete rest.setlang;
 		const query = new URLSearchParams(rest).toString();
-		const target = langPath(valid ? setLang : (req.forcedLanguage || defaultLanguage), req.path, defaultLanguage);
+		// Leading slashes are collapsed: "//host" would otherwise become a protocol-relative redirect to another origin
+		const path = `/${req.path.replace(/^[/\\]+/, '')}`;
+		const target = langPath(valid ? setLang : (req.forcedLanguage || defaultLanguage), path, defaultLanguage);
 		return res.redirect(302, query ? `${target}?${query}` : target);
 	}
 

@@ -86,7 +86,6 @@ export const Chip = ({ label, selected, onPress, color, icon }) => {
 	);
 };
 
-// One scrollable line of chips, for long lists (radio presets) that would otherwise fill the panel.
 export const ChipScroll = ({ children }) => (
 	<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipScroll} keyboardShouldPersistTaps="handled">{children}</ScrollView>
 );
@@ -157,7 +156,6 @@ export const Stat = ({ label, value, tone }) => (
 	</View>
 );
 
-// A selectable row with an optional description (basemaps, elevation source).
 export const Option = ({ label, info, selected, onPress }) => {
 	const { accent, accentBright } = useTheme();
 
@@ -174,7 +172,6 @@ export const Option = ({ label, info, selected, onPress }) => {
 
 export const Divider = () => <View style={styles.divider} />;
 
-// Small uppercase caption above a group of controls.
 export const Heading = ({ children }) => <Text style={styles.heading} accessibilityRole="header">{children}</Text>;
 
 export const Section = ({ title, children }) => (
@@ -184,7 +181,6 @@ export const Section = ({ title, children }) => (
 	</View>
 );
 
-// A row that opens its content on tap: the title on the left, a short summary of the current value and a chevron on the right.
 export const Collapsible = ({ title, summary, children }) => {
 	const [open, setOpen] = useState(false);
 

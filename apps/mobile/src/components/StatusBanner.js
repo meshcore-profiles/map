@@ -13,8 +13,6 @@ const styles = StyleSheet.create({
 	bar: { position: 'absolute', left: 0, bottom: 0, height: 3 },
 });
 
-// Loading progress, an initial-load error, or a notice that the cached copy is shown because refreshing failed.
-// Same pill as the toasts, kept in the bottom corner beside the map buttons.
 export const StatusBanner = () => {
 	const { t } = useI18n();
 	const { accent, accentBright } = useTheme();

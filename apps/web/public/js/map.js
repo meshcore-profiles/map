@@ -2,7 +2,7 @@
 import { unpack } from '../vendor/msgpackr/msgpackr.js';
 import { toCanvas as qrToCanvas } from '../vendor/qrcode/qrcode.js';
 import * as ntools from './node-utils.js';
-import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, countByType, createStatusThresholds, formatTimeAgo, indexNode, prepareNode } from '/core/nodes.js';
+import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, countByType, createStatusThresholds, formatTimeAgo, indexNode, prepareNode, searchNodes } from '/core/nodes.js';
 import { t, tRaw, plural } from './i18n.js';
 import { initModal } from './modal.js';
 import { initNodeDeletionDialog } from './node-deletion.js';
@@ -394,9 +394,7 @@ const setBaseMap = async name => {
 
 	try {
 		localStorage.setItem('baseMapSelected', selection);
-	} catch {
-		// ...
-	}
+	} catch { /* storage unavailable */ }
 
 	if (wasOnMap) return;
 
@@ -804,7 +802,7 @@ const highlightString = (source, toHighlight) => {
 	const escapedSource = escapeHtml(source);
 	const matchIndex = source.toLowerCase().indexOf(toHighlight.toLowerCase());
 	const highlight = matchIndex >= 0 ? source.substring(matchIndex, matchIndex + toHighlight.length) : toHighlight;
-	return escapedSource.replace(escapeHtml(highlight), `<b>${escapeHtml(highlight)}</b>`);
+	return escapedSource.replace(escapeHtml(highlight), match => `<b>${match}</b>`);
 };
 
 const updateRegionToggleUI = () => {
@@ -860,12 +858,7 @@ function renderSearchResults() {
 		return;
 	}
 
-	const nodes = state.filteredNodes;
-	searchResults = nodes.filter(
-		node => node.adv_name.toLowerCase().includes(state.search.toLowerCase()) || node.public_key.startsWith(state.search)
-	).toSorted(
-		(a, b) => a.adv_name.localeCompare(b.adv_name)
-	).slice(0, 20);
+	searchResults = searchNodes(state.filteredNodes, state.search);
 
 	searchResultsEl.hidden = searchResults.length === 0;
 	if (!searchResultsEl.hidden) positionDropdown(searchResultsEl);
@@ -986,7 +979,7 @@ const downloadNodes = async region => {
 
 	if (nodesCache[region]) {
 		applyDownloadedNodes(nodesCache[region]);
-		return;
+		return true;
 	}
 
 	const thresholds = createStatusThresholds();
@@ -1033,7 +1026,7 @@ const downloadNodes = async region => {
 		}
 
 		setLoadingProgress('download');
-		loadingMeta.textContent = `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)} · ${t('map:downloadComplete')}`;
+		loadingMeta.textContent = `${totalBytes ? `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)}` : ntools.formatBytes(receivedBytes)} · ${t('map:downloadComplete')}`;
 
 		const nodesBuffer = new Uint8Array(receivedBytes);
 		let writeOffset = 0;
@@ -1095,12 +1088,14 @@ const downloadNodes = async region => {
 
 		nodesCache[region] = { nodes, byType: index.byType, radioOptions: index.radioOptions, dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
+		return true;
 	} catch (err) {
 		if (err.name !== 'AbortError') {
 			const message = err.isApiError ? err.message : t('map:unexpectedLoadError');
 			showToast(message, { status: 'error', duration: 6000 });
 			console.error(err);
 		}
+		return false;
 	} finally {
 		if (currentDownloadAbort === abortController) {
 			currentDownloadAbort = null;
@@ -1113,10 +1108,11 @@ const setRegion = async region => {
 	if (region === state.region) return;
 
 	const cached = Boolean(nodesCache[region]);
+	if (!await downloadNodes(region)) return;
+
 	state.region = region;
 	localStorage.setItem('regionSelected', region);
 	updateRegionToggleUI();
-	await downloadNodes(region);
 	applyFilters({ silent: !cached });
 };
 
@@ -1219,11 +1215,13 @@ filtersShareBtn.addEventListener('click', () => {
 clusteringZoomInput.addEventListener('input', () => {
 	state.clusteringZoom = Number(clusteringZoomInput.value);
 	updateClusteringSlider();
-	refreshMap();
-	syncUrlParams();
 });
 
-clusteringZoomInput.addEventListener('change', saveFiltersToStorage);
+clusteringZoomInput.addEventListener('change', () => {
+	refreshMap();
+	syncUrlParams();
+	saveFiltersToStorage();
+});
 
 closeFiltersOnApplyCheckbox.checked = localStorage.getItem('closeFiltersOnApply') !== '0';
 

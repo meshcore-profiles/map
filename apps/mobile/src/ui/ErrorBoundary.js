@@ -9,7 +9,6 @@ const styles = StyleSheet.create({
 	stack: { color: colors.textMuted, fontSize: 11, fontFamily: 'monospace' },
 });
 
-// Last-resort screen: shows what crashed instead of a blank/closed app.
 export class ErrorBoundary extends Component {
 	state = { error: null };
 

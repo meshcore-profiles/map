@@ -6,7 +6,6 @@ import { fetchRegionInfo, hasCachedRegion } from '../data/nodesRepository';
 import { useI18n } from '../i18n';
 import { useSettings } from './SettingsContext';
 
-// Switches the map scope. Asks for consent before the first (large) worldwide download, like the website.
 export const useRegionSwitch = () => {
 	const { t } = useI18n();
 	const { settings, update } = useSettings();

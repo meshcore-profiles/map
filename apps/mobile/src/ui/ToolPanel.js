@@ -9,7 +9,6 @@ import { useKeyboardHeight } from './useKeyboardHeight';
 import { useSheetMotion } from './useSheetMotion';
 import { colors, MIN_TOUCH, radius, shadow, spacing } from '../theme';
 
-// Handle plus the title row: all that stays visible when the panel is collapsed (the safe-area inset is added on top).
 const COLLAPSED_HEIGHT = 12 + MIN_TOUCH + spacing.sm;
 
 const styles = StyleSheet.create({
@@ -21,8 +20,6 @@ const styles = StyleSheet.create({
 	content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm, gap: spacing.md },
 });
 
-// Tool panel docked at the bottom - unlike Sheet it does not block the map, so points can still be picked.
-// The handle resizes it between collapsed (just the title, the tool stays active and the map is free), half and almost full height; only the close button ends the tool.
 export const ToolPanel = ({ title, icon, onClose, children }) => {
 	const { t } = useI18n();
 	const { accentBright } = useTheme();

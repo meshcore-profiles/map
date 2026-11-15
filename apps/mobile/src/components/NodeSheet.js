@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
 
 const QR_SIZE = 128;
 
-// Radio parameters as short chips: frequency and bandwidth carry a unit, spreading factor and coding rate are labelled with their usual abbreviations.
 const RADIO_FORMATS = {
 	freq: value => `${value} MHz`,
 	bw: value => `${value} kHz`,

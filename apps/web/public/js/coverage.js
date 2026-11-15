@@ -60,10 +60,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		if ([...bwInput.options].some(o => Number(o.value) === entry.params.bw)) bwInput.value = entry.params.bw;
 	};
 
-	// Reentrant-safe: the modal can close and reopen (e.g. mid-pick via "Wskaż na mapie")
-	// before the first call resolves, so a second call must await the same in-flight
-	// population instead of appending a duplicate set of <option> elements. Shares map.js's
-	// own getPresets() (and its cache) instead of fetching the presets a second time.
+	// Reentrant: a second call while the first is in flight awaits the same population instead of duplicating the <option> elements
 	const populatePresets = () => {
 		if (presetsLoaded) return Promise.resolve();
 		if (populatingPromise) return populatingPromise;
@@ -130,9 +127,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		}
 	};
 
-	// Rebuilds the legend content on every render (not just once), since whether the ERP
-	// circle item applies depends on the current computation (linkBudgetRangeM vs MAX_RANGE_M),
-	// which can change between one "Oblicz zasięg" click and the next.
+	// Rebuilt on every render: the ERP circle item depends on the current linkBudgetRangeM vs MAX_RANGE_M
 	const ensureLegend = (showBudget, tiles) => {
 		if (!legendControl) {
 			legendControl = L.control({ position: 'bottomleft' });
@@ -258,9 +253,6 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 	pointInput.addEventListener('input', syncFromInput);
 
-	// Once the user is done typing, normalize the field to the canonical "name (key)" form
-	// (matching what picking on the map or clicking a node produces) instead of leaving
-	// whatever partial text they typed to find the match.
 	pointInput.addEventListener('change', () => {
 		if (origin?.label) pointInput.value = formatPointLabel(origin);
 	});

@@ -1,5 +1,11 @@
 const DEFAULT_CHUNK_SIZE = 100;
 
+const assertElevations = (provider, elevations, points) => {
+	if (!Array.isArray(elevations) || elevations.length !== points.length || !elevations.every(Number.isFinite)) throw new Error(`${provider} returned incomplete elevation data.`);
+
+	return elevations;
+};
+
 const fetchFromLookupApi = (fetchImpl, url, points) => fetchImpl(url, {
 	method: 'POST',
 	headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
@@ -41,7 +47,7 @@ export const createElevationProviders = ({ getSefinekApi, pack, unpack, fetchImp
 			if (!res.ok) throw new Error(`Open-Elevation returned error ${res.status}`);
 
 			const data = await res.json();
-			return data.results.map(r => r.elevation);
+			return assertElevations('Open-Elevation', data.results?.map(r => r.elevation), points);
 		},
 	},
 	'open-meteo': {
@@ -54,7 +60,7 @@ export const createElevationProviders = ({ getSefinekApi, pack, unpack, fetchImp
 			if (!res.ok) throw new Error(`Open-Meteo returned error ${res.status}`);
 
 			const data = await res.json();
-			return data.elevation;
+			return assertElevations('Open-Meteo', data.elevation, points);
 		},
 	},
 });

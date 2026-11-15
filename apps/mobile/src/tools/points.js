@@ -6,7 +6,6 @@ export const pointFromCoords = ({ lat, lng }) => ({ lat, lng, label: null });
 
 export const pointFromNode = node => ({ lat: node.lat, lng: node.lon, label: node.adv_name, key: node.public_key, radio: node.params });
 
-// Coordinates ("52.1, 21.2") or a node name / public key prefix; null when neither matches.
 export const pointFromText = (text, nodes) => {
 	const coords = parseLatLng(text);
 	if (coords) return pointFromCoords(coords);

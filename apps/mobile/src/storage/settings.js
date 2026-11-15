@@ -6,7 +6,6 @@ import { readJson, writeJson } from './files';
 
 const FILE = 'settings.json';
 
-// Same options as the website's settings (the providers live in core/elevation-providers).
 export const ELEVATION_SOURCES = ['sefinek', 'open-elevation', 'open-meteo'];
 
 export const createDefaultSettings = () => ({
@@ -20,7 +19,6 @@ export const createDefaultSettings = () => ({
 	filters: createDefaultFilters(),
 });
 
-// Fills in fields missing after an app update and drops invalid values.
 const sanitize = saved => {
 	const defaults = createDefaultSettings();
 	const filters = { ...defaults.filters, ...saved?.filters };

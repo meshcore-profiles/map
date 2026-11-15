@@ -53,7 +53,6 @@ const loadStyle = async (name, url, attribution) => {
 	}
 };
 
-// The basemap catalogue, the style of the active map (null until it is ready) and the reaction to a map that fails to load.
 export const useBasemap = ({ config, settings, update }) => {
 	const { t, tRaw } = useI18n();
 	const showToast = useToast();

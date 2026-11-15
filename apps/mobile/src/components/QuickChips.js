@@ -25,7 +25,6 @@ const Chip = ({ icon, label, onPress, accessibilityLabel, accent }) => {
 	);
 };
 
-// Quick actions under the search bar, like the chips in modern map apps: the map scope and the node counts (tapping a count opens the statistics).
 export const QuickChips = memo(({ nodes, onStats }) => {
 	const { t } = useI18n();
 	const { settings } = useSettings();

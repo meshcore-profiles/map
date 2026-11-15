@@ -22,7 +22,6 @@ const styles = StyleSheet.create({
 	change: { color: colors.text, fontSize: 14, lineHeight: 20 },
 });
 
-// Marker legend (node types and update statuses) like the website's, with the changelog behind a button.
 export const LegendSheet = ({ visible, onClose }) => {
 	const { t, tRaw } = useI18n();
 	const { fetchedAt } = useNodes();

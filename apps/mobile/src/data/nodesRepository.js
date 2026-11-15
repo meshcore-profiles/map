@@ -8,7 +8,6 @@ const nodesUrl = (apiBase, region) => `${apiBase}/api/v1/nodes?region=${region}`
 const dataName = region => `nodes-${region}.bin`;
 const metaName = region => `nodes-${region}.json`;
 
-// HEAD request: payload size and server-side data timestamp, without downloading.
 export const fetchRegionInfo = async (apiBase, region, signal) => {
 	const res = await apiFetch(nodesUrl(apiBase, region), { method: 'HEAD', signal });
 	if (!res.ok) throw new Error(`Nodes API returned ${res.status}`);

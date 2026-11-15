@@ -12,7 +12,6 @@ const styles = StyleSheet.create({
 	logo: { width: LOGO, height: LOGO, borderRadius: 8, backgroundColor: colors.bg },
 });
 
-// The site's logo at the start of the search bar.
 export const BrandLogo = () => {
 	const { settings } = useSettings();
 	const { logo, icon192, mobileLogo } = SITES[settings.region];

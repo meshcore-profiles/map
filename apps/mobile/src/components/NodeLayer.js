@@ -39,7 +39,6 @@ const toFeature = node => {
 	return feature;
 };
 
-// Same look as the website's marker clusters: translucent halo around a stronger disc, in the theme's accent colour.
 const createThemedPaints = ({ accent, accentBright }) => ({
 	clusterHalo: {
 		'circle-color': accent,
@@ -81,7 +80,6 @@ const CLUSTER_LABEL_LAYOUT = {
 	'text-allow-overlap': true,
 };
 
-// Clients: coloured disc (hash of the name) with the name's initial or emoji, like the website.
 const CLIENT_PAINT = {
 	'circle-color': ['get', 'color'],
 	'circle-radius': 13,
@@ -104,7 +102,6 @@ const BADGE_LAYOUT = {
 
 const WHITE = { 'text-color': '#fff' };
 
-// Clustering is disabled from zoom clusteringZoom upwards (like disableClusteringAtZoom on the web).
 // scope: unique per loaded style, so a freshly mounted copy never shares source or layer ids with the previous one (the native side would drop them together).
 export const NodeLayer = memo(({ scope, nodes, selected, clusteringZoom, sourceRef, onPress }) => {
 	const theme = useTheme();

@@ -18,7 +18,6 @@ const TOOL_FABS = [
 	{ id: 'measure', icon: 'ruler', title: 'measure:toggleTitle' },
 ];
 
-// Round buttons in the bottom right corner (tools, basemap, add node) and the loading status next to them.
 export const MapControls = ({ region, features, toolsOpen, onToggleTools, onOpenTool, onOpenBasemap, onOpenLegend }) => {
 	const { t } = useI18n();
 	const insets = useSafeAreaInsets();

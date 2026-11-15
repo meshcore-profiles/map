@@ -5,7 +5,6 @@ import { destinationPoint } from '@meshcore-map/core/geo';
 const CELL_TARGET_M = 250;
 const MAX_CELLS = 160;
 
-// The tiles of the coverage layer as OverlayLayer fills: horizontal runs of equally shaded cells merged into one rectangle.
 export const coverageTileFeatures = ({ origin, rayResults, capM, linkBudgetRangeM }) => {
 	const { cells, items } = buildCoverageGrid({ rayResults, capM, linkBudgetRangeM, cellTargetM: CELL_TARGET_M, maxCells: MAX_CELLS });
 	const north = destinationPoint(origin, 0, capM).lat;

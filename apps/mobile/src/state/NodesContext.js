@@ -60,7 +60,6 @@ export const NodesProvider = ({ children }) => {
 		}
 	}, [region]);
 
-	// Stops a running download; without a cached copy the status banner then offers a retry.
 	const cancel = useCallback(() => {
 		abortRef.current?.abort();
 		setProgress(0);

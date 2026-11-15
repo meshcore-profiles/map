@@ -28,7 +28,6 @@ const styles = StyleSheet.create({
 	empty: { color: colors.textMuted, paddingVertical: spacing.md },
 });
 
-// New nodes per period and the repeaters added in the selected one (a preset or a custom date range), like the website's statistics modal.
 export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, onShowOnMap }) => {
 	const { t, tRaw, plural } = useI18n();
 	const { accentBright } = useTheme();

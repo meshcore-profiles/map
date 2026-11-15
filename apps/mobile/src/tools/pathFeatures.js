@@ -8,7 +8,6 @@ const point = (p, color, label) => ({
 
 const LABEL_ONLY = 'label';
 
-// Features for OverlayLayer: labelled points, a polyline and distance labels at segment midpoints.
 export const buildPathFeatures = (points, { color, labelFor, segmentLabels = true }) => {
 	const features = points.map((p, i) => point(p, color, labelFor(p, i)));
 	if (points.length < 2) return features;

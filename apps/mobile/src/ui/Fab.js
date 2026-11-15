@@ -10,7 +10,6 @@ const styles = StyleSheet.create({
 	pressed: { opacity: 0.8, transform: [{ scale: 0.95 }] },
 });
 
-// Round map button, same look as the website's #fab-stack.
 export const Fab = ({ icon, label, onPress, primary }) => {
 	const { accent, accentBright } = useTheme();
 

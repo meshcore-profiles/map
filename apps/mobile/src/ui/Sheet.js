@@ -25,10 +25,8 @@ const styles = StyleSheet.create({
 	footer: { padding: spacing.lg, paddingTop: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
 });
 
-// The drag handle; the parent puts the pan handlers on a wrapper that contains it.
 export const SheetGrip = () => <View style={styles.grip}><View style={styles.handle} /></View>;
 
-// Handle and title bar: the area that can be dragged to dismiss (and, on the docked sheet, to resize) the sheet.
 const SheetHeader = ({ title, close, panHandlers }) => {
 	const { t } = useI18n();
 
@@ -45,7 +43,6 @@ const SheetHeader = ({ title, close, panHandlers }) => {
 	);
 };
 
-// Modal bottom sheet: dismissed by swiping it down, tapping the backdrop or pressing Back.
 export const Sheet = ({ visible, title, onClose, children, footer }) => {
 	const { t } = useI18n();
 	const insets = useSafeAreaInsets();
@@ -68,7 +65,6 @@ export const Sheet = ({ visible, title, onClose, children, footer }) => {
 	);
 };
 
-// Non-modal bottom panel: there is no backdrop, so the map and the controls above it stay interactive. Swipe the handle up to expand it, down to collapse and then dismiss.
 export const DockedSheet = ({ title, visible = true, onClose, onExited, children, footer }) => {
 	const insets = useSafeAreaInsets();
 	const { height } = useWindowDimensions();

@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Linking } from 'react-native';
 import { parseMapLink } from '@meshcore-map/core/links';
 
-// Calls onLink({ node } | { view }) for the link that opened the app and for links received while it runs (a shared ?node= link, lat/lon/zoom).
 export const useMapLink = onLink => {
 	useEffect(() => {
 		const handle = url => {

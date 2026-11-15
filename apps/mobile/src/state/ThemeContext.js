@@ -4,7 +4,6 @@ import { useSettings } from './SettingsContext';
 
 const ThemeContext = createContext(THEMES[DEFAULT_THEME]);
 
-// Accent colours follow the selected map scope, like the two sites (Poland: red, worldwide: indigo).
 export const ThemeProvider = ({ children }) => {
 	const { settings } = useSettings();
 

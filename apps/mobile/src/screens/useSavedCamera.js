@@ -4,7 +4,6 @@ import { loadCamera, saveCamera } from '../storage/camera';
 const SAVE_DELAY_MS = 500;
 
 // The last map position: `savedCamera` is undefined while it loads, null when nothing usable is stored.
-// `handleRegionDidChange` is the map's onRegionDidChange; it stores the view once the user stops moving.
 export const useSavedCamera = () => {
 	const [savedCamera, setSavedCamera] = useState(undefined);
 	const timer = useRef(null);

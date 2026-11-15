@@ -21,7 +21,6 @@ export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24 };
 export const radius = { sm: 8, md: 12, lg: 20 };
 export const MIN_TOUCH = 44;
 
-// The shared look of the floating notices (toasts and the loading status): one rounded pill.
 export const pill = { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44, paddingVertical: 10, paddingLeft: 14, paddingRight: 18, borderRadius: 999, borderWidth: 1, borderColor: colors.borderStrong, backgroundColor: colors.panelSolid };
 
 export const shadow = { elevation: 8, shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 14, shadowOffset: { width: 0, height: 4 } };

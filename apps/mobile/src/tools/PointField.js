@@ -9,7 +9,6 @@ const styles = StyleSheet.create({
 	pick: { minWidth: 96 },
 });
 
-// Text field (coordinates or a node name) with a button that arms picking on the map.
 export const PointField = ({ label, value, placeholder, picking, pickLabel, onChangeText, onEndEditing, onTogglePick }) => {
 	const { t } = useI18n();
 

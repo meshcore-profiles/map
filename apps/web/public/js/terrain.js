@@ -186,8 +186,6 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 	inputA.addEventListener('input', () => syncFromInput('a'));
 	inputB.addEventListener('input', () => syncFromInput('b'));
 
-	// Once the user is done typing, normalize the field to the matched node's canonical name
-	// instead of leaving whatever partial text they typed to find it.
 	inputA.addEventListener('change', () => {
 		if (points.a?.label) inputA.value = points.a.label;
 	});

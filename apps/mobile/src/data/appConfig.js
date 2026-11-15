@@ -16,7 +16,6 @@ const getJson = async path => {
 	return (await res.json()).data;
 };
 
-// From the network, falling back to the last saved copy when offline.
 const loadWithCache = async (path, file) => {
 	try {
 		const data = await getJson(path);

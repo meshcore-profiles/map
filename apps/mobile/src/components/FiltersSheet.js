@@ -38,7 +38,6 @@ const toDateString = days => (days ? new Date(Date.now() - days * DAY_MS).toISOS
 
 const sortValues = values => [...values].sort((a, b) => a === 'unknown' ? 1 : b === 'unknown' ? -1 : Number(a) - Number(b));
 
-// "Last N days" presets and an exact date (YYYY-MM-DD), like the website's date input.
 const DateFilter = ({ label, value, onChange }) => {
 	const { t } = useI18n();
 	const [text, setText] = useState(value);
@@ -68,8 +67,6 @@ const DateFilter = ({ label, value, onChange }) => {
 	);
 };
 
-// One radio parameter (frequency, SF, CR, BW). Closed it only says what is selected; open it lists the values with All / None shortcuts.
-// `values` are all options, `shown` the ones left after a search.
 const RadioGroup = ({ title, values, shown, selection, search, hint, onToggle, onSelectAll, onSelectNone }) => {
 	const { t } = useI18n();
 	const { accentBright } = useTheme();
