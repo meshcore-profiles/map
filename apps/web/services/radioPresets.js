@@ -1,4 +1,4 @@
-const RedisClient = require('../global/services/redis.js');
+const RedisClient = require('../../../global/services/redis.js');
 
 const CACHE_KEY = 'radioPresets:data';
 

@@ -19,17 +19,17 @@ const resolveSite = req => {
 
 // Node data itself is fetched/cached into Redis by the meshcore-profiles/cronjobs worker;
 // this app only reads it (see global/services/nodeCache.js).
-const MongooseConnection = require('./global/database/mongoose.js');
-const RedisClient = require('./global/services/redis.js');
+const MongooseConnection = require('../../global/database/mongoose.js');
+const RedisClient = require('../../global/services/redis.js');
 
 // Middleware imports
 const timeout = require('./middlewares/timeout.js');
-const logger = require('./global/middlewares/morgan.js');
+const logger = require('../../global/middlewares/morgan.js');
 const limiter = require('./middlewares/ratelimit.js');
 const language = require('./middlewares/language.js');
 const languageNegotiation = require('./middlewares/languageNegotiation.js');
-const { detectLanguagePrefix, isLanguageAgnosticPath } = require('./global/utils/languageResolver.js');
-const { SUPPORTED } = require('./global/services/i18n.js');
+const { detectLanguagePrefix, isLanguageAgnosticPath } = require('../../global/utils/languageResolver.js');
+const { SUPPORTED } = require('../../global/services/i18n.js');
 const HttpError = require('./utils/httpError.js');
 
 // Create an Express app

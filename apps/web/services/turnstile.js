@@ -1,4 +1,4 @@
-const axios = require('../global/services/axios.js');
+const axios = require('../../../global/services/axios.js');
 const secret = process.env.TURNSTILE_SECRET;
 
 module.exports = async (token, ip, hostname, publicKey) => {
