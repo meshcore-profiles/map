@@ -10,31 +10,34 @@ const styles = StyleSheet.create({
 	danger: { backgroundColor: colors.red },
 	pressed: { opacity: 0.8 },
 	disabled: { opacity: 0.45 },
-	buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+	buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 	ghostText: { color: colors.text },
 	chip: { minHeight: 36, paddingHorizontal: spacing.md, borderRadius: 18, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.chip, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
-	chipText: { color: colors.text, fontSize: 14 },
+	chipText: { color: colors.text, fontSize: 15 },
 	chipTextSelected: { color: '#fff', fontWeight: '700' },
 	chipTextOnColor: { color: '#0b0e14', fontWeight: '700' },
 	chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-	label: { color: colors.text, fontSize: 14, fontWeight: '600' },
-	hint: { color: colors.textMuted, fontSize: 12, lineHeight: 17 },
+	label: { color: colors.text, fontSize: 16, fontWeight: '600' },
+	hint: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
 	field: { gap: spacing.xs },
 	input: { minHeight: MIN_TOUCH, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, color: colors.text, paddingHorizontal: spacing.md, backgroundColor: colors.bg },
 	switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: MIN_TOUCH },
-	switchText: { flex: 1, gap: 2 },
-	switchLabel: { color: colors.text, fontSize: 15 },
+	switchText: { flex: 1, gap: 4 },
+	switchLabel: { color: colors.text, fontSize: 16, fontWeight: '600' },
 	segmented: { flexDirection: 'row', borderRadius: radius.md, backgroundColor: colors.bg, padding: 3 },
 	segment: { flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm },
-	segmentText: { color: colors.textMuted, fontWeight: '600' },
+	segmentText: { color: colors.textMuted, fontWeight: '600', fontSize: 15 },
 	segmentTextSelected: { color: '#fff' },
 	stepper: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: spacing.sm },
 	stepButton: { width: MIN_TOUCH, height: MIN_TOUCH, borderRadius: radius.sm, backgroundColor: colors.chip, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
 	stepText: { color: colors.text, fontSize: 22 },
 	stepValue: { color: colors.text, fontSize: 18, fontWeight: '700', minWidth: 36, textAlign: 'center' },
 	stat: { flexGrow: 1, flexBasis: '30%', backgroundColor: colors.bg, borderRadius: radius.sm, padding: spacing.md, gap: 2 },
-	statLabel: { color: colors.textMuted, fontSize: 12 },
-	statValue: { color: colors.text, fontSize: 16, fontWeight: '700' },
+	statLabel: { color: colors.textMuted, fontSize: 13 },
+	statValue: { color: colors.text, fontSize: 17, fontWeight: '700' },
+	section: { gap: spacing.md, padding: spacing.lg, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: 'rgba(148, 166, 204, 0.05)' },
+	sectionHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+	sectionTitle: { flex: 1, color: colors.text, fontSize: 17, fontWeight: '700' },
 	divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
 });
 
@@ -77,7 +80,7 @@ export const ChipRow = ({ children }) => <View style={styles.chipRow}>{children}
 
 export const Label = ({ children }) => <Text style={styles.label}>{children}</Text>;
 
-export const Hint = ({ children }) => <Text style={styles.hint}>{children}</Text>;
+export const Hint = ({ children, style }) => <Text style={[styles.hint, style]}>{children}</Text>;
 
 export const Field = ({ label, style, ...props }) => (
 	<View style={styles.field}>
@@ -140,3 +143,19 @@ export const Stat = ({ label, value, tone }) => (
 );
 
 export const Divider = () => <View style={styles.divider} />;
+
+export const Section = ({ title, icon, children }) => {
+	const { accentBright } = useTheme();
+
+	return (
+		<View style={styles.section}>
+			{title && (
+				<View style={styles.sectionHeading}>
+					{icon && <Icon name={icon} size={20} color={accentBright} />}
+					<Text style={styles.sectionTitle} accessibilityRole="header">{title}</Text>
+				</View>
+			)}
+			{children}
+		</View>
+	);
+};

@@ -11,6 +11,7 @@ import plRoute from '../../../../locales/pl/route.json';
 import plTerrain from '../../../../locales/pl/terrain.json';
 import plCoverage from '../../../../locales/pl/coverage.json';
 import plStats from '../../../../locales/pl/stats.json';
+import plSettings from '../../../../locales/pl/settings.json';
 import plMobile from '../../../../locales/pl/mobile.json';
 import enCommon from '../../../../locales/en/common.json';
 import enMap from '../../../../locales/en/map.json';
@@ -20,11 +21,12 @@ import enRoute from '../../../../locales/en/route.json';
 import enTerrain from '../../../../locales/en/terrain.json';
 import enCoverage from '../../../../locales/en/coverage.json';
 import enStats from '../../../../locales/en/stats.json';
+import enSettings from '../../../../locales/en/settings.json';
 import enMobile from '../../../../locales/en/mobile.json';
 
 const BUNDLES = {
-	pl: { common: plCommon, map: plMap, filters: plFilters, measure: plMeasure, route: plRoute, terrain: plTerrain, coverage: plCoverage, stats: plStats, mobile: plMobile },
-	en: { common: enCommon, map: enMap, filters: enFilters, measure: enMeasure, route: enRoute, terrain: enTerrain, coverage: enCoverage, stats: enStats, mobile: enMobile },
+	pl: { common: plCommon, map: plMap, filters: plFilters, measure: plMeasure, route: plRoute, terrain: plTerrain, coverage: plCoverage, stats: plStats, settings: plSettings, mobile: plMobile },
+	en: { common: enCommon, map: enMap, filters: enFilters, measure: enMeasure, route: enRoute, terrain: enTerrain, coverage: enCoverage, stats: enStats, settings: enSettings, mobile: enMobile },
 };
 
 export const resolveLanguage = preference => {

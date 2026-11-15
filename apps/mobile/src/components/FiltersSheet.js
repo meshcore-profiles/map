@@ -54,7 +54,7 @@ export const FiltersSheet = ({ visible, filters, byType, radioOptions, total, on
 			{DAY_PRESETS.map(days => (
 				<Chip
 					key={days}
-					label={days === 0 ? t('mobile:filters.anyTime') : t('mobile:filters.lastDays', { count: days })}
+					label={days === 0 ? t('mobile:filters.anyTime') : days === 1 ? t('mobile:filters.lastDay') : t('mobile:filters.lastDays', { count: days })}
 					selected={daysFromDate(draft[field]) === days}
 					onPress={() => setDraft(current => ({ ...current, [field]: toDateString(days) }))}
 				/>

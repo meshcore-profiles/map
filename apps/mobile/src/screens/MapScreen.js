@@ -12,7 +12,7 @@ import { OverlayLayer } from '../components/OverlayLayer';
 import { RegionPrompt } from '../components/RegionPrompt';
 import { SearchBar } from '../components/SearchBar';
 import { SettingsSheet } from '../components/SettingsSheet';
-import { BrandButton } from '../components/BrandButton';
+import { BrandLogo } from '../components/BrandLogo';
 import { BasemapSheet } from '../components/BasemapSheet';
 import { QuickChips } from '../components/QuickChips';
 import { StatsSheet } from '../components/StatsSheet';
@@ -121,6 +121,10 @@ export const MapScreen = () => {
 		cameraRef.current?.flyTo({ center: view.center, zoom: view.zoom, duration: 800 });
 	}, [settings.region]);
 
+	useEffect(() => {
+		if (!settings.rotateTilt) cameraRef.current?.easeTo({ bearing: 0, pitch: 0, duration: 300 });
+	}, [settings.rotateTilt]);
+
 	const flyToNode = useCallback(node => cameraRef.current?.flyTo({ center: [node.lon, node.lat], zoom: 14, duration: 800 }), []);
 
 	const fitTo = useCallback(bounds => cameraRef.current?.fitBounds(bounds, { padding: { top: insets.top + 130, bottom: 360, left: 40, right: 40 }, duration: 600 }), [insets.top]);
@@ -182,17 +186,20 @@ export const MapScreen = () => {
 
 	return (
 		<View style={styles.root}>
-			<MapView style={styles.map} mapStyle={mapStyle} onDidFinishLoadingStyle={() => setStyleEpoch(epoch => epoch + 1)} onPress={handleMapPress} onDidFailLoadingMap={handleBasemapFailed}>
+			<MapView style={styles.map} mapStyle={mapStyle} onDidFinishLoadingStyle={() => setStyleEpoch(epoch => epoch + 1)} touchRotate={settings.rotateTilt} touchPitch={settings.rotateTilt} onPress={handleMapPress} onDidFailLoadingMap={handleBasemapFailed}>
 				<Camera ref={cameraRef} initialViewState={{ center: view.center, zoom: view.zoom }} />
 				<NodeLayer key={`nodes-${styleEpoch}`} nodes={filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />
 				{overlay && <OverlayLayer key={`overlay-${styleEpoch}`} features={overlay} />}
 			</MapView>
 
 			<View style={[styles.topBar, { top: insets.top + spacing.sm }]}>
-				<SearchBar nodes={filtered} onSelect={showNode} leading={<BrandButton onPress={() => setSheet('settings')} />}>
+				<SearchBar nodes={filtered} onSelect={showNode} leading={<BrandLogo />}>
 					<Pressable style={styles.barButton} onPress={() => setSheet('filters')} accessibilityRole="button" accessibilityLabel={t('filters:toggleTitle')}>
 						<Icon name="filter" size={22} color={filtersOn ? accentBright : colors.text} />
 						{filtersOn && <View style={[styles.activeDot, { backgroundColor: accentBright }]} />}
+					</Pressable>
+					<Pressable style={styles.barButton} onPress={() => setSheet('settings')} accessibilityRole="button" accessibilityLabel={t('settings:title')}>
+						<Icon name="settings" size={22} color={colors.text} />
 					</Pressable>
 				</SearchBar>
 				<QuickChips nodes={filtered} onStats={() => setSheet('stats')} />
@@ -204,7 +211,7 @@ export const MapScreen = () => {
 						{toolsOpen && TOOL_FABS.filter(tool => config?.features?.[tool.id] !== false).map(tool => (
 							<Fab key={tool.id} icon={tool.icon} label={t(tool.title)} onPress={() => openTool(tool.id)} />
 						))}
-						<Fab icon={toolsOpen ? 'close' : 'ruler'} label={t('mobile:tools.title')} onPress={() => setToolsOpen(open => !open)} />
+						<Fab icon={toolsOpen ? 'close' : 'wrench'} label={t('mobile:tools.title')} onPress={() => setToolsOpen(open => !open)} />
 						<Fab icon="layers" label={t('map:basemapToggleTitle')} onPress={() => setSheet('basemap')} />
 						<Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(SITES[settings.region ?? 'all'].addNodeUrl)} />
 					</View>

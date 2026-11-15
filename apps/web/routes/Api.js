@@ -26,11 +26,11 @@ router.get('/nodes', async (req, res) => {
 	}
 });
 
-// Basemap API keys, the same ones the site exposes in window.MAP_CONFIG.
+// Basemap keys for the mobile app. The site's keys are restricted to its origin, so the app gets its own (*_MOBILE) and falls back to the site's ones.
 const getBasemapConfig = () => ({
-	esriApiKey: process.env.ESRI_API_KEY?.trim() || null,
-	cartoApiKey: process.env.CARTO_API_KEY || null,
-	maptilerApiKey: process.env.MAPTILER_API_KEY || null,
+	esriApiKey: process.env.ESRI_API_KEY_MOBILE || process.env.ESRI_API_KEY || null,
+	cartoApiKey: process.env.CARTO_API_KEY_MOBILE || process.env.CARTO_API_KEY || null,
+	maptilerApiKey: process.env.MAPTILER_API_KEY_MOBILE || process.env.MAPTILER_API_KEY || null,
 });
 
 // Konfiguracja dla klienta mobilnego (to samo, co strona dostaje we window.MAP_CONFIG).

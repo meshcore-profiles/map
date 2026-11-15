@@ -16,10 +16,10 @@ Comment language: `packages/core` and `apps/mobile` use English (only `apps/web/
 ## Commands
 
 - Clone with `--recurse-submodules` (or `git submodule update --init`); `global/` (repo root) is a submodule.
-- Monorepo (npm workspaces): `apps/web` is the site described below (paths in this file are relative to it, except `global/` and `locales/`, which live in the repo root), `packages/core` is shared plain-ESM logic with no DOM/Leaflet (tests: `npm test`), served to the browser at `/core/*` (`express.static` in `index.js`) and imported from `public/js` as `/core/<file>.js`; `public/js/{node-utils,pathtools,elevation}.js` re-export from it. Run: `npm start` (from the root; or `node .` in `apps/web`). Lint: `npm run lint` (flat config in `apps/web`, ignores `public/vendor/**`).
+- Monorepo (npm workspaces): `apps/web` is the site described below (paths in this file are relative to it, except `global/` and `locales/`, which live in the repo root), `packages/core` is shared plain-ESM logic with no DOM/Leaflet (tests: `npm test`, a single file: `node --test packages/core/test/core.test.js` from the root), served to the browser at `/core/*` (`express.static` in `index.js`) and imported from `public/js` as `/core/<file>.js`; `public/js/{node-utils,pathtools,elevation}.js` re-export from it. Run: `npm start` (from the root; or `node .` in `apps/web`). Lint: `npm run lint` (flat config in `apps/web`, ignores `public/vendor/**`).
 - Prod: PM2 process `mcmap` (`ecosystem.config.js` in the repo root, `cwd` is `apps/web`); root `npm run update` pulls, installs only `apps/web` and restarts. `npm run m` is dependency maintenance only.
 - `node global/database/syncIndexes.js` - manual script, syncs Mongoose indexes of all models in `global/database/models/`.
-- Needs MongoDB, Redis and a `.env` (copy `.env.example`; every variable is documented there). Notable: `SITE_MODE` (`auto`/`poland`/`global`) forces a site regardless of host; the keys `ESRI_API_KEY`, `MAPTILER_API_KEY`, `CARTO_API_KEY` unlock basemaps; `TURNSTILE_*` enables node deletion (feature is off without them).
+- Needs MongoDB, Redis and a `.env` (copy `.env.example`; every variable is documented there). Notable: `SITE_MODE` (`auto`/`poland`/`global`) forces a site regardless of host; the keys `ESRI_API_KEY`, `MAPTILER_API_KEY`, `CARTO_API_KEY` unlock basemaps; `*_MOBILE` variants of the three are what `/api/v1/app-config` sends to the app (fallback to the site's keys); `TURNSTILE_*` enables node deletion (feature is off without them).
 
 ## Backend
 

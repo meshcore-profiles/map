@@ -8,6 +8,7 @@ export const createDefaultSettings = () => ({
 	region: null,
 	language: 'auto',
 	basemap: DEFAULT_BASEMAP_SELECTION,
+	rotateTilt: false,
 	filters: createDefaultFilters(),
 });
 
@@ -20,6 +21,7 @@ const sanitize = saved => {
 		region: saved?.region === 'all' || saved?.region === 'pl' ? saved.region : null,
 		language: ['auto', 'pl', 'en'].includes(saved?.language) ? saved.language : 'auto',
 		basemap: typeof saved?.basemap === 'string' && saved.basemap ? saved.basemap : DEFAULT_BASEMAP_SELECTION,
+		rotateTilt: saved?.rotateTilt === true,
 		filters: {
 			...filters,
 			radioFilters: { ...defaults.filters.radioFilters, ...filters.radioFilters },

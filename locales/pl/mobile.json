@@ -4,40 +4,43 @@
 	},
 	"region": {
 		"promptTitle": "Jaką mapę chcesz zobaczyć?",
-		"promptText": "Wybór można później zmienić w ustawieniach. Dane zapisują się na urządzeniu, więc mapa działa też bez internetu.",
+		"promptText": "Zakres mapy możesz później zmienić w ustawieniach. Pobrane dane są zapisywane na urządzeniu, więc możesz je przeglądać także bez internetu.",
 		"title": "Zakres mapy",
 		"desc": "Mapa globalna pokazuje węzły z całego świata, a polska tylko te z Polski.",
 		"pl": "Tylko Polska",
 		"all": "Cały świat",
-		"plDesc": "Tylko węzły w Polsce. Mniejsza paczka danych ({{size}}).",
-		"allDesc": "Wszystkie węzły na świecie. Większa paczka danych ({{size}}).",
+		"plDesc": "Węzły tylko z Polski. Mniej danych do pobrania ({{size}}).",
+		"allDesc": "Węzły z całego świata. Więcej danych do pobrania ({{size}}).",
 		"sizeUnknown": "rozmiar nieznany"
 	},
 	"loading": {
 		"reading": "Wczytywanie zapisanych danych...",
-		"downloading": "Pobieranie węzłów... {{percent}}%",
+		"downloading": "Pobieranie danych węzłów... {{percent}}%",
 		"failed": "Nie udało się pobrać danych. Sprawdź połączenie z internetem.",
 		"retry": "Ponów"
 	},
 	"offline": {
-		"usingCache": "Pokazuję dane zapisane na urządzeniu. Nie udało się ich odświeżyć."
+		"usingCache": "Nie udało się odświeżyć danych. Wyświetlane są dane zapisane na urządzeniu."
 	},
 	"settings": {
 		"languageAuto": "Automatyczny",
+		"rotateTilt": "Obracanie i pochylanie mapy",
+		"rotateTiltDesc": "Umożliwia obracanie i pochylanie mapy dwoma palcami.",
 		"data": "Dane węzłów",
 		"updated": "Pobrano: {{time}}",
 		"neverUpdated": "Dane nie zostały jeszcze pobrane",
-		"nodesCount": "Zapisane offline: {{count}} węzłów",
+		"nodesCount": "Liczba zapisanych węzłów: {{count}}",
 		"refresh": "Odśwież dane",
 		"version": "Wersja {{version}}"
 	},
 	"filters": {
-		"anyTime": "Dowolnie",
+		"anyTime": "Bez ograniczeń",
+		"lastDay": "1 dzień",
 		"lastDays": "{{count}} dni"
 	},
 	"tools": {
 		"title": "Narzędzia",
 		"picking": "Dotknij mapy...",
-		"routeDesc": "Trasa po nazwach lub początkach kluczy publicznych."
+		"routeDesc": "Rysowanie trasy na podstawie nazw węzłów lub początków ich kluczy publicznych."
 	}
 }

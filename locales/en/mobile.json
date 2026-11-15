@@ -4,9 +4,9 @@
 	},
 	"region": {
 		"promptTitle": "Which map do you want to see?",
-		"promptText": "You can change this later in settings. Data is stored on the device, so the map also works offline.",
+		"promptText": "You can change the map scope later in settings. Downloaded data is saved on your device, so you can also browse it offline.",
 		"title": "Map scope",
-		"desc": "The global map shows nodes from all over the world, the Polish one only those in Poland.",
+		"desc": "The global map shows nodes worldwide, while the Poland-only map shows just those in Poland.",
 		"pl": "Poland only",
 		"all": "Worldwide",
 		"plDesc": "Only nodes in Poland. Smaller download ({{size}}).",
@@ -15,29 +15,32 @@
 	},
 	"loading": {
 		"reading": "Loading saved data...",
-		"downloading": "Downloading nodes... {{percent}}%",
+		"downloading": "Downloading node data... {{percent}}%",
 		"failed": "Could not download the data. Check your internet connection.",
 		"retry": "Retry"
 	},
 	"offline": {
-		"usingCache": "Showing data stored on the device. It could not be refreshed."
+		"usingCache": "Could not refresh the data. Showing data saved on your device."
 	},
 	"settings": {
 		"languageAuto": "Automatic",
+		"rotateTilt": "Map rotation and tilt",
+		"rotateTiltDesc": "Enables two-finger gestures to rotate and tilt the map.",
 		"data": "Node data",
 		"updated": "Downloaded: {{time}}",
 		"neverUpdated": "No data downloaded yet",
-		"nodesCount": "Stored offline: {{count}} nodes",
+		"nodesCount": "Saved nodes: {{count}}",
 		"refresh": "Refresh data",
 		"version": "Version {{version}}"
 	},
 	"filters": {
 		"anyTime": "Any time",
+		"lastDay": "1 day",
 		"lastDays": "{{count}} days"
 	},
 	"tools": {
 		"title": "Tools",
 		"picking": "Tap the map...",
-		"routeDesc": "Route by names or the start of public keys."
+		"routeDesc": "Draw a route using node names or public key prefixes."
 	}
 }
