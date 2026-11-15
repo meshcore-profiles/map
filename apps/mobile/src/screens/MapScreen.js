@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BasemapSheet } from '../components/BasemapSheet';
 import { FiltersSheet } from '../components/FiltersSheet';
 import { LegendSheet } from '../components/LegendSheet';
+import { MapAttribution } from '../components/MapAttribution';
 import { MapControls } from '../components/MapControls';
 import { NodeLayer } from '../components/NodeLayer';
 import { NodeSheet } from '../components/NodeSheet';
@@ -15,6 +16,7 @@ import { StatsSheet } from '../components/StatsSheet';
 import { TopBar } from '../components/TopBar';
 import { DEFAULT_VIEW } from '../config';
 import { useAppConfig } from '../data/appConfig';
+import { configureMapCache } from '../data/mapCache';
 import { useNodes } from '../state/NodesContext';
 import { useMapLink } from '../state/useMapLink';
 import { useSettings } from '../state/SettingsContext';
@@ -58,7 +60,7 @@ export const MapScreen = () => {
 	// The style that finished loading last and the number of successful loads. The native side drops layers that were queued for a style which never loaded (e.g. 403 before a fallback), so the layers mount only after a style is ready and are rebuilt for each new one.
 	const [loadedStyle, setLoadedStyle] = useState({ style: null, epoch: 0 });
 
-	const { basemaps, mapStyle, handleStyleFailed } = useBasemap({ config, settings, update });
+	const { basemaps, mapStyle, attribution, handleStyleFailed } = useBasemap({ config, settings, update });
 	const mapStyleRef = useRef(mapStyle);
 	mapStyleRef.current = mapStyle;
 	// The layers belong to the style that loaded last. Once the style prop changes they are unmounted in that same render, before the native side swaps styles; removing their images from the new style afterwards only logs warnings.
@@ -69,6 +71,10 @@ export const MapScreen = () => {
 
 	const repeaters = useMemo(() => byType[2] ?? [], [byType]);
 	const byKey = useMemo(() => new Map(nodes.map(node => [node.public_key, node])), [nodes]);
+
+	useEffect(() => {
+		configureMapCache();
+	}, []);
 
 	// The camera jumps to the default view when the user narrows the map to Poland; widening to all nodes keeps the current view.
 	// The launch view (the saved one, else the region's default) is the Camera's initialViewState, so the first run only records the region.
@@ -94,7 +100,6 @@ export const MapScreen = () => {
 	const fitTo = useCallback(bounds => cameraRef.current?.fitBounds(bounds, { padding: { top: insets.top + 130, bottom: 360, left: 40, right: 40 }, duration: 600 }), [insets.top]);
 
 	// Stable references: a new object on every render would be pushed to the native map again each time.
-	const attributionPosition = useMemo(() => ({ left: 8, bottom: insets.bottom + 8 }), [insets.bottom]);
 	const compassPosition = useMemo(() => ({ top: insets.top + 140, right: 12 }), [insets.top]);
 
 	const closeSheet = useCallback(() => setSheet(null), []);
@@ -198,13 +203,14 @@ export const MapScreen = () => {
 	return (
 		<View style={styles.root}>
 			{mapReady && (
-				<MapView style={styles.map} mapStyle={mapStyle} logo={false} attributionPosition={attributionPosition} compass={settings.rotateTilt} compassPosition={compassPosition} onDidFinishLoadingStyle={handleStyleLoaded} touchRotate={settings.rotateTilt} touchPitch={settings.rotateTilt} onPress={handleMapPress} onRegionDidChange={handleRegionDidChange} onDidFailLoadingMap={handleStyleFailed}>
+				<MapView style={styles.map} mapStyle={mapStyle} logo={false} attribution={false} compass={settings.rotateTilt} compassPosition={compassPosition} onDidFinishLoadingStyle={handleStyleLoaded} touchRotate={settings.rotateTilt} touchPitch={settings.rotateTilt} onPress={handleMapPress} onRegionDidChange={handleRegionDidChange} onDidFailLoadingMap={handleStyleFailed}>
 					<Camera ref={cameraRef} initialViewState={savedCamera ?? { center: view.center, zoom: view.zoom }} />
-					{styleEpoch > 0 && <NodeLayer key={styleEpoch} scope={styleEpoch} nodes={filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />}
-					{styleEpoch > 0 && overlay && <OverlayLayer key={styleEpoch} scope={styleEpoch} features={overlay} />}
+					{styleEpoch > 0 && <NodeLayer key={`nodes-${styleEpoch}`} scope={styleEpoch} nodes={filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />}
+					{styleEpoch > 0 && overlay && <OverlayLayer key={`overlay-${styleEpoch}`} scope={styleEpoch} features={overlay} />}
 				</MapView>
 			)}
 			{mapReady && styleEpoch === 0 && <View pointerEvents="none" style={styles.curtain} />}
+			{mapReady && <MapAttribution html={attribution} />}
 
 			<TopBar nodes={filtered} filters={settings.filters} onSelectNode={showNode} onOpenSheet={setSheet} />
 

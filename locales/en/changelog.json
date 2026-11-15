@@ -1,6 +1,16 @@
 {
 	"entries": [
 		{
+			"version": "0.13.0",
+			"date": "2026-11-15",
+			"changes": [
+				"Fixed an issue with button styling.",
+				"The add node button on the Polish map now links to instructions in Polish (docs.meshcorepolska.org).",
+				"Reorganized the project structure and extracted shared map logic for the web and mobile versions. A mobile map app for phones will be available soon.",
+				"Updated backend and frontend dependencies to their latest versions."
+			]
+		},
+		{
 			"version": "0.12.0",
 			"date": "2026-11-08",
 			"changes": [

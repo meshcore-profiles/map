@@ -8,28 +8,33 @@ import { useI18n } from '../i18n';
 
 // Share of the window height the docked panel may take; the camera padding in MapScreen relies on it.
 export const DOCKED_MAX_HEIGHT = 0.5;
+export const DOCKED_EXPANDED_MAX_HEIGHT = 0.88;
 
 const styles = StyleSheet.create({
 	root: { flex: 1, justifyContent: 'flex-end' },
 	backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
 	sheet: { backgroundColor: colors.panelSolid, borderWidth: 1, borderBottomWidth: 0, borderColor: colors.border, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg },
-	docked: { position: 'absolute', left: 0, right: 0, bottom: 0, ...shadow },
+	docked: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+	dockedSheet: shadow,
 	grip: { paddingTop: spacing.sm },
 	handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.borderStrong },
 	header: { flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.lg, paddingRight: spacing.sm, paddingTop: spacing.sm },
 	title: { flex: 1, color: colors.text, fontSize: 18, fontWeight: '700' },
 	close: { width: MIN_TOUCH, height: MIN_TOUCH, alignItems: 'center', justifyContent: 'center' },
-	content: { padding: spacing.lg, gap: spacing.md },
+	content: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.lg, gap: spacing.md },
 	footer: { padding: spacing.lg, paddingTop: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
 });
 
-// Handle and title bar: the area that can be dragged down to dismiss the sheet.
+// The drag handle; the parent puts the pan handlers on a wrapper that contains it.
+export const SheetGrip = () => <View style={styles.grip}><View style={styles.handle} /></View>;
+
+// Handle and title bar: the area that can be dragged to dismiss (and, on the docked sheet, to resize) the sheet.
 const SheetHeader = ({ title, close, panHandlers }) => {
 	const { t } = useI18n();
 
 	return (
 		<View {...panHandlers}>
-			<View style={styles.grip}><View style={styles.handle} /></View>
+			<SheetGrip />
 			<View style={styles.header}>
 				<Text style={styles.title} numberOfLines={2} accessibilityRole="header">{title}</Text>
 				<Pressable onPress={close} style={styles.close} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('close')}>
@@ -63,11 +68,11 @@ export const Sheet = ({ visible, title, onClose, children, footer }) => {
 	);
 };
 
-// Non-modal bottom panel: there is no backdrop, so the map and the controls above it stay interactive.
+// Non-modal bottom panel: there is no backdrop, so the map and the controls above it stay interactive. Swipe the handle up to expand it, down to collapse and then dismiss.
 export const DockedSheet = ({ title, visible = true, onClose, onExited, children, footer }) => {
 	const insets = useSafeAreaInsets();
 	const { height } = useWindowDimensions();
-	const { translateY, panHandlers, close } = useSheetMotion({ visible, onClose, animateOut: true, onExited });
+	const { translateY, maxHeight, panHandlers, close } = useSheetMotion({ visible, onClose, animateOut: true, onExited, snaps: [height * DOCKED_MAX_HEIGHT, height * DOCKED_EXPANDED_MAX_HEIGHT] });
 
 	useEffect(() => {
 		if (!visible) return undefined;
@@ -81,10 +86,13 @@ export const DockedSheet = ({ title, visible = true, onClose, onExited, children
 	}, [visible, close]);
 
 	return (
-		<Animated.View style={[styles.sheet, styles.docked, { maxHeight: height * DOCKED_MAX_HEIGHT, paddingBottom: insets.bottom, transform: [{ translateY }] }]}>
-			<SheetHeader title={title} close={close} panHandlers={panHandlers} />
-			<ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" bounces={false}>{children}</ScrollView>
-			{footer && <View style={styles.footer}>{footer}</View>}
+		// Two nodes: an Animated node cannot mix drivers, and the slide (transform) is native while the resize (maxHeight, a layout property) is not.
+		<Animated.View style={[styles.docked, { transform: [{ translateY }] }]}>
+			<Animated.View style={[styles.sheet, styles.dockedSheet, { maxHeight, paddingBottom: insets.bottom }]}>
+				<SheetHeader title={title} close={close} panHandlers={panHandlers} />
+				<ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" bounces={false}>{children}</ScrollView>
+				{footer && <View style={styles.footer}>{footer}</View>}
+			</Animated.View>
 		</Animated.View>
 	);
 };

@@ -37,7 +37,7 @@ export const LegendSheet = ({ visible, onClose }) => {
 		<Sheet visible={visible} title={changelog ? t('legend:changelogButton') : t('legend:toggleTitle')} onClose={close}>
 			{changelog ? (
 				<>
-					{(tRaw('changelog:entries') ?? []).map(entry => (
+					{(tRaw('appChangelog:entries') ?? []).map(entry => (
 						<View key={entry.version} style={styles.entry}>
 							<View style={styles.entryTitle}>
 								<Text style={styles.version}>{`v${entry.version}`}</Text>

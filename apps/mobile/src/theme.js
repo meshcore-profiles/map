@@ -10,6 +10,8 @@ export const colors = {
 	border: 'rgba(148, 166, 204, 0.16)',
 	borderStrong: 'rgba(148, 166, 204, 0.3)',
 	text: '#eef1f8',
+	qrDark: '#000000',
+	qrLight: '#ffffff',
 	...PALETTE,
 };
 

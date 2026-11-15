@@ -39,8 +39,8 @@ export const QuickChips = memo(({ nodes, onStats }) => {
 			<Chip icon="globe" accent label={pl ? t('map:polandOnlyLabel') : t('map:allNodesLabel')} accessibilityLabel={t(pl ? 'map:showAllWorld' : 'map:showPolandOnly')} onPress={() => switchRegion(pl ? 'all' : 'pl')} />
 			{nodes.length > 0 && (
 				<>
-					<Chip icon="user" label={format(counts.clients)} accessibilityLabel={t('map:clientsCountTooltip')} onPress={onStats} />
 					<Chip icon={NODE_TYPE_ICONS[2]} label={format(counts.repeaters)} accessibilityLabel={t('map:repeatersCountTooltip')} onPress={onStats} />
+					<Chip icon="user" label={format(counts.clients)} accessibilityLabel={t('map:clientsCountTooltip')} onPress={onStats} />
 					<Chip icon={NODE_TYPE_ICONS[3]} label={format(counts.roomServers)} accessibilityLabel={t('map:roomServersCountTooltip')} onPress={onStats} />
 				</>
 			)}

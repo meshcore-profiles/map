@@ -60,7 +60,17 @@ export const loadAppConfig = () => {
 	return configPromise;
 };
 
-export const loadRadioPresets = async () => normalizeRadioPresets(await loadWithCache('/api/v1/radio-presets', PRESETS_FILE));
+let presetsPromise = null;
+
+// Fetched once per session (the node sheet and the coverage tool both need them); a failure is not remembered, so the next call retries.
+export const loadRadioPresets = () => {
+	presetsPromise ??= loadWithCache('/api/v1/radio-presets', PRESETS_FILE).then(normalizeRadioPresets).catch(err => {
+		presetsPromise = null;
+		throw err;
+	});
+
+	return presetsPromise;
+};
 
 export const useAppConfig = () => {
 	const [config, setConfig] = useState(null);

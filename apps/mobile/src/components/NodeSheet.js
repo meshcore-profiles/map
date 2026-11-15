@@ -6,11 +6,13 @@ import { buildContactUrl } from '@meshcore-map/core/contact';
 import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, formatTimeAgo } from '@meshcore-map/core/nodes';
 import { truncateKey } from '@meshcore-map/core/node-utils';
 import { API_BASE } from '../config';
+import { loadRadioPresets } from '../data/appConfig';
 import { useI18n } from '../i18n';
 import { useTheme } from '../state/ThemeContext';
 import { colors, NODE_TYPE_ICONS, radius, spacing } from '../theme';
 import { Button } from '../ui/controls';
 import { Icon } from '../ui/Icon';
+import { QrCode } from '../ui/QrCode';
 import { DockedSheet } from '../ui/Sheet';
 
 const styles = StyleSheet.create({
@@ -19,9 +21,12 @@ const styles = StyleSheet.create({
 	metaText: { color: colors.textMuted, fontSize: 14 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	separator: { color: colors.borderStrong, fontSize: 14 },
-	fresh: { gap: 2 },
-	freshMain: { color: colors.text, fontSize: 17, fontWeight: '600' },
-	freshSub: { color: colors.textMuted, fontSize: 13 },
+	header: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.lg },
+	qr: { borderRadius: radius.sm, overflow: 'hidden' },
+	info: { flex: 1, gap: spacing.sm },
+	infoLabel: { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
+	infoValue: { color: colors.text, fontSize: 16, fontWeight: '600' },
+	infoSub: { color: colors.textMuted, fontSize: 13 },
 	radio: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 	radioChip: { backgroundColor: colors.chip, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 6 },
 	radioText: { color: colors.text, fontSize: 13, fontVariant: ['tabular-nums'] },
@@ -32,12 +37,14 @@ const styles = StyleSheet.create({
 	action: { flex: 1 },
 });
 
+const QR_SIZE = 128;
+
 // Radio parameters as short chips: frequency and bandwidth carry a unit, spreading factor and coding rate are labelled with their usual abbreviations.
 const RADIO_FORMATS = {
 	freq: value => `${value} MHz`,
 	bw: value => `${value} kHz`,
 	sf: value => `SF${value}`,
-	cr: value => `CR ${value}`,
+	cr: value => `CR${value}`,
 };
 
 const Meta = ({ node }) => {
@@ -58,18 +65,53 @@ const Meta = ({ node }) => {
 	);
 };
 
-// How fresh the node's data is: the update time when the node reports one, otherwise when it was added.
-const Freshness = ({ node }) => {
+const InfoRow = ({ label, value, sub }) => (
+	<View>
+		<Text style={styles.infoLabel}>{label}</Text>
+		<Text style={styles.infoValue}>{value}</Text>
+		{sub && <Text style={styles.infoSub}>{sub}</Text>}
+	</View>
+);
+
+// The preset is matched by frequency, bandwidth and spreading factor, like on the website; null while the preset list is loading.
+const getPresetLabel = (node, presets, t) => {
+	if (['freq', 'sf', 'bw'].some(key => node.radio[key] === 'unknown')) return t('map:noRadioData');
+	if (!presets) return null;
+
+	return presets.find(p => p.params.freq === node.params.freq && p.params.sf === node.params.sf && p.params.bw === node.params.bw)?.name ?? t('map:customPreset');
+};
+
+const Info = ({ node }) => {
 	const { t, tRaw, plural } = useI18n();
-	const date = node.updatedDate || node.insertDate;
-	const label = node.updatedDate ? t('map:columns.updatedDate') : t('map:columns.insertedDate');
+	const timeAgo = date => formatTimeAgo(date.getTime(), { t, tRaw, plural });
 
 	return (
-		<View style={styles.fresh}>
-			<Text style={styles.freshMain}>{`${label} ${formatTimeAgo(date.getTime(), { t, tRaw, plural })}`}</Text>
-			<Text style={styles.freshSub}>{date.toLocaleString()}</Text>
+		<View style={styles.info}>
+			<InfoRow label={t('map:columns.insertedDate')} value={timeAgo(node.insertDate)} sub={node.insertDate.toLocaleString()} />
+			{node.updatedDate && <InfoRow label={t('map:columns.updatedDate')} value={timeAgo(node.updatedDate)} sub={node.updatedDate.toLocaleString()} />}
 		</View>
 	);
+};
+
+const Preset = ({ node }) => {
+	const { t } = useI18n();
+	const [presets, setPresets] = useState(null);
+
+	useEffect(() => {
+		let cancelled = false;
+		loadRadioPresets().then(list => !cancelled && setPresets(list)).catch(err => {
+			console.error('Failed to load radio presets:', err);
+			if (!cancelled) setPresets([]);
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	const preset = getPresetLabel(node, presets, t);
+
+	return preset && <InfoRow label={t('map:columns.preset')} value={preset} />;
 };
 
 const NodePanel = ({ node, visible, onClose, onExited }) => {
@@ -112,7 +154,13 @@ const NodePanel = ({ node, visible, onClose, onExited }) => {
 			)}
 		>
 			<Meta node={node} />
-			<Freshness node={node} />
+			<View style={styles.header}>
+				<View style={styles.qr} accessible accessibilityLabel={t('map:addContact')}>
+					<QrCode value={buildContactUrl(node)} size={QR_SIZE} />
+				</View>
+				<Info node={node} />
+			</View>
+			<Preset node={node} />
 			{radio.length > 0 && (
 				<View style={styles.radio}>
 					{radio.map(key => (

@@ -15,8 +15,8 @@ export const BasemapSheet = ({ visible, onClose, basemaps, selection, onSelect }
 	const { t, tRaw } = useI18n();
 	const info = tRaw('map:baseMapInfo');
 
-	// Only the chosen map shows its description; a list where every entry explains itself would be a wall of text.
-	const option = (value, name, description) => <Option key={value} label={name} info={selection === value ? description : undefined} selected={selection === value} onPress={() => onSelect(value)} />;
+	// Every map shows its description (usage limits and caching rules included), as the tooltips do on the website, so the choice can be made before tapping.
+	const option = (value, name, description) => <Option key={value} label={name} info={description} selected={selection === value} onPress={() => onSelect(value)} />;
 
 	return (
 		<Sheet visible={visible} title={t('map:basemapToggleTitle')} onClose={onClose}>
