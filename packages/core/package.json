@@ -1,0 +1,12 @@
+{
+  "name": "@meshcore-map/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.js"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  }
+}

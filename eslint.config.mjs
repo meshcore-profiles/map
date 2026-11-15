@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
-	{ ignores: ['public/vendor/**'] },
+	{ ignores: ['apps/web/public/vendor/**', '**/node_modules/**'] },
 	js.configs.recommended,
 	{
 		languageOptions: {
@@ -59,7 +59,11 @@ export default [
 		},
 	},
 	{
-		files: ['public/**/*.js'],
+		files: ['packages/**/*.js'],
+		languageOptions: { sourceType: 'module' },
+	},
+	{
+		files: ['apps/web/public/**/*.js'],
 		languageOptions: {
 			sourceType: 'module',
 			globals: { ...globals.browser },

@@ -1,9 +1,10 @@
 /* global L */
 import { t } from './i18n.js';
+import { formatDistance } from '/core/geo.js';
+import { escapeHtml } from '/core/node-utils.js';
 
-export const formatDistance = meters => meters >= 1000 ? `${(meters / 1000).toFixed(2)} km` : `${Math.round(meters)} m`;
-
-export const escapeHtml = html => html.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+export { formatDistance } from '/core/geo.js';
+export { escapeHtml, resolveNodeByQuery, findNodeNearLatLng } from '/core/node-utils.js';
 
 export const loadJson = key => {
 	try {
@@ -12,21 +13,6 @@ export const loadJson = key => {
 		return null;
 	}
 };
-
-export const resolveNodeByQuery = (query, nodes) => {
-	const lower = query.trim().toLowerCase();
-	if (!lower) return null;
-
-	return nodes.find(n => n.adv_name.toLowerCase() === lower)
-		|| nodes.find(n => n.public_key.toLowerCase().startsWith(lower))
-		|| nodes.find(n => n.adv_name.toLowerCase().includes(lower))
-		|| null;
-};
-
-const URL_POINT_MATCH_TOLERANCE = 0.0001;
-
-export const findNodeNearLatLng = (nodes, lat, lng) =>
-	nodes.find(n => Math.abs(n.lat - lat) < URL_POINT_MATCH_TOLERANCE && Math.abs(n.lon - lng) < URL_POINT_MATCH_TOLERANCE) || null;
 
 const readyPanes = new Set();
 export const ensurePane = (map, name, zIndex) => {

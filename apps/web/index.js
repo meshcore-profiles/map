@@ -3,6 +3,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const crypto = require('node:crypto');
+const path = require('node:path');
 const { version } = require('./package.json');
 
 const { DOMAIN, NODE_ENV, PORT, SITE_MODE } = process.env;
@@ -95,6 +96,7 @@ app.use(helmet({
 }));
 app.use(cors({ origin: SAFE_ORIGINS }));
 app.use(express.static('public'));
+app.use('/core', express.static(path.join(__dirname, '../../packages/core/src')));
 app.use((req, res, next) => {
 	req.site = resolveSite(req);
 	next();

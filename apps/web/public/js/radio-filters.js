@@ -1,5 +1,5 @@
 import { t } from './i18n.js';
-import { RADIO_FILTER_KEYS, isRadioValueSelected, updateRadioSelection } from './radio-filter-utils.js';
+import { RADIO_FILTER_KEYS, isRadioValueSelected, updateRadioSelection } from '/core/radio-filter-utils.js';
 
 const valueLabel = (key, value) => {
 	if (value === 'unknown') return t('filters:unknownFreq');
