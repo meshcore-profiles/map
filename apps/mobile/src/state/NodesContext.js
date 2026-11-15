@@ -64,7 +64,10 @@ export const NodesProvider = ({ children }) => {
 		return () => abortRef.current?.abort();
 	}, [ready, refresh]);
 
-	const filtered = useMemo(() => collectFilteredNodes(settings.filters, data.byType), [settings.filters, data.byType]);
+	const filtered = useMemo(() => {
+		console.log('DEBUG data', Object.keys(data.byType), data.nodes.length, JSON.stringify(data.nodes[0]), typeof data.byType['1']);
+		return collectFilteredNodes(settings.filters, data.byType);
+	}, [settings.filters, data.byType]);
 	const value = useMemo(() => ({ ...data, filtered, phase, progress, error, refresh }), [data, filtered, phase, progress, error, refresh]);
 
 	return <NodesContext.Provider value={value}>{children}</NodesContext.Provider>;
