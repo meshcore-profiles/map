@@ -1,6 +1,7 @@
 import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GITHUB_URL, SITES } from '@meshcore-map/core/sites';
 import { API_BASE } from '../config';
+import { apiHeaders } from '../data/http';
 import { useI18n } from '../i18n';
 import { useSettings } from '../state/SettingsContext';
 import { useTheme } from '../state/ThemeContext';
@@ -44,7 +45,7 @@ export const TopBar = ({ onStats, onBasemap, children }) => {
 	return (
 		<View>
 			<View style={styles.brandBar}>
-				<Image source={{ uri: logo }} style={styles.logo} accessibilityIgnoresInvertColors />
+				<Image source={{ uri: logo, headers: apiHeaders() }} style={styles.logo} accessibilityIgnoresInvertColors />
 				<Text style={styles.brandName} numberOfLines={1}>
 					{site.brandAccent ? site.brandName.slice(0, -site.brandAccent.length) : site.brandName}{site.brandAccent ? <Text style={{ color: accentBright, fontWeight: '700' }}>{site.brandAccent}</Text> : null}
 				</Text>

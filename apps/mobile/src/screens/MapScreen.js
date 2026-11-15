@@ -86,6 +86,11 @@ export const MapScreen = () => {
 	const available = basemaps.byName(selectedName) ? selectedName : basemaps.defaultName;
 	const activeName = fallbackName && basemaps.byName(fallbackName) ? fallbackName : available;
 	const activeBasemap = basemaps.byName(activeName);
+	// The style object is rebuilt whenever the app config arrives; comparing its serialised form keeps the map from reloading an identical style.
+	const styleKey = typeof activeBasemap.style === 'string' ? activeBasemap.style : JSON.stringify(activeBasemap.style);
+	const mapStyle = useMemo(() => activeBasemap.style, [styleKey]);
+	// A style load clears every source and layer added on top, so the layers are mounted again once it finished.
+	const [styleEpoch, setStyleEpoch] = useState(0);
 
 	useEffect(() => {
 		setFallbackName(null);
@@ -176,10 +181,10 @@ export const MapScreen = () => {
 
 	return (
 		<View style={styles.root}>
-			<MapView style={styles.map} mapStyle={activeBasemap.style} onPress={handleMapPress} onDidFailLoadingMap={handleBasemapFailed}>
+			<MapView style={styles.map} mapStyle={mapStyle} onDidFinishLoadingStyle={() => setStyleEpoch(epoch => epoch + 1)} onPress={handleMapPress} onDidFailLoadingMap={handleBasemapFailed}>
 				<Camera ref={cameraRef} initialViewState={{ center: view.center, zoom: view.zoom }} />
-				<NodeLayer nodes={filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />
-				{overlay && <OverlayLayer features={overlay} />}
+				<NodeLayer key={`nodes-${styleEpoch}`} nodes={filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />
+				{overlay && <OverlayLayer key={`overlay-${styleEpoch}`} features={overlay} />}
 			</MapView>
 
 			<View style={[styles.topBar, { top: insets.top + spacing.sm }]}>

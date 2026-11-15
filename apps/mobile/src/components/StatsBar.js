@@ -7,9 +7,8 @@ import { colors, MIN_TOUCH, radius, spacing } from '../theme';
 import { Icon } from '../ui/Icon';
 
 const styles = StyleSheet.create({
-	bar: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: spacing.sm, marginTop: spacing.sm, paddingHorizontal: spacing.md, minHeight: MIN_TOUCH - 10, backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md },
+	bar: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', justifyContent: 'space-between', marginTop: spacing.sm, paddingHorizontal: spacing.md, minHeight: MIN_TOUCH - 10, backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md },
 	group: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-	label: { color: colors.textMuted, fontSize: 13, fontFamily: 'monospace' },
 	separator: { color: colors.textMuted, fontSize: 13 },
 	value: { fontSize: 13, fontWeight: '700', overflow: 'hidden', paddingHorizontal: 7, paddingVertical: 1, borderRadius: radius.sm },
 });
@@ -28,7 +27,6 @@ export const StatsBar = memo(({ nodes }) => {
 	return (
 		<View style={styles.bar}>
 			<View style={styles.group} accessibilityLabel={t('map:totalCountTooltip')}>
-				<Text style={styles.label}>{t('map:totalLabel')}</Text>
 				{value(nodes.length)}
 			</View>
 			<Text style={styles.separator}>|</Text>
