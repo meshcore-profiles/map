@@ -11,6 +11,7 @@
     "badges": "node scripts/generate-badges.mjs"
   },
   "dependencies": {
+    "@bugsnag/expo": "^58.0.1",
     "@maplibre/maplibre-react-native": "^11.5.1",
     "@meshcore-map/core": "*",
     "expo": "^58.0.25",

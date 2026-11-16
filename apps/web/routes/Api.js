@@ -36,7 +36,7 @@ const getBasemapConfig = () => ({
 // Konfiguracja dla klienta mobilnego (to samo, co strona dostaje we window.MAP_CONFIG).
 router.get('/app-config', (req, res) => {
 	res.set('Cache-Control', 'public, max-age=300');
-	res.json({ success: true, status: 200, message: 'OK', data: { features, sefinekApi: process.env.SEFINEK_API || null, basemaps: getBasemapConfig() } });
+	res.json({ success: true, status: 200, message: 'OK', data: { features, sefinekApi: process.env.SEFINEK_API || null, bugsnagApiKey: process.env.BUGSNAG_API_KEY || null, basemaps: getBasemapConfig() } });
 });
 
 router.get('/radio-presets', async (req, res) => {

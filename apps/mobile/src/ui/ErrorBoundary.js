@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
+import { notifyError } from '../bugsnag';
 import { colors, spacing } from '../theme';
 
 const styles = StyleSheet.create({
@@ -18,6 +19,7 @@ export class ErrorBoundary extends Component {
 
 	componentDidCatch(error, info) {
 		console.error('Unhandled render error:', error?.message, error?.stack, info?.componentStack);
+		notifyError(error, event => event.addMetadata('react', { componentStack: info?.componentStack }));
 	}
 
 	render() {
