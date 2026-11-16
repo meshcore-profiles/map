@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
 	row: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xs },
 	rowText: { flex: 1 },
 	name: { color: colors.text, fontSize: 15 },
-	ago: { color: colors.textMuted, fontSize: 12 },
+	ago: { color: colors.textMuted, fontSize: 13 },
 	range: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 	rangeField: { flex: 1 },
 	empty: { color: colors.textMuted, paddingVertical: spacing.md },

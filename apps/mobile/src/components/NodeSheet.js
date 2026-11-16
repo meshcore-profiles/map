@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
 	info: { flex: 1, gap: spacing.sm },
 	infoLabel: { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
 	infoValue: { color: colors.text, fontSize: 16, fontWeight: '600' },
-	infoSub: { color: colors.textMuted, fontSize: 13 },
+	infoSub: { color: colors.textMuted, fontSize: 14 },
 	radio: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 	radioChip: { backgroundColor: colors.chip, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 6 },
 	radioText: { color: colors.text, fontSize: 13, fontVariant: ['tabular-nums'] },

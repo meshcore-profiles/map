@@ -58,7 +58,7 @@ export const SettingsSheet = ({ visible, onClose }) => {
 			</Section>
 
 			<Divider />
-			<Section title={t('mobile:tools.title')}>
+			<Section title={t('settings:tabTools')}>
 				<Label>{t('settings:elevationSourceLabel')}</Label>
 				<Dropdown
 					options={ELEVATION_SOURCES.map(source => ({ value: source, label: t(ELEVATION_KEYS[source][0]) }))}

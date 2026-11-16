@@ -37,12 +37,9 @@
 		"lastDays": "{{count}} days"
 	},
 	"tools": {
-		"title": "Tools",
-		"picking": "Tap the map...",
-		"routeDesc": "Draw a route using node names or public key prefixes."
+		"picking": "Tap the map..."
 	},
 	"basemap": {
-		"needsKey": "This map needs an API key. Add your own in the settings.",
 		"noCache": "This map is unavailable in the app because its provider does not allow map data to be stored."
 	}
 }

@@ -29,7 +29,7 @@ export const MapControls = ({ region, features, toolsOpen, onToggleTools, onOpen
 				{toolsOpen && TOOL_FABS.filter(tool => features?.[tool.id] !== false).map(tool => (
 					<Fab key={tool.id} icon={tool.icon} label={t(tool.title)} onPress={() => onOpenTool(tool.id)} />
 				))}
-				<Fab icon={toolsOpen ? 'close' : 'wrench'} label={t('mobile:tools.title')} onPress={onToggleTools} />
+				<Fab icon={toolsOpen ? 'close' : 'wrench'} label={t('settings:tabTools')} onPress={onToggleTools} />
 				<Fab icon="info" label={t('legend:toggleTitle')} onPress={onOpenLegend} />
 				<Fab icon="layers" label={t('map:basemapToggleTitle')} onPress={onOpenBasemap} />
 				<Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(SITES[region].addNodeUrl)} />

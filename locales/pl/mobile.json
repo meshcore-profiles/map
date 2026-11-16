@@ -37,12 +37,9 @@
 		"lastDays": "{{count}} dni"
 	},
 	"tools": {
-		"title": "Narzędzia",
-		"picking": "Dotknij mapy...",
-		"routeDesc": "Rysowanie trasy na podstawie nazw węzłów lub początków ich kluczy publicznych."
+		"picking": "Dotknij mapy..."
 	},
 	"basemap": {
-		"needsKey": "Ta mapa wymaga klucza API. Dodaj własny w ustawieniach.",
 		"noCache": "Ta mapa jest niedostępna w aplikacji, ponieważ jej dostawca nie zezwala na zapisywanie danych mapowych."
 	}
 }

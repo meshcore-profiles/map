@@ -82,10 +82,6 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      - name: Update the Gradle wrapper
-        working-directory: apps/mobile/android
-        run: ./gradlew wrapper --gradle-version 9.9.1 --distribution-type bin
-
       - name: Build the signed APK and AAB
         working-directory: apps/mobile/android
         run: >

@@ -17,7 +17,7 @@ export const BasemapSheet = ({ visible, onClose, basemaps, view, onSelect }) => 
 	const describe = item => {
 		const type = t(`map:basemapTypes.${item.group}`);
 		const shown = view.usingFallback && item.name === view.active ? `${t('map:basemapShown')} · ` : '';
-		if (item.disabled) return `${shown}${type} · ${t(item.reason === 'caching' ? 'mobile:basemap.noCache' : 'mobile:basemap.needsKey')}`;
+		if (item.disabled) return `${shown}${type} · ${t(item.reason === 'caching' ? 'mobile:basemap.noCache' : 'map:basemapNeedsKey')}`;
 
 		const failure = view.describeFailure(item.name);
 		if (failure) return `${shown}${type} · ${t('map:basemapUnavailable')}: ${failure}`;
