@@ -1,4 +1,4 @@
-import { DEFAULT_BASEMAP_SELECTION } from '@meshcore-map/core/basemaps';
+import { normalizeBasemapSelection, sanitizeCustomApiKeys } from '@meshcore-map/core/basemaps';
 import { createDefaultFilters } from '@meshcore-map/core/nodes';
 import { regionForLocale } from '@meshcore-map/core/sites';
 import { deviceLocale } from '../i18n/deviceLocale';
@@ -11,7 +11,9 @@ export const ELEVATION_SOURCES = ['sefinek', 'open-elevation', 'open-meteo'];
 export const createDefaultSettings = () => ({
 	region: regionForLocale(deviceLocale()),
 	language: 'auto',
-	basemap: DEFAULT_BASEMAP_SELECTION,
+	// The map the user chose; null follows the default.
+	basemap: null,
+	apiKeys: {},
 	rotateTilt: false,
 	haptics: true,
 	closeFiltersOnApply: true,
@@ -28,7 +30,8 @@ const sanitize = saved => {
 		// First launch (or an unusable value): the scope follows the device region, like each site defaults to its own.
 		region: saved?.region === 'all' || saved?.region === 'pl' ? saved.region : defaults.region,
 		language: ['auto', 'pl', 'en'].includes(saved?.language) ? saved.language : 'auto',
-		basemap: typeof saved?.basemap === 'string' && saved.basemap ? saved.basemap : DEFAULT_BASEMAP_SELECTION,
+		basemap: normalizeBasemapSelection(saved?.basemap),
+		apiKeys: sanitizeCustomApiKeys(saved?.apiKeys),
 		rotateTilt: saved?.rotateTilt === true,
 		haptics: saved?.haptics !== false,
 		closeFiltersOnApply: saved?.closeFiltersOnApply !== false,

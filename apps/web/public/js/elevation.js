@@ -17,13 +17,13 @@ export const requireSefinekElevationSource = (getElevationSource, showToast) => 
 	const source = getElevationSource ? getElevationSource() : 'sefinek';
 	if (source === 'sefinek') return true;
 
-	showToast(t('common:elevationSourceUnsupported'), { status: 'error', duration: 6000 });
+	showToast(t('common:elevationSourceUnsupported'), { status: 'error' });
 	return false;
 };
 
 export const requireFeature = (name, showToast) => {
 	if (window.MAP_CONFIG.features?.[name]) return true;
 
-	showToast(t('common:toolUnavailable'), { status: 'error', duration: 6000 });
+	showToast(t('common:toolUnavailable'), { status: 'error' });
 	return false;
 };

@@ -2,6 +2,7 @@ import { Linking, StyleSheet, Text } from 'react-native';
 import { GITHUB_URL } from '@meshcore-map/core/sites';
 import Constants from 'expo-constants';
 import { useI18n } from '../i18n';
+import { ApiKeysSection } from './ApiKeysSection';
 import { useNodes, useNodesStatus } from '../state/NodesContext';
 import { useSettings } from '../state/SettingsContext';
 import { useRegionSwitch } from '../state/useRegionSwitch';
@@ -66,6 +67,9 @@ export const SettingsSheet = ({ visible, onClose }) => {
 				/>
 				<Hint>{t('settings:coverageStyleDesc')}</Hint>
 			</Section>
+
+			<Divider />
+			<ApiKeysSection />
 
 			<Divider />
 			<Section title={t('mobile:settings.data')}>

@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
 	collapseSummary: { color: colors.textMuted, fontSize: 14 },
 	collapseBody: { gap: spacing.md, paddingBottom: spacing.md },
 	option: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.chip },
+	optionDisabled: { opacity: 0.5 },
 	optionText: { flex: 1, gap: 2 },
 	optionLabel: { color: colors.text, fontSize: 15 },
 	optionInfo: { color: colors.textMuted, fontSize: 12, lineHeight: 16 },
@@ -178,14 +179,14 @@ export const Stat = ({ label, value, tone }) => (
 	</View>
 );
 
-export const Option = ({ label, info, selected, onPress }) => {
+export const Option = ({ label, info, selected, disabled, onPress }) => {
 	const { accent, accentBright } = useTheme();
 
 	return (
-		<Pressable style={[styles.option, selected && { borderColor: accentBright, backgroundColor: `${accent}33` }]} onPress={() => {
+		<Pressable style={[styles.option, selected && { borderColor: accentBright, backgroundColor: `${accent}33` }, disabled && styles.optionDisabled]} disabled={disabled} onPress={() => {
 			haptics.select();
 			onPress?.();
-		}} accessibilityRole="radio" accessibilityState={{ selected }}>
+		}} accessibilityRole="radio" accessibilityState={{ selected, disabled: Boolean(disabled) }}>
 			<View style={styles.optionText}>
 				<Text style={styles.optionLabel}>{label}</Text>
 				{info ? <Text style={styles.optionInfo}>{info}</Text> : null}

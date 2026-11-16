@@ -35,10 +35,6 @@ html, body, #map {
 	color: var(--blue-bright);
 }
 
-.map-attribution-details summary::-webkit-details-marker {
-	display: none;
-}
-
 .map-attribution-details summary:hover {
 	text-decoration: underline;
 }
@@ -95,11 +91,6 @@ html, body, #map {
 .leaflet-control-zoom a:active {
 	background: #12151c!important;
 	color: var(--blue-bright)!important;
-}
-
-.svg-node-icon {
-	border: none!important;
-	background: none!important;
 }
 
 .embed-pin {

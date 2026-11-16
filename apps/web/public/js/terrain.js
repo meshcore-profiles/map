@@ -293,7 +293,7 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 		} catch (err) {
 			console.error('Failed to run terrain analysis:', err);
 			loadingToast.remove();
-			showToast(t('terrain:fetchElevationFailed'), { status: 'error', duration: 5000 });
+			showToast(t('terrain:fetchElevationFailed'), { status: 'error' });
 		} finally {
 			analyzeBtn.disabled = false;
 		}

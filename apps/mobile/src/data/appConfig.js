@@ -37,7 +37,7 @@ const withDefaults = data => ({ ...DEFAULT_CONFIG, ...data, features: { ...DEFAU
 let configPromise = null;
 
 // The saved copy is used at once and refreshed in the background (changed keys apply on the next launch), so the map never waits for the network.
-export const loadAppConfig = () => {
+const loadAppConfig = () => {
 	configPromise ??= (async () => {
 		const cached = await readJson(CONFIG_FILE);
 		const fresh = getJson('/api/v1/app-config').then(async data => {
@@ -81,7 +81,7 @@ export const useAppConfig = () => {
 	return config;
 };
 
-export const createProviders = sefinekApi => createElevationProviders({ getSefinekApi: () => sefinekApi, pack, unpack, fetchImpl: apiFetch });
+const createProviders = sefinekApi => createElevationProviders({ getSefinekApi: () => sefinekApi, pack, unpack, fetchImpl: apiFetch });
 
 export const getElevations = (sefinekApi, points, source = 'sefinek') => fetchElevations(createProviders(sefinekApi), points, source);
 

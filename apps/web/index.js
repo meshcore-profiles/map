@@ -4,7 +4,9 @@ const helmet = require('helmet');
 const cors = require('cors');
 const crypto = require('node:crypto');
 const path = require('node:path');
-const { version } = require('./package.json');
+// The version lives in the root package.json only (the shared global/ code reads it too).
+const { version } = require('../../package.json');
+const { parseAppVersion } = require('../../packages/core/src/version.js');
 
 const { DOMAIN, NODE_ENV, PORT, SITE_MODE } = process.env;
 const isProd = NODE_ENV === 'production';
@@ -37,9 +39,14 @@ const app = express();
 
 // Configure the app
 if (isProd) app.set('trust proxy', 1);
+// Absolute paths, so the start directory does not matter (`node .` from the repo root works like `npm start`).
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.locals.domain = `${process.env.DOMAIN}${isProd ? '' : `:${process.env.PORT}`}`;
-app.locals.v = version;
+// package.json holds "x.y.z+YYYYMMDD": the version and the release date are shown separately.
+const release = parseAppVersion(version);
+app.locals.v = release.version;
+app.locals.releaseDate = release.date;
 app.locals.features = require('./config/features.js');
 
 // Safe origins allowed to read this app's resources cross-origin (e.g. the flasher app loading static JS)
@@ -95,7 +102,7 @@ app.use(helmet({
 	},
 }));
 app.use(cors({ origin: SAFE_ORIGINS }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/core', express.static(path.join(__dirname, '../../packages/core/src')));
 app.use((req, res, next) => {
 	req.site = resolveSite(req);

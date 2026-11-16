@@ -30,6 +30,7 @@
 	--font-body: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	--font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 	--ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--focus-ring: 0 0 0 3px var(--red-glow);
 }
 
 * {
@@ -156,4 +157,104 @@ a:active {
 
 .update-extinct {
 	--node-color: var(--status-extinct);
+}
+
+/* Form controls and checkboxes shared by the panels, settings and tools */
+.date-input, #route-input, .terrain-height-field input {
+	padding: 9px 11px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background: var(--bg-panel-solid);
+	color: var(--text);
+	font: inherit;
+	font-size: 15px;
+	color-scheme: dark;
+	transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.date-input:hover, #route-input:hover, .terrain-height-field input:hover {
+	border-color: var(--border-strong);
+}
+
+.date-input:focus, #route-input:focus, .terrain-height-field input:focus, #filter-toggle:focus-visible, .region-toggle-btn:focus-visible, .fab:focus-visible, .settings-tab:focus-visible, .settings-btn:focus-visible, .settings-version:focus-visible {
+	border-color: var(--red);
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+select.date-input {
+	padding: 9px 30px 9px 11px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2399a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 10px center;
+	background-size: 16px;
+	appearance: none;
+	-webkit-appearance: none;
+	cursor: pointer;
+}
+
+select.date-input:disabled {
+	cursor: not-allowed;
+}
+
+select.date-input option {
+	background: var(--bg-panel-solid);
+	color: var(--text);
+}
+
+.checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 16px;
+	cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+	position: relative;
+	flex-shrink: 0;
+	width: 19px;
+	height: 19px;
+	margin: 0;
+	border: 1.5px solid var(--border-strong);
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.04);
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+}
+
+.checkbox-label input[type="checkbox"]:hover {
+	border-color: var(--red);
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+	border-color: var(--red);
+	background: var(--red);
+}
+
+.checkbox-label input[type="checkbox"]:checked::after {
+	--checkmark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 12.5l5 5 10-10'/%3E%3C/svg%3E");
+	position: absolute;
+	background-color: #fff;
+	content: '';
+	inset: 1px;
+	mask: var(--checkmark) center / contain no-repeat;
+	-webkit-mask: var(--checkmark) center / contain no-repeat;
+}
+
+.checkbox-label input[type="checkbox"]:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+/* Shared by the map and the embed (/embed) */
+.svg-node-icon {
+	border: none!important;
+	background: none!important;
+}
+
+.map-attribution-details summary::-webkit-details-marker {
+	display: none;
 }

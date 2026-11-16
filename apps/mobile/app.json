@@ -52,7 +52,8 @@
     },
     "extra": {
       "apiBase": "https://map.meshcoreprofiles.com",
-      "sefinekApi": "https://api.sefinek.net"
+      "sefinekApi": "https://api.sefinek.net",
+      "androidCertSha1": "0B:E4:AA:8F:28:59:DD:D9:74:08:A1:F1:1C:03:2E:7E:59:EE:6E:E6"
     },
     "scheme": "meshcoremap"
   }

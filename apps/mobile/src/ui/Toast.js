@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { toastDuration } from '@meshcore-map/core/toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, pill, shadow, spacing } from '../theme';
 import { Icon } from './Icon';
@@ -56,7 +57,8 @@ export const ToastProvider = ({ children }) => {
 	const [toasts, setToasts] = useState([]);
 
 	// A toast with the same `group` replaces the previous one, so a chain of related events (basemaps failing one after another) shows a single message.
-	const show = useCallback((message, { status = 'success', duration = 3000, group = null } = {}) => {
+	// Without "duration" the time follows the length of the message.
+	const show = useCallback((message, { status = 'success', duration = toastDuration(message), group = null } = {}) => {
 		const id = ++lastId;
 		setToasts(current => [...(group ? current.filter(toast => toast.group !== group) : current), { id, message, status, duration, group }]);
 	}, []);

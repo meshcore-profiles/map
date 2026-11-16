@@ -1,3 +1,4 @@
+import { toastDuration } from '/core/toast.js';
 import { t } from './i18n.js';
 
 const getContainer = () => document.getElementById('toast-container');
@@ -20,7 +21,8 @@ const scheduleDismiss = (el, duration) => {
 	el.dismissTimer = setTimeout(() => dismissToast(el), duration);
 };
 
-export const showToast = (message, { duration = 3000, status = 'success' } = {}) => {
+// Without "duration" the time follows the length of the message; 0 keeps the toast until it is updated or dismissed (loading).
+export const showToast = (message, { duration = toastDuration(message), status = 'success' } = {}) => {
 	const el = document.createElement('div');
 	renderToastContent(el, message, status);
 
@@ -31,7 +33,7 @@ export const showToast = (message, { duration = 3000, status = 'success' } = {})
 	return el;
 };
 
-export const updateToast = (el, message, { duration = 3000, status = 'success' } = {}) => {
+export const updateToast = (el, message, { duration = toastDuration(message), status = 'success' } = {}) => {
 	if (!el?.isConnected) return showToast(message, { duration, status });
 
 	clearTimeout(el.dismissTimer);

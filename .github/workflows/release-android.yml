@@ -65,6 +65,18 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > "$RUNNER_TEMP/release.keystore"
           keytool -list -keystore "$RUNNER_TEMP/release.keystore" -alias "$ANDROID_KEY_ALIAS" -storepass:env ANDROID_KEYSTORE_PASSWORD > /dev/null
 
+      - name: Release certificate matches extra.androidCertSha1
+        run: |
+          actual=$(keytool -list -v -keystore "$RUNNER_TEMP/release.keystore" -alias "$ANDROID_KEY_ALIAS" -storepass:env ANDROID_KEYSTORE_PASSWORD | sed -n 's/^[[:space:]]*SHA1: *//p' | head -n 1 | tr -d ':' | tr 'A-F' 'a-f')
+          configured=$(node -p "(require('./apps/mobile/app.json').expo.extra.androidCertSha1 || '').replace(/:/g, '').toLowerCase()")
+          echo "Release certificate SHA-1: $actual" >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "$configured" ]; then
+            echo "::warning::extra.androidCertSha1 in apps/mobile/app.json is empty; a CARTO key restricted to mobile apps will refuse the app (SHA-1: $actual)"
+          elif [ "$configured" != "$actual" ]; then
+            echo "extra.androidCertSha1 ($configured) does not match the release certificate ($actual)" >&2
+            exit 1
+          fi
+
       - name: Generate the native project
         run: npm exec -w apps/mobile -- expo prebuild --platform android --no-install
 
@@ -96,3 +108,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" dist/* --title "MeshCore Map ${{ steps.app.outputs.version }}" --generate-notes
+
+      - name: Remove the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"

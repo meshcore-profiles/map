@@ -9,8 +9,8 @@
 		"none": "Dodano ręcznie",
 		"recent": "Zaktualizowano niedawno",
 		"stale": "Zaktualizowano jakiś czas temu",
-		"old": "Nie aktualizowano",
-		"extinct": "Zostanie wkrótce usunięte"
+		"old": "Dawno nie aktualizowano",
+		"extinct": "Wkrótce zostanie usunięty"
 	},
 	"radioParams": {
 		"bw": "Szerokość pasma",
@@ -25,7 +25,7 @@
 		"publicKey": "Klucz publiczny",
 		"preset": "Preset radiowy",
 		"params": "Parametry radiowe",
-		"link": "Link Meshcore"
+		"link": "Link MeshCore"
 	},
 	"customPreset": "Niestandardowy",
 	"allPresetsOption": "Wszystkie presety",
@@ -34,11 +34,11 @@
 	"copyLinkButton": "Skopiuj do schowka",
 	"copyName": "Kopiuj nazwę",
 	"copyInfo": "Skopiuj",
-	"shareTitle": "Skopiuj link do tego urządzenia do schowka",
+	"shareTitle": "Skopiuj do schowka link do tego węzła",
 	"copyInfoTitle": "Skopiuj informacje o urządzeniu do schowka",
 	"reportDeletionTitle": "Zgłoś usunięcie swojego węzła z mapy",
 	"deletion": {
-		"ownerQuestion": "Czy aby na pewno jesteś właścicielem tego węzła?",
+		"ownerQuestion": "Czy jesteś właścicielem tego węzła?",
 		"yes": "Tak, jestem właścicielem",
 		"no": "Nie",
 		"ownerOnly": "Tylko właściciel może zarządzać tym węzłem i zgłaszać jego usunięcie z mapy.",
@@ -60,12 +60,12 @@
 			"expired": "Weryfikacja wygasła. Spróbuj ponownie.",
 			"load": "Nie udało się wczytać Cloudflare Turnstile. Sprawdź połączenie i ustawienia blokowania treści, a następnie spróbuj ponownie.",
 			"request": "Nie udało się zweryfikować zgłoszenia. Spróbuj ponownie.",
-			"invalidRequest": "Nieprawidłowe dane zgłoszenia. Zamknij dialog i wybierz węzeł ponownie.",
-			"rateLimited": "Dokonujesz zbyt wielu prób. Spróbuj ponownie później."
+			"invalidRequest": "Nieprawidłowe dane zgłoszenia. Zamknij okno i wybierz węzeł ponownie.",
+			"rateLimited": "Zbyt wiele prób. Spróbuj ponownie później."
 		}
 	},
 	"addContact": "Dodaj kontakt",
-	"addContactTitle": "Wymagana jest oficjalna aplikacja MeshCore w wersji 1.47.0 lub nowszej do obsługi ten funkcji",
+	"addContactTitle": "Ta funkcja wymaga oficjalnej aplikacji MeshCore w wersji 1.47.0 lub nowszej",
 	"addContactLaunching": "Uruchamianie aplikacji MeshCore...",
 	"addContactErrorTitle": "Nie udało się dodać kontaktu",
 	"addContactErrorText": "Nie udało się otworzyć aplikacji MeshCore. Upewnij się, że masz zainstalowaną oficjalną aplikację MeshCore w wersji co najmniej 1.47.0 - wcześniejsze wersje nie obsługują protokołu meshcore://.",
@@ -81,7 +81,7 @@
 	"downloading": "Pobieranie danych...",
 	"unpacking": "Rozpakowywanie danych...",
 	"processingNodes": "Przetwarzanie węzłów... ({{end}} / {{total}})",
-	"fetchingPresets": "Uzyskiwanie presetów radiowych...",
+	"fetchingPresets": "Pobieranie presetów radiowych...",
 	"ready": "Gotowe.",
 	"downloadComplete": "Ukończono",
 	"unexpectedLoadError": "Wystąpił nieoczekiwany błąd podczas wczytywania danych. Spróbuj odświeżyć stronę.",
@@ -91,7 +91,7 @@
 	"noRadioData": "Brak danych",
 	"shiftSearchHint": "Wskazówka: wciśnij Shift, aby przejść od razu do wyszukiwania",
 	"highlightedNodes": "Podświetlono {{count}} {{unit}}",
-	"previewProfileNodes": "Węzły użytkownika {{owner}}: {{count}}, pozostałe są ukryte",
+	"previewProfileNodes": "Węzły użytkownika {{owner}}: {{count}} (pozostałe są ukryte)",
 	"previewNodes": "Węzły: {{count}} (pozostałe są ukryte)",
 	"newNodeUnit": ["nowy węzeł", "nowe węzły", "nowych węzłów"],
 	"noNodesInPeriod": "Brak węzłów w wybranym okresie.",
@@ -99,22 +99,52 @@
 	"showAllWorld": "Pokaż wszystkie węzły na świecie",
 	"allNodesLabel": "Wszystkie węzły",
 	"polandOnlyLabel": "Tylko Polska",
-	"totalCountTooltip": "Łączna liczba węzłów spełniających filtry",
+	"totalCountTooltip": "Łączna liczba węzłów pasujących do filtrów",
 	"totalLabel": "razem: ",
-	"clientsCountTooltip": "Liczba klientów spełniających filtry",
-	"repeatersCountTooltip": "Liczba repeaterów spełniających filtry",
-	"roomServersCountTooltip": "Liczba room serwerów spełniających filtry",
+	"clientsCountTooltip": "Liczba klientów pasujących do filtrów",
+	"repeatersCountTooltip": "Liczba repeaterów pasujących do filtrów",
+	"roomServersCountTooltip": "Liczba room serwerów pasujących do filtrów",
 	"leafletTitle": "Biblioteka JS do map interaktywnych",
-	"tileBaseMaps": "Kafelki",
-	"vectorBaseMaps": "Wektorowe",
 	"loadingBasemap": "Wczytywanie mapy...",
 	"basemapLoaded": "Mapa wczytana",
-	"basemapFallback": "Nie udało się wczytać mapy \"{{failed}}\". Przełączono na \"{{fallback}}\"",
+	"basemapFallback": "Mapa \"{{failed}}\" jest niedostępna: {{reason}}. Wyświetlamy \"{{fallback}}\".",
+	"basemapFailure": {
+		"denied": "odmowa dostępu (HTTP {{status}}), możliwe przyczyny to osiągnięty limit lub nieprawidłowy klucz API",
+		"limit": "zbyt wiele zapytań (HTTP 429), prawdopodobnie osiągnięto limit",
+		"server": "błąd serwera (HTTP {{status}})",
+		"network": "brak połączenia z serwerem",
+		"unknown": "brak poprawnej odpowiedzi (możliwy limit lub problem z połączeniem)",
+		"keyRejected": "klucz API został prawdopodobnie odrzucony lub osiągnięto przypisany do niego limit"
+	},
 	"basemapMissingApiKey": "Mapa \"{{name}}\" jest niedostępna (brak klucza API). Wybrano domyślną mapę.",
-	"regionWarningTitle": "Jesteś tego pewny?",
-	"regionWarningText": "Dane obejmujące cały świat ważą {{size}}, to znacznie więcej niż same węzły z Polski. Na starszych urządzeniach mapa może stać się też trochę mniej responsywna.",
-	"downloadAnyway": "Pobierz mimo to",
+	"appBanner": {
+		"title": "Otworzyć w aplikacji MeshCore Map?",
+		"text": "Otwórz link w aplikacji z natywną mapą i dostępem do zapisanych danych offline.",
+		"open": "Otwórz w aplikacji",
+		"dismiss": "Nie teraz"
+	},
+	"basemapCategories": {
+		"maps": "Mapy",
+		"satellite": "Satelitarne"
+	},
+	"basemapShown": "aktywna",
+	"basemapUnavailable": "niedostępna",
+	"basemapUsing": "Mapa \"{{failed}}\" jest niedostępna: {{reason}}. Wyświetlamy \"{{active}}\".",
+	"basemapAllFailed": "Nie udało się wczytać żadnej mapy: {{reason}}.",
 	"defaultBasemap": "Domyślna",
+	"basemapTypes": {
+		"tiles": "raster",
+		"vector": "wektor"
+	},
+	"basemapTypeInfo": {
+		"tiles": "Kafelki rastrowe: gotowe obrazy, które mniej obciążają urządzenie.",
+		"vector": "Mapa wektorowa: rysowana na urządzeniu za pomocą WebGL. Pozostaje ostra przy powiększaniu, ale może bardziej obciążać urządzenie."
+	},
+	"basemapNeedsKey": "Ta mapa wymaga klucza API. Dodaj własny w ustawieniach.",
+	"basemapNeedsKeyShort": "wymaga klucza API",
+	"regionWarningTitle": "Pobrać dane z całego świata?",
+	"regionWarningText": "Dane węzłów z całego świata zajmują {{size}}, czyli znacznie więcej niż dane samych węzłów z Polski. Na starszych urządzeniach mapa może działać wolniej.",
+	"downloadAnyway": "Pobierz mimo to",
 	"attributionSources": "Źródła",
 	"tilesAttribution": {
 		"CartoDB Dark": "Kafelki: &copy; <a href=\"https://carto.com/attribution\">CARTO</a> Dane: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
@@ -129,15 +159,15 @@
 		"OpenFreeMap": "Kafelki: &copy; <a href=\"https://openfreemap.org\">OpenFreeMap</a> &copy; <a href=\"https://www.openmaptiles.org\">OpenMapTiles</a> Dane: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
 	},
 	"baseMapInfo": {
-		"CartoDB Dark": "Ciemna mapa uliczna od CARTO. Bezpłatna i bez deklarowanego limitu zapytań, ale nieprzeznaczona do obsługi bardzo dużego ruchu.",
-		"CartoDB Positron": "Jasna, minimalistyczna mapa uliczna od CARTO. Bezpłatna i bez deklarowanego limitu zapytań, ale nieprzeznaczona do obsługi bardzo dużego ruchu.",
-		"OpenStreetMap": "Standardowa mapa OpenStreetMap z oficjalnego serwera kafelków. Przeznaczona do zwykłego przeglądania, bez masowego pobierania, intensywnego buforowania i użytku offline.",
-		"Esri Hybrid": "Zdjęcia satelitarne Esri z nałożonymi granicami i nazwami miejsc.",
+		"CartoDB Dark": "Ciemna mapa uliczna CARTO. Wymaga klucza API. Darmowy plan pozwala na użytek niekomercyjny z limitem 5 mln żądań kafelków miesięcznie. Limit jest wspólny dla wszystkich kluczy danego klienta.",
+		"CartoDB Positron": "Jasna, minimalistyczna mapa uliczna CARTO. Wymaga klucza API. Darmowy plan pozwala na użytek niekomercyjny z limitem 5 mln żądań kafelków miesięcznie. Limit jest wspólny dla wszystkich kluczy danego klienta.",
+		"OpenStreetMap": "Standardowa mapa OpenStreetMap z oficjalnego serwera kafelków. Służy do interaktywnego przeglądania, bez gwarancji dostępności. Masowe pobieranie i pobieranie na zapas są niedozwolone, a intensywne korzystanie z usługi może skutkować blokadą.",
+		"Esri Hybrid": "Zdjęcia satelitarne Esri z nałożonymi granicami i nazwami miejsc. Wymaga klucza API ArcGIS (darmowy miesięczny limit). Regulamin Esri nie pozwala przechowywać jej danych mapowych, dlatego mapa jest przeznaczona do użytku online.",
 		"OpenTopoMap": "Mapa topograficzna udostępniana przez serwer społecznościowy o ograniczonej przepustowości. Należy unikać generowania dużego ruchu.",
-		"MapTiler Outdoor": "Mapa terenowa MapTiler z drogami, szlakami i informacjami topograficznymi.",
-		"MapTiler Hybrid": "Zdjęcia satelitarne MapTiler z nałożonymi granicami i lokalnymi nazwami miejsc.",
+		"MapTiler Outdoor": "Mapa terenowa MapTiler z drogami, szlakami i informacjami topograficznymi. Wymaga klucza API. Darmowy plan jest przeznaczony do użytku niekomercyjnego, ma miesięczny limit i pozwala jedynie na tymczasowe przechowywanie danych w pamięci podręcznej.",
+		"MapTiler Hybrid": "Zdjęcia satelitarne MapTiler z nałożonymi granicami i lokalnymi nazwami miejsc. Wymaga klucza API. Darmowy plan jest przeznaczony do użytku niekomercyjnego, ma miesięczny limit i pozwala jedynie na tymczasowe przechowywanie danych w pamięci podręcznej.",
 		"CyclOSM": "Mapa rowerowa oparta na danych OpenStreetMap. Korzysta z serwera społecznościowego openstreetmap.fr, dlatego należy zachować umiarkowany poziom ruchu.",
-		"Humanitarian OSM": "Humanitarny styl mapy OpenStreetMap opracowany przez HOT. Korzysta z serwera społecznościowego openstreetmap.fr, dlatego należy zachować umiarkowany poziom ruchu.",
-		"OpenFreeMap": "Wektorowa mapa uliczna wyświetlana przez MapLibre. Bezpłatna i bez deklarowanego limitu zapytań, ale wymaga obsługi WebGL i może bardziej obciążać urządzenie."
+		"Humanitarian OSM": "Styl mapy OpenStreetMap opracowany przez HOT na potrzeby działań humanitarnych. Korzysta z serwera społecznościowego openstreetmap.fr, dlatego należy unikać generowania dużego ruchu.",
+		"OpenFreeMap": "Wektorowa mapa uliczna wyświetlana przez MapLibre. Bezpłatna, bez klucza API i bez deklarowanego limitu zapytań. Wymaga obsługi WebGL i może bardziej obciążać urządzenie."
 	}
 }

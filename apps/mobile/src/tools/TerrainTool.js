@@ -12,6 +12,7 @@ import { boundsOf, buildPathFeatures } from './pathFeatures';
 import { PointField } from './PointField';
 import { describePoint, pointFromText } from './points';
 import { useMapPicker } from './useMapPicker';
+import { useMounted } from './useMounted';
 import { useShareLink } from './useShareLink';
 
 const SAMPLE_COUNT = 48;
@@ -72,6 +73,7 @@ export const TerrainTool = ({ ctx }) => {
 	const [result, setResult] = useState(null);
 	const [error, setError] = useState(null);
 	const share = useShareLink();
+	const mounted = useMounted();
 
 	const setPoint = (key, point) => {
 		setPoints(current => ({ ...current, [key]: point }));
@@ -105,6 +107,8 @@ export const TerrainTool = ({ ctx }) => {
 		try {
 			const samplePoints = sampleLine(points.a, points.b, SAMPLE_COUNT);
 			const elevations = await getElevations(config.sefinekApi, samplePoints, elevationSource);
+			if (!mounted.current) return;
+
 			const analysis = analyzeLineOfSight({ pointA: points.a, samplePoints, elevations, heightA: Number(heights.a) || 0, heightB: Number(heights.b) || 0 });
 			setResult({ ...analysis, elevations });
 			fitTo(boundsOf([points.a, points.b]));
@@ -112,7 +116,7 @@ export const TerrainTool = ({ ctx }) => {
 			console.error('Terrain analysis failed:', err);
 			setError(t('terrain:fetchElevationFailed'));
 		} finally {
-			setBusy(false);
+			if (mounted.current) setBusy(false);
 		}
 	};
 

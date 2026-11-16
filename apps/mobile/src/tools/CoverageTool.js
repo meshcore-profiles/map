@@ -12,6 +12,7 @@ import { boundsOf } from './pathFeatures';
 import { PointField } from './PointField';
 import { describePoint, pointFromText } from './points';
 import { useMapPicker } from './useMapPicker';
+import { useMounted } from './useMounted';
 import { useShareLink } from './useShareLink';
 
 const styles = StyleSheet.create({
@@ -66,6 +67,7 @@ export const CoverageTool = ({ ctx }) => {
 	const [error, setError] = useState(null);
 	const [summary, setSummary] = useState(null);
 	const share = useShareLink();
+	const mounted = useMounted();
 
 	const setField = key => value => setForm(current => ({ ...current, [key]: value }));
 
@@ -127,7 +129,9 @@ export const CoverageTool = ({ ctx }) => {
 		setProgress(null);
 		try {
 			const allPoints = [origin, ...buildRayPoints(origin, bearings, samplesPerRay, searchRangeM)];
-			const elevations = await getElevationsChunked(config.sefinekApi, allPoints, (current, total) => total > 1 && setProgress({ current, total }), elevationSource);
+			const elevations = await getElevationsChunked(config.sefinekApi, allPoints, (current, total) => mounted.current && total > 1 && setProgress({ current, total }), elevationSource);
+			if (!mounted.current) return;
+
 			const rays = computeCoverage({ origin, elevations, bearings, samplesPerRay, searchRangeM, txHeight, rxHeight, freqMHz, margin, linkBudgetRangeM });
 
 			const opticalRing = rays.map(r => r.opticalPoint);
@@ -150,8 +154,10 @@ export const CoverageTool = ({ ctx }) => {
 			console.error('Coverage computation failed:', err);
 			setError(t('coverage:fetchElevationFailed'));
 		} finally {
-			setBusy(false);
-			setProgress(null);
+			if (mounted.current) {
+				setBusy(false);
+				setProgress(null);
+			}
 		}
 	};
 

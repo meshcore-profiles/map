@@ -2,7 +2,7 @@
 	"toggleTitle": "Map legend",
 	"closeAria": "Close legend",
 	"plansTitle": "What's next?",
-	"plansIntro": "A service called <a href=\"https://meshcoreprofiles.com\" target=\"_blank\" rel=\"noopener\">meshcoreprofiles.com</a> is planned, integrated with the worldwide node map.",
+	"plansIntro": "A new service, <a href=\"https://meshcoreprofiles.com\" target=\"_blank\" rel=\"noopener\">meshcoreprofiles.com</a>, is planned with integration into the worldwide node map.",
 	"plansBullet1": "Users who submit their companion or repeater details will get their own profile.",
 	"plansBullet2": "Selected profile information will be shown directly on the map, making it easy to see who a given node belongs to.",
 	"plansBullet3": "Repeater owners will be able to upload photos, which will then be displayed publicly on the site.",

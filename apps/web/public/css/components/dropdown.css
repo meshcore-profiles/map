@@ -29,7 +29,7 @@
 	}
 }
 
-#basemap-menu li[data-basemap], #lang-menu a {
+#basemap-menu li.basemap-option, #lang-menu a {
 	padding: 9px 10px;
 	border-radius: var(--radius-sm);
 	color: var(--text);
@@ -42,13 +42,105 @@
 	text-decoration: none;
 }
 
-#basemap-menu li[data-basemap]:hover, #lang-menu a:hover, #lang-menu a:focus-visible {
+#basemap-menu li.basemap-option:hover, #lang-menu a:hover, #lang-menu a:focus-visible {
 	background: var(--bg-panel-hover);
 }
 
-#basemap-menu li[data-basemap].active, #lang-menu a.active {
+#basemap-menu li.basemap-option.active, #lang-menu a.active {
 	background: var(--red-glow);
 	color: #fff;
+}
+
+#basemap-menu {
+	width: 270px;
+}
+
+#basemap-menu li.basemap-option, #basemap-menu li.locked {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+}
+
+#basemap-menu li.locked {
+	padding: 9px 10px;
+	color: var(--text-muted);
+	font-size: 14px;
+	cursor: pointer;
+}
+
+#basemap-menu li.locked:hover {
+	background: var(--bg-panel-hover);
+	color: var(--text);
+}
+
+#basemap-menu li.unavailable {
+	color: var(--text-muted);
+}
+
+.basemap-badges {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 6px;
+}
+
+.basemap-badge {
+	flex-shrink: 0;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--chip-bg);
+	color: var(--text-muted);
+	font-size: 11px;
+	white-space: nowrap;
+}
+
+.basemap-default-name {
+	color: var(--text-muted);
+}
+
+#basemap-menu li.active .basemap-default-name {
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.basemap-badge-shown {
+	background: rgba(77, 171, 247, 0.18);
+	color: var(--blue-bright);
+}
+
+.basemap-badge-type {
+	border: 1px solid var(--border);
+	background: transparent;
+}
+
+#basemap-menu li.active .basemap-badge-type {
+	border-color: rgba(255, 255, 255, 0.35);
+	background: transparent;
+}
+
+.basemap-badge-warn {
+	background: rgba(242, 177, 52, 0.18);
+	color: var(--amber-bright);
+}
+
+#basemap-menu li.active .basemap-badge {
+	background: rgba(255, 255, 255, 0.18);
+	color: #fff;
+}
+
+.basemap-status {
+	margin: 2px 2px 6px;
+	padding: 10px;
+	border: 1px solid rgba(242, 177, 52, 0.35);
+	border-radius: var(--radius-sm);
+	background: rgba(242, 177, 52, 0.08);
+	color: var(--text);
+	font-size: 13px;
+	line-height: 1.45;
+}
+
+#basemap-toggle.warn {
+	border-color: var(--amber-bright);
 }
 
 #basemap-menu .basemap-category {

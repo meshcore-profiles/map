@@ -480,7 +480,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 		} catch (err) {
 			console.error('Failed to compute coverage:', err);
 			loadingToast.remove();
-			showToast(t('coverage:fetchElevationFailed'), { status: 'error', duration: 5000 });
+			showToast(t('coverage:fetchElevationFailed'), { status: 'error' });
 		} finally {
 			computeBtn.disabled = false;
 		}

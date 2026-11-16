@@ -61,7 +61,7 @@ export const MapScreen = () => {
 	// The style that finished loading last and the number of successful loads. The native side drops layers that were queued for a style which never loaded (e.g. 403 before a fallback), so the layers mount only after a style is ready and are rebuilt for each new one.
 	const [loadedStyle, setLoadedStyle] = useState({ style: null, epoch: 0 });
 
-	const { basemaps, mapStyle, attribution, handleStyleFailed } = useBasemap({ config, settings, update });
+	const { basemaps, mapStyle, attribution, handleStyleFailed, selectBasemap: chooseBasemap, basemapView } = useBasemap({ config, settings, update });
 	const mapStyleRef = useRef(mapStyle);
 	mapStyleRef.current = mapStyle;
 	// The layers belong to the style that loaded last. Once the style prop changes they are unmounted in that same render, before the native side swaps styles; removing their images from the new style afterwards only logs warnings.
@@ -195,9 +195,9 @@ export const MapScreen = () => {
 	}, [update, settings.closeFiltersOnApply]);
 
 	const selectBasemap = useCallback(name => {
-		update({ basemap: name });
+		chooseBasemap(name);
 		setSheet(null);
-	}, [update]);
+	}, [chooseBasemap]);
 
 	const toolContext = useMemo(() => ({ nodes, config, elevationSource: settings.elevationSource, coverageStyle: settings.coverageStyle, defaultRadio: SITES[region].defaultRadio, setOverlay, setPicker, fitTo, onClose: closeTool }), [nodes, config, settings.elevationSource, settings.coverageStyle, region, setPicker, fitTo, closeTool]);
 	const ActiveTool = toolId ? TOOLS[toolId] : null;
@@ -229,7 +229,7 @@ export const MapScreen = () => {
 				<FiltersSheet visible filters={settings.filters} byType={byType} radioOptions={radioOptions} total={nodes.length} onApply={applyFilters} onClose={closeSheet} />
 			)}
 			<StatsSheet visible={sheet === 'stats'} onClose={closeSheet} nodes={nodes} repeaters={repeaters} onSelectNode={selectNodeFromStats} onShowOnMap={showRepeaters} />
-			<BasemapSheet visible={sheet === 'basemap'} onClose={closeSheet} basemaps={basemaps} selection={settings.basemap} onSelect={selectBasemap} />
+			<BasemapSheet visible={sheet === 'basemap'} onClose={closeSheet} basemaps={basemaps} view={basemapView} onSelect={selectBasemap} />
 			<LegendSheet visible={sheet === 'legend'} onClose={closeSheet} />
 			<SettingsSheet visible={sheet === 'settings'} onClose={closeSheet} />
 		</View>

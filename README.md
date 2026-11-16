@@ -42,7 +42,7 @@ cp .env.example .env
 Then fill in the MongoDB (`MONGODB_URL`) and Redis (`REDIS_HOST`, `REDIS_PASSWD`) credentials in the created `.env` file.
 The `SITE_MODE` variable lets you force the Polish (`poland`) or global (`global`) version regardless of the domain - by default (`auto`) it's chosen based on the request host.
 
-Set `ESRI_API_KEY` to an ArcGIS Location Platform API key with the Basemap styles privilege to enable Esri Hybrid (World Imagery with vector labels). Roads and their labels appear from Leaflet zoom 12; borders and place labels retain the provider's zoom ranges. Restrict the key to your site's referrers. The `Default` basemap selects Esri Hybrid when this key is configured, otherwise MapTiler Hybrid when `MAPTILER_API_KEY` is configured, or OpenStreetMap when neither key is configured. A user's explicit basemap selection is preserved.
+Set `ESRI_API_KEY` to an ArcGIS Location Platform API key with the Basemap styles privilege to enable Esri Hybrid (World Imagery with vector labels). Roads and their labels appear from Leaflet zoom 12; borders and place labels retain the provider's zoom ranges. Restrict the key to your site's referrers. The default basemap is the first available of Esri Hybrid (`ESRI_API_KEY`), CartoDB Dark (`CARTO_API_KEY`), OpenStreetMap and OpenFreeMap (the last two need no key); if a map fails, the next one in that order is shown. MapTiler maps are available only by explicit choice, and every visitor can enter their own Esri, MapTiler or CARTO key in the settings (it replaces the server's key). A user's explicit basemap selection is preserved.
 
 Start the server with:
 ```bash

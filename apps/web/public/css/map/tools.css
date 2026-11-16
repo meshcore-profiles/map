@@ -155,11 +155,6 @@ li.tool-panel-empty {
 	font-size: 15px;
 }
 
-.modal-title {
-	margin-bottom: 4px;
-	font-size: 19px;
-}
-
 #route-actions {
 	margin-top: 12px;
 }
@@ -186,7 +181,7 @@ li.tool-panel-empty {
 	font-size: 14px;
 }
 
-#terrain-point-row, #terrain-height-row {
+#terrain-point-row, #terrain-height-row, .coverage-field-row {
 	display: flex;
 	gap: 12px;
 	margin-bottom: 14px;
@@ -349,12 +344,6 @@ li.tool-panel-empty {
 }
 
 #coverage-point-row {
-	margin-bottom: 14px;
-}
-
-.coverage-field-row {
-	display: flex;
-	gap: 12px;
 	margin-bottom: 14px;
 }
 

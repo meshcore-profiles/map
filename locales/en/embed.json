@@ -3,5 +3,5 @@
 	"roomServer": ["room server", "room servers"],
 	"span": "Span",
 	"openNode": "Open on the map",
-	"mapLabel": "Map of the nodes"
+	"mapLabel": "Node map"
 }

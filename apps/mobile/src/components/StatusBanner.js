@@ -22,7 +22,7 @@ export const StatusBanner = () => {
 	const usingCache = Boolean(error) && nodes.length > 0;
 
 	useEffect(() => {
-		if (usingCache) showToast(t('mobile:offline.usingCache'), { status: 'error', duration: 6000, group: 'offline' });
+		if (usingCache) showToast(t('mobile:offline.usingCache'), { status: 'error', group: 'offline' });
 	}, [usingCache, showToast, t]);
 
 	if (phase === 'loading' || phase === 'downloading') {

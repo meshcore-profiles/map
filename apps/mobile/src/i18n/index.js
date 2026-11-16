@@ -34,7 +34,7 @@ const BUNDLES = {
 	en: { common: enCommon, map: enMap, filters: enFilters, measure: enMeasure, route: enRoute, terrain: enTerrain, coverage: enCoverage, stats: enStats, settings: enSettings, mobile: enMobile, legend: enLegend, appChangelog: enAppChangelog },
 };
 
-export const resolveLanguage = preference => {
+const resolveLanguage = preference => {
 	if (preference === 'pl' || preference === 'en') return preference;
 
 	return deviceLocale().toLowerCase().startsWith('pl') ? 'pl' : 'en';

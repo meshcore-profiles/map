@@ -184,6 +184,11 @@
 	backdrop-filter: none;
 }
 
+#search-form #filter-toggle[aria-expanded="true"], #search-form #filter-toggle.active {
+	background: rgba(255, 255, 255, 0.12);
+	color: #fff;
+}
+
 #search-form #filter-toggle .icon {
 	width: 16px;
 	height: 16px;

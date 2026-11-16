@@ -19,7 +19,7 @@
 	"settings": {
 		"languageAuto": "Automatic",
 		"haptics": "Haptic feedback",
-		"hapticsDesc": "Short vibrations when you tap, pick an option or set a point.",
+		"hapticsDesc": "Short vibrations when you tap buttons, select options or place points.",
 		"rotateTilt": "Map rotation and tilt",
 		"rotateTiltDesc": "Enables two-finger gestures to rotate and tilt the map.",
 		"data": "Node data",
@@ -38,5 +38,9 @@
 		"title": "Tools",
 		"picking": "Tap the map...",
 		"routeDesc": "Draw a route using node names or public key prefixes."
+	},
+	"basemap": {
+		"needsKey": "This map needs an API key. Add your own in the settings.",
+		"noCache": "This map is unavailable in the app because its provider does not allow map data to be stored."
 	}
 }

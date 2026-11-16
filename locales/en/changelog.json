@@ -6,7 +6,7 @@
 			"changes": [
 				"Fixed an issue with button styling.",
 				"The add node button on the Polish map now links to instructions in Polish (docs.meshcorepolska.org).",
-				"Reorganized the project structure and extracted shared map logic for the web and mobile versions. A mobile map app for phones will be available soon.",
+				"Reorganized the project structure and extracted shared map logic for the web and mobile versions. A mobile map app will be available soon.",
 				"Updated backend and frontend dependencies to their latest versions."
 			]
 		},
@@ -14,7 +14,7 @@
 			"version": "0.12.0",
 			"date": "2026-11-08",
 			"changes": [
-				"Preparation for MeshCore Profiles: embedded maps on profiles and a preview of user nodes.",
+				"Prepared MeshCore Profiles integration: embedded maps on profiles and a preview of each user's nodes.",
 				"Updated backend dependencies to their latest versions."
 			]
 		},
@@ -71,7 +71,7 @@
 				"Updated frontend msgpackr to version 2.1.2 and backend dependencies.",
 				"Fixed node popup positioning so the top navigation no longer obscures their contents.",
 				"Raised the elevation point limit in the coverage layer so the \"High\" resolution (144 directions) keeps full sampling along each ray at a 20 km range.",
-				"Added a layer style option to the coverage layer: tiles are shown by default, with lines as an alternative, where the darker the tile, the higher the chance of reception.",
+				"Added a coverage layer style option: tiles are shown by default, with lines as an alternative. Darker tiles indicate a higher chance of reception.",
 				"Removed the \"Maximum range\" field from the \"Coverage layer\" tool.",
 				"Renamed the ERP field in the coverage tool to \"Transmit power ERP (dBm)\"."
 			]
@@ -112,7 +112,7 @@
 			"date": "2026-09-07",
 			"changes": [
 				"Hardened site security: tightened the CORS policy and added a Content-Security-Policy header to protect against XSS attacks.",
-				"The \"Terrain and coverage analysis\" and \"Coverage layer\" tools now only work with the Sefinek API - picking another source in Settings now shows a message instead of failing.",
+				"The \"Terrain and range analysis\" and \"Coverage layer\" tools now only work with the Sefinek API - picking another source in Settings now shows a message instead of failing.",
 				"Changed the coverage layer's default direction resolution to \"High\" (144 directions) for more accurate results."
 			]
 		},
@@ -226,7 +226,7 @@
 				"Poland selected as the default region on first launch.",
 				"Data sent in a compact MessagePack format; only nodes from Poland are fetched in the default view.",
 				"Searching nodes by name and public key, with keyboard support.",
-				"Frontend built with HTML, CSS and JavaScript with no application framework, modern code."
+				"Frontend built with HTML, CSS and JavaScript, without an application framework."
 			]
 		}
 	]

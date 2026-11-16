@@ -4,7 +4,12 @@ import { toCanvas as qrToCanvas } from '../vendor/qrcode/qrcode.js';
 import * as ntools from './node-utils.js';
 import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, countByType, createStatusThresholds, formatTimeAgo, indexNode, prepareNode, searchNodes } from '/core/nodes.js';
 import { t, tRaw, plural } from './i18n.js';
+import { initApiKeySettings } from './api-keys.js';
 import { initModal } from './modal.js';
+import { initAppBanner } from './app-banner.js';
+import { initDataSettings } from './settings-data.js';
+import { initSettingsTabs } from './settings-tabs.js';
+import { initMapLanguageSetting, readFlag, readSavedView, saveView, writeFlag } from './preferences.js';
 import { initNodeDeletionDialog } from './node-deletion.js';
 import { initRadioFilters } from './radio-filters.js';
 import { buildContactUrl } from '/core/contact.js';
@@ -20,7 +25,7 @@ import { initRouteTool } from './route.js';
 import { initTerrainTool } from './terrain.js';
 import { initCoverageTool } from './coverage.js';
 import { escapeHtml } from './pathtools.js';
-import { isBaseMapMissingKey, getNextFallbackBaseMap, maplibreBaseMapOptions, tileBaseMaps, maplibreBaseMaps, baseMapAttributions, baseMapInfo, getBaseMapGroups, getBaseMapNames, defaultBaseMapName, DEFAULT_BASEMAP_SELECTION, resolveBaseMapName, getMaplibreBaseMapLayer } from './basemaps.js';
+import { initBasemapManager } from './basemap-manager.js';
 import { showToast, updateToast, showActionToast, dismissToast } from './toast.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
@@ -230,19 +235,14 @@ const getPresets = async signal => {
 };
 
 
-const storedBaseMap = localStorage.getItem('baseMapSelected');
-const baseMapSelected = storedBaseMap === DEFAULT_BASEMAP_SELECTION || getBaseMapNames().includes(storedBaseMap)
-	? storedBaseMap
-	: DEFAULT_BASEMAP_SELECTION;
-
-if (storedBaseMap && storedBaseMap !== baseMapSelected && isBaseMapMissingKey(storedBaseMap)) {
-	showToast(t('map:basemapMissingApiKey', { name: storedBaseMap }), { status: 'info', duration: 5000 });
-}
-
 const urlParams = Object.fromEntries(new URLSearchParams(location.search));
 let initialView = window.MAP_CONFIG.defaultView;
+let rememberView = readFlag('rememberView', false);
 if (Number(urlParams.lat) && Number(urlParams.lon) && Number(urlParams.zoom)) {
 	initialView = urlParams;
+} else if (rememberView) {
+	// A link with a position wins; otherwise the map returns to where it was left.
+	initialView = readSavedView() ?? initialView;
 }
 
 const map = window.leafletMap = L.map('map', {
@@ -319,98 +319,6 @@ map.on('popupopen', e => {
 });
 
 
-let baseMapRequestId = 0;
-let currentBaseMapAttribution = null;
-let activateBaseMapFallback = null;
-
-const waitForBaseMapLoad = (targetLayer, name) => new Promise((resolve, reject) => {
-	const listeners = [];
-	const timer = setTimeout(() => fail(), 20000);
-	function finish(error) {
-		clearTimeout(timer);
-		for (const [layer, event, handler] of listeners) layer.off(event, handler);
-		if (error) reject(error);
-		else resolve();
-	}
-	const listen = (layer, event, handler) => {
-		listeners.push([layer, event, handler]);
-		layer.on(event, handler);
-	};
-	function fail() {
-		finish(new Error(`Base map "${name}" failed to load`));
-	}
-	listen(targetLayer, 'remove', fail);
-	if (maplibreBaseMapOptions[name]) {
-		const glMap = targetLayer.getMaplibreMap();
-		if (!glMap) {
-			fail();
-			return;
-		}
-		if (glMap.loaded()) {
-			finish();
-			return;
-		}
-		listen(glMap, 'load', () => finish());
-		listen(glMap, 'error', fail);
-		return;
-	}
-
-	const tileLayers = targetLayer.getLayers ? targetLayer.getLayers() : [targetLayer];
-	let pending = tileLayers.length;
-	if (pending === 0) {
-		finish();
-		return;
-	}
-
-	tileLayers.forEach(layer => {
-		listen(layer, 'tileerror', fail);
-		listen(layer, 'load', () => {
-			pending -= 1;
-			if (pending === 0) finish();
-		});
-	});
-});
-
-const setBaseMap = async name => {
-	const selection = name;
-	name = resolveBaseMapName(name);
-	const requestId = ++baseMapRequestId;
-	const targetLayer = maplibreBaseMapOptions[name]
-		? await getMaplibreBaseMapLayer(name)
-		: tileBaseMaps[name];
-
-	if (requestId !== baseMapRequestId) return;
-
-	for (const layer of [...Object.values(tileBaseMaps), ...Object.values(maplibreBaseMaps)]) {
-		if (layer !== targetLayer && map.hasLayer(layer)) map.removeLayer(layer);
-	}
-	const wasOnMap = map.hasLayer(targetLayer);
-	if (!wasOnMap) map.addLayer(targetLayer);
-	map.setMaxZoom(targetLayer.options.maxZoom);
-
-	if (currentBaseMapAttribution) map.attributionControl.removeAttribution(currentBaseMapAttribution);
-	currentBaseMapAttribution = targetLayer.options.esriAttribution || baseMapAttributions[name];
-	map.attributionControl.addAttribution(currentBaseMapAttribution);
-
-	try {
-		localStorage.setItem('baseMapSelected', selection);
-	} catch { /* storage unavailable */ }
-
-	if (wasOnMap) return;
-
-	try {
-		await waitForBaseMapLoad(targetLayer, name);
-	} catch (err) {
-		if (requestId === baseMapRequestId) throw err;
-	}
-};
-
-void setBaseMap(baseMapSelected).catch(err => {
-	console.error('Failed to set the base map:', err);
-	activateBaseMapFallback?.(baseMapSelected);
-});
-
-
 const icons = Object.fromEntries(['none', 'recent', 'stale', 'old', 'extinct'].map(color => [color,
 	Object.fromEntries([2, 3, 4].map(id => [id, L.divIcon({
 		html: `<svg width="32" height="32"><use href="/icons/node-types.svg#${NODE_TYPE_ICON_NAMES[id]}"></use></svg>`,
@@ -459,6 +367,18 @@ const closeFiltersOnApplyCheckbox = document.getElementById('setting-close-filte
 const elevationSourceSelect = document.getElementById('setting-elevation-source');
 const elevationSourceDesc = document.getElementById('setting-elevation-desc');
 const coverageStyleSelect = document.getElementById('setting-coverage-style');
+initAppBanner();
+const settingsTabs = initSettingsTabs(document.getElementById('settings-tabs'));
+initBasemapManager({
+	map,
+	toggle: basemapToggle,
+	menu: basemapMenu,
+	onOpenKeys: () => {
+		settingsModal.open();
+		settingsTabs.selectById('maps');
+	},
+});
+initApiKeySettings({ container: document.getElementById('setting-api-keys'), saveButton: document.getElementById('setting-api-keys-save') });
 const legendPanelUi = initLegendPanel();
 const searchInline = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
@@ -480,8 +400,9 @@ const legendUpdatedAtEl = document.getElementById('legend-updated-at');
 const nodePanelContent = document.getElementById('node-panel-content');
 const nodeModalCloseBtn = document.getElementById('node-modal-close');
 
+let hapticsEnabled = readFlag('haptics', true);
 const vibrate = (duration = 10) => {
-	if (navigator.vibrate) navigator.vibrate(duration);
+	if (hapticsEnabled && navigator.vibrate) navigator.vibrate(duration);
 };
 
 document.addEventListener('click', e => {
@@ -590,7 +511,21 @@ const statsModal = initStatsModal({
 	onShowOnMap: nodes => showNodesHighlight(nodes),
 });
 
-const changelogModal = initChangelogModal({ onDismiss: () => legendPanelUi.open() });
+// The changelog is reached from the legend and from the version in the settings; closing it returns to where it was opened from.
+const reopenLegend = () => legendPanelUi.open();
+let afterChangelog = reopenLegend;
+const changelogModal = initChangelogModal({
+	onDismiss: () => {
+		const back = afterChangelog;
+		afterChangelog = reopenLegend;
+		back();
+	},
+});
+document.getElementById('settings-version').addEventListener('click', () => {
+	afterChangelog = () => settingsModal.open();
+	settingsModal.close();
+	changelogModal.open();
+});
 const measureTool = initMeasureTool({ map, setPicker, escapeHtml, getNodes: () => state.nodes, showToast });
 const routeTool = initRouteTool({ map, getNodes: () => state.nodes, escapeHtml });
 let elevationSource = localStorage.getItem('elevationSource') || 'sefinek';
@@ -889,9 +824,16 @@ const collectFilteredNodes = () => previewKeys
 const numberFormat = new Intl.NumberFormat(window.MAP_CONFIG.languageCode);
 let summaryTimer = 0;
 
+const updateFilterButtons = () => {
+	const pristine = buildFilterParams(state).size === 0;
+	filtersShareBtn.disabled = pristine;
+	clearFiltersBtn.disabled = pristine;
+};
+
 const renderFilterSummary = matching => {
 	const total = state.nodes.length;
 
+	updateFilterButtons();
 	filtersSummary.hidden = total === 0;
 	filtersSummary.textContent = t('filters:summary', { matching: numberFormat.format(matching), total: numberFormat.format(total) });
 };
@@ -929,7 +871,7 @@ const applyFilters = ({ silent = false } = {}) => {
 	requestAnimationFrame(() => requestAnimationFrame(() => {
 		try {
 			runFilterPass();
-			updateToast(filterToast, t('filters:updated'), { duration: 1000, status: 'success' });
+			updateToast(filterToast, t('filters:updated'), { status: 'success' });
 		} catch (err) {
 			console.error('Failed to update data:', err);
 			updateToast(filterToast, t('filters:updateFailed'), { status: 'error' });
@@ -1092,7 +1034,7 @@ const downloadNodes = async region => {
 	} catch (err) {
 		if (err.name !== 'AbortError') {
 			const message = err.isApiError ? err.message : t('map:unexpectedLoadError');
-			showToast(message, { status: 'error', duration: 6000 });
+			showToast(message, { status: 'error' });
 			console.error(err);
 		}
 		return false;
@@ -1121,7 +1063,7 @@ searchInline.addEventListener('submit', e => e.preventDefault());
 searchInput.addEventListener('focus', () => {
 	if (localStorage.getItem('shiftSearchHintShown')) return;
 	localStorage.setItem('shiftSearchHintShown', '1');
-	showToast(t('map:shiftSearchHint'), { duration: 4000, status: 'info' });
+	showToast(t('map:shiftSearchHint'), { status: 'info' });
 }, { once: true });
 
 searchInput.addEventListener('input', () => {
@@ -1215,6 +1157,7 @@ filtersShareBtn.addEventListener('click', () => {
 clusteringZoomInput.addEventListener('input', () => {
 	state.clusteringZoom = Number(clusteringZoomInput.value);
 	updateClusteringSlider();
+	updateFilterButtons();
 });
 
 clusteringZoomInput.addEventListener('change', () => {
@@ -1247,6 +1190,37 @@ elevationSourceSelect.addEventListener('change', () => {
 	elevationSource = elevationSourceSelect.value;
 	localStorage.setItem('elevationSource', elevationSource);
 	updateElevationSourceDesc();
+});
+
+const scaleControl = L.control.scale({ imperial: false, position: 'bottomleft' });
+
+// A checkbox stored as a flag in localStorage; onChange also receives the initial value.
+const bindFlagSetting = (id, key, fallback, onChange) => {
+	const input = document.getElementById(id);
+	input.checked = readFlag(key, fallback);
+	onChange(input.checked);
+	input.addEventListener('change', () => {
+		writeFlag(key, input.checked);
+		onChange(input.checked);
+	});
+};
+
+bindFlagSetting('setting-show-scale', 'showScale', false, enabled => enabled ? scaleControl.addTo(map) : scaleControl.remove());
+bindFlagSetting('setting-remember-view', 'rememberView', false, enabled => {
+	rememberView = enabled;
+	if (enabled) saveView(map.getCenter(), map.getZoom());
+});
+bindFlagSetting('setting-haptics', 'haptics', true, enabled => {
+	hapticsEnabled = enabled;
+});
+if (!navigator.vibrate) document.getElementById('setting-haptics-row').hidden = true;
+
+initMapLanguageSetting(document.getElementById('setting-map-language'));
+initDataSettings({
+	tab: document.getElementById('settings-tab-data'),
+	usage: document.getElementById('setting-storage-usage'),
+	resetButton: document.getElementById('setting-reset'),
+	clearButton: document.getElementById('setting-clear-data'),
 });
 
 coverageStyleSelect.value = coverageStyle;
@@ -1326,66 +1300,6 @@ regionToggle?.addEventListener('click', async () => {
 	}
 
 	void setRegion(targetRegion);
-});
-
-let currentBaseMap = baseMapSelected;
-
-const renderBaseMapToggle = () => {
-	const selectedName = resolveBaseMapName(currentBaseMap) === defaultBaseMapName ? DEFAULT_BASEMAP_SELECTION : currentBaseMap;
-	basemapToggle.classList.toggle('active', selectedName !== DEFAULT_BASEMAP_SELECTION);
-	[...basemapMenu.children].forEach(li => li.classList.toggle('active', li.dataset.basemap === selectedName));
-};
-
-activateBaseMapFallback = (failedName, toastHandle) => {
-	if (failedName !== currentBaseMap) return;
-
-	const resolvedFailedName = resolveBaseMapName(failedName);
-	const nextName = getNextFallbackBaseMap(resolvedFailedName);
-	if (!nextName) return;
-
-	console.error(`Base map "${failedName}" failed to load, falling back to "${nextName}".`);
-	updateToast(toastHandle, t('map:basemapFallback', { failed: resolvedFailedName, fallback: nextName }), { status: 'error' });
-
-	currentBaseMap = nextName;
-	renderBaseMapToggle();
-
-	setBaseMap(nextName).catch(() => activateBaseMapFallback(nextName, toastHandle));
-};
-
-const renderBasemapMenu = () => {
-	const groups = getBaseMapGroups().map(group => ({ ...group, names: group.names.filter(name => name !== defaultBaseMapName) })).filter(group => group.names.length);
-	basemapMenu.innerHTML = `<li data-basemap="${DEFAULT_BASEMAP_SELECTION}" title="${defaultBaseMapName}">${escapeHtml(t('map:defaultBasemap'))} (${escapeHtml(defaultBaseMapName)})</li>` + groups.map(group => `
-		<li class="basemap-category">${group.label}</li>
-		${group.names.map(name => `<li data-basemap="${name}" title="${baseMapInfo[name]}">${name}</li>`).join('')}`
-	).join('');
-};
-
-renderBasemapMenu();
-renderBaseMapToggle();
-
-basemapMenu.addEventListener('click', e => {
-	const li = e.target.closest('li');
-	if (!li?.dataset.basemap) return;
-
-	const selectedName = li.dataset.basemap;
-	currentBaseMap = selectedName;
-	renderBaseMapToggle();
-	basemapMenu.hidden = true;
-
-	const resolvedSelectedName = resolveBaseMapName(selectedName);
-	const loadingToast = maplibreBaseMapOptions[resolvedSelectedName] && !maplibreBaseMaps[resolvedSelectedName]
-		? showToast(t('map:loadingBasemap'), { duration: 0, status: 'loading' })
-		: null;
-
-	setBaseMap(selectedName)
-		.then(() => {
-			if (selectedName !== currentBaseMap) return;
-			if (loadingToast) updateToast(loadingToast, t('map:basemapLoaded'), { duration: 1000, status: 'success' });
-		})
-		.catch(err => {
-			console.error('Failed to set the base map:', err);
-			activateBaseMapFallback(selectedName, loadingToast);
-		});
 });
 
 basemapToggle.addEventListener('click', () => {
@@ -1493,13 +1407,16 @@ window.addEventListener('resize', () => {
 });
 
 map.on('moveend', syncUrlParams);
+map.on('moveend', () => {
+	if (rememberView) saveView(map.getCenter(), map.getZoom());
+});
 
 updateRegionToggleUI();
 
 downloadNodes(state.region).then(() => {
 	applyFilters({ silent: true });
 
-	if (sharedFilters) showToast(t('filters:sharedApplied'), { status: 'info', duration: 5000 });
+	if (sharedFilters) showToast(t('filters:sharedApplied'), { status: 'info' });
 
 	if (urlParams.node) {
 		const node = state.nodes.find(n => n.public_key === urlParams.node);

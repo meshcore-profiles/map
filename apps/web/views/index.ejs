@@ -326,32 +326,129 @@ const _titleBrand = site.shortName || site.brandName; %>
 		<button type="button" class="modal-close-btn" id="settings-close-btn" aria-label="<%= t('settings:closeAria') %>">
 			<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#close"></use></svg>
 		</button>
-		<div class="modal-title" id="settings-title"><%= t('settings:title') %></div>
 
-		<div class="setting-item">
-			<label class="checkbox-label"><input type="checkbox" id="setting-close-filters-on-apply" checked aria-describedby="setting-close-filters-desc"> <%= t('settings:closeFiltersLabel') %></label>
-			<p class="setting-desc" id="setting-close-filters-desc"><%= t('settings:closeFiltersDesc') %></p>
+		<aside class="settings-sidebar">
+			<div class="modal-title" id="settings-title"><%= t('settings:title') %></div>
+			<div class="settings-tabs" id="settings-tabs" role="tablist" aria-orientation="vertical" aria-label="<%= t('settings:tabsAria') %>">
+				<% [{ id: 'general', icon: 'settings', key: 'tabGeneral' }, { id: 'tools', icon: 'wrench', key: 'tabTools' }, { id: 'maps', icon: 'layers', key: 'tabMaps' }, { id: 'data', icon: 'info', key: 'tabData' }].forEach((tab, i) => { %>
+				<button type="button" class="settings-tab" role="tab" id="settings-tab-<%= tab.id %>" aria-controls="settings-pane-<%= tab.id %>" aria-selected="<%= i === 0 %>" tabindex="<%= i === 0 ? 0 : -1 %>">
+					<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#<%= tab.icon %>"></use></svg>
+					<span><%= t('settings:' + tab.key) %></span>
+				</button>
+				<% }); %>
+			</div>
+			<button type="button" class="settings-version" id="settings-version" title="<%= t('settings:openChangelog') %>">
+				<span><%= t('settings:version', { version: v }) %></span>
+				<% if (releaseDate) { %><time datetime="<%= releaseDate %>"><%= t('settings:released', { date: languageCode === 'pl' ? releaseDate.split('-').reverse().join('.') : releaseDate }) %></time><% } %>
+			</button>
+		</aside>
+
+		<div class="settings-content">
+			<section class="settings-pane" role="tabpanel" id="settings-pane-general" aria-labelledby="settings-tab-general">
+				<h2 class="settings-pane-title"><%= t('settings:tabGeneral') %></h2>
+				<p class="settings-pane-desc"><%= t('settings:generalDesc') %></p>
+				<div class="settings-card">
+					<div class="settings-row">
+						<div class="settings-row-text">
+							<label class="checkbox-label"><input type="checkbox" id="setting-close-filters-on-apply" checked aria-describedby="setting-close-filters-desc"> <%= t('settings:closeFiltersLabel') %></label>
+							<p class="setting-desc" id="setting-close-filters-desc"><%= t('settings:closeFiltersDesc') %></p>
+						</div>
+					</div>
+					<div class="settings-row">
+						<div class="settings-row-text">
+							<label class="checkbox-label"><input type="checkbox" id="setting-remember-view" aria-describedby="setting-remember-view-desc"> <%= t('settings:rememberViewLabel') %></label>
+							<p class="setting-desc" id="setting-remember-view-desc"><%= t('settings:rememberViewDesc') %></p>
+						</div>
+					</div>
+					<div class="settings-row">
+						<div class="settings-row-text">
+							<label class="checkbox-label"><input type="checkbox" id="setting-show-scale" aria-describedby="setting-show-scale-desc"> <%= t('settings:showScaleLabel') %></label>
+							<p class="setting-desc" id="setting-show-scale-desc"><%= t('settings:showScaleDesc') %></p>
+						</div>
+					</div>
+					<div class="settings-row" id="setting-haptics-row">
+						<div class="settings-row-text">
+							<label class="checkbox-label"><input type="checkbox" id="setting-haptics" aria-describedby="setting-haptics-desc"> <%= t('settings:hapticsLabel') %></label>
+							<p class="setting-desc" id="setting-haptics-desc"><%= t('settings:hapticsDesc') %></p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="settings-pane" role="tabpanel" id="settings-pane-tools" aria-labelledby="settings-tab-tools" hidden>
+				<h2 class="settings-pane-title"><%= t('settings:tabTools') %></h2>
+				<p class="settings-pane-desc"><%= t('settings:toolsDesc') %></p>
+				<div class="settings-card">
+					<div class="settings-row settings-row-stack">
+						<label for="setting-elevation-source" class="settings-row-label"><%= t('settings:elevationSourceLabel') %></label>
+						<p class="setting-desc" id="setting-elevation-desc"><%= t('settings:elevationDesc') %></p>
+						<select class="date-input settings-row-control" id="setting-elevation-source" aria-describedby="setting-elevation-desc">
+							<option value="sefinek" selected><%= t('settings:elevationSefinek') %></option>
+							<option value="open-elevation"><%= t('settings:elevationOpenElevation') %></option>
+							<option value="open-meteo"><%= t('settings:elevationOpenMeteo') %></option>
+						</select>
+					</div>
+					<div class="settings-row settings-row-stack">
+						<label for="setting-coverage-style" class="settings-row-label"><%= t('settings:coverageStyleLabel') %></label>
+						<p class="setting-desc" id="setting-coverage-style-desc"><%= t('settings:coverageStyleDesc') %></p>
+						<select class="date-input settings-row-control" id="setting-coverage-style" aria-describedby="setting-coverage-style-desc">
+							<option value="tiles" selected><%= t('settings:coverageStyleTiles') %></option>
+							<option value="lines"><%= t('settings:coverageStyleLines') %></option>
+						</select>
+					</div>
+				</div>
+			</section>
+
+			<section class="settings-pane" role="tabpanel" id="settings-pane-maps" aria-labelledby="settings-tab-maps" hidden>
+				<h2 class="settings-pane-title"><%= t('settings:tabMaps') %></h2>
+				<p class="settings-pane-desc"><%= t('settings:mapsDesc') %></p>
+				<div class="settings-group-title"><%= t('settings:mapAppearanceGroup') %></div>
+				<div class="settings-card">
+					<div class="settings-row settings-row-stack">
+						<label for="setting-map-language" class="settings-row-label"><%= t('settings:mapLanguageLabel') %></label>
+						<p class="setting-desc" id="setting-map-language-desc"><%= t('settings:mapLanguageDesc') %></p>
+						<select class="date-input settings-row-control" id="setting-map-language" aria-describedby="setting-map-language-desc">
+							<option value="auto"><%= t('settings:mapLanguageAuto') %></option>
+							<option value="local"><%= t('settings:mapLanguageLocal') %></option>
+							<option value="pl">Polski</option>
+							<option value="en">English</option>
+						</select>
+					</div>
+				</div>
+				<div class="settings-group-title" id="setting-api-keys-label"><%= t('settings:apiKeysLabel') %></div>
+				<div class="settings-card">
+					<div class="settings-row settings-row-block">
+						<p class="setting-desc"><%= t('settings:apiKeysDesc') %></p>
+					</div>
+					<div id="setting-api-keys" role="group" aria-labelledby="setting-api-keys-label"></div>
+					<div class="settings-row settings-row-footer">
+						<button type="button" class="apply-filters-btn settings-save-btn" id="setting-api-keys-save"><%= t('settings:apiKeysSave') %></button>
+					</div>
+				</div>
+			</section>
+
+			<section class="settings-pane" role="tabpanel" id="settings-pane-data" aria-labelledby="settings-tab-data" hidden>
+				<h2 class="settings-pane-title"><%= t('settings:tabData') %></h2>
+				<p class="settings-pane-desc"><%= t('settings:dataDesc') %></p>
+				<div class="settings-card">
+					<div class="settings-row">
+						<div class="settings-row-text">
+							<div class="settings-row-label"><%= t('settings:resetLabel') %></div>
+							<p class="setting-desc"><%= t('settings:resetDesc') %></p>
+						</div>
+						<button type="button" class="settings-btn" id="setting-reset"><%= t('settings:resetButton') %></button>
+					</div>
+					<div class="settings-row">
+						<div class="settings-row-text">
+							<div class="settings-row-label"><%= t('settings:clearLabel') %></div>
+							<p class="setting-desc"><%= t('settings:clearDesc') %></p>
+						</div>
+						<button type="button" class="settings-btn settings-btn-danger" id="setting-clear-data"><%= t('settings:clearButton') %></button>
+					</div>
+				</div>
+				<p class="settings-footnote" id="setting-storage-usage"></p>
+			</section>
 		</div>
-
-		<div class="setting-item setting-item-select">
-			<label for="setting-elevation-source" class="setting-label"><%= t('settings:elevationSourceLabel') %></label>
-			<select class="date-input" id="setting-elevation-source" aria-describedby="setting-elevation-desc">
-				<option value="sefinek" selected><%= t('settings:elevationSefinek') %></option>
-				<option value="open-elevation"><%= t('settings:elevationOpenElevation') %></option>
-				<option value="open-meteo"><%= t('settings:elevationOpenMeteo') %></option>
-			</select>
-			<p class="setting-desc" id="setting-elevation-desc"><%= t('settings:elevationDesc') %></p>
-		</div>
-
-		<div class="setting-item setting-item-select">
-			<label for="setting-coverage-style" class="setting-label"><%= t('settings:coverageStyleLabel') %></label>
-			<select class="date-input" id="setting-coverage-style" aria-describedby="setting-coverage-style-desc">
-				<option value="tiles" selected><%= t('settings:coverageStyleTiles') %></option>
-				<option value="lines"><%= t('settings:coverageStyleLines') %></option>
-			</select>
-			<p class="setting-desc" id="setting-coverage-style-desc"><%= t('settings:coverageStyleDesc') %></p>
-		</div>
-
 	</div>
 </div>
 

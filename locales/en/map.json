@@ -25,7 +25,7 @@
 		"publicKey": "Public key",
 		"preset": "Radio preset",
 		"params": "Radio parameters",
-		"link": "Meshcore link"
+		"link": "MeshCore link"
 	},
 	"customPreset": "Custom",
 	"allPresetsOption": "All presets",
@@ -38,7 +38,7 @@
 	"copyInfoTitle": "Copy the device info to the clipboard",
 	"reportDeletionTitle": "Request removal of your node from the map",
 	"deletion": {
-		"ownerQuestion": "Are you sure you are the owner of this node?",
+		"ownerQuestion": "Are you the owner of this node?",
 		"yes": "Yes, I am the owner",
 		"no": "No",
 		"ownerOnly": "Only the owner can manage this node and request its removal from the map.",
@@ -69,7 +69,7 @@
 	"addContactLaunching": "Launching the MeshCore app...",
 	"addContactErrorTitle": "Failed to add contact",
 	"addContactErrorText": "Could not open the MeshCore app. Make sure you have the official MeshCore app installed, version 1.47.0 or newer - earlier versions don't support the meshcore:// protocol.",
-	"reportDeletion": "Report node removal",
+	"reportDeletion": "Request node removal",
 	"infoStatus": "Status",
 	"loadingAriaLabel": "Loading nodes",
 	"searchPlaceholder": "Search nodes...",
@@ -91,7 +91,7 @@
 	"noRadioData": "No data",
 	"shiftSearchHint": "Tip: press Shift to jump straight to search",
 	"highlightedNodes": "Highlighted {{count}} {{unit}}",
-	"previewProfileNodes": "Nodes of {{owner}}: {{count}}, others are hidden",
+	"previewProfileNodes": "Nodes owned by {{owner}}: {{count}} (others are hidden)",
 	"previewNodes": "Nodes: {{count}} (others are hidden)",
 	"newNodeUnit": ["new node", "new nodes"],
 	"noNodesInPeriod": "No nodes in the selected period.",
@@ -105,16 +105,46 @@
 	"repeatersCountTooltip": "Number of repeaters matching the filters",
 	"roomServersCountTooltip": "Number of room servers matching the filters",
 	"leafletTitle": "JS library for interactive maps",
-	"tileBaseMaps": "Tiles",
-	"vectorBaseMaps": "Vector",
 	"loadingBasemap": "Loading map...",
 	"basemapLoaded": "Map loaded",
-	"basemapFallback": "Failed to load the \"{{failed}}\" map. Switched to \"{{fallback}}\"",
+	"basemapFallback": "Map \"{{failed}}\" is unavailable: {{reason}}. Using \"{{fallback}}\".",
+	"basemapFailure": {
+		"denied": "access denied (HTTP {{status}}), possibly due to an exhausted quota or an invalid API key",
+		"limit": "too many requests (HTTP 429), the limit has probably been reached",
+		"server": "server error (HTTP {{status}})",
+		"network": "no connection to the server",
+		"unknown": "no valid response (possibly due to a request limit or a connection problem)",
+		"keyRejected": "the API key may have been rejected or its quota exhausted"
+	},
 	"basemapMissingApiKey": "The \"{{name}}\" map is unavailable (missing API key). Switched to the default map.",
-	"regionWarningTitle": "Are you sure?",
-	"regionWarningText": "Worldwide data weighs {{size}}, considerably more than just the nodes from Poland.  On older devices the map may also become somewhat less responsive.",
-	"downloadAnyway": "Download anyway",
+	"appBanner": {
+		"title": "Open in the MeshCore Map app?",
+		"text": "Open this link in the app for a native map and offline access to saved data.",
+		"open": "Open in app",
+		"dismiss": "Not now"
+	},
+	"basemapCategories": {
+		"maps": "Maps",
+		"satellite": "Satellite"
+	},
+	"basemapShown": "active",
+	"basemapUnavailable": "unavailable",
+	"basemapUsing": "Map \"{{failed}}\" is unavailable: {{reason}}. Showing \"{{active}}\".",
+	"basemapAllFailed": "No map could be loaded: {{reason}}.",
 	"defaultBasemap": "Default",
+	"basemapTypes": {
+		"tiles": "raster",
+		"vector": "vector"
+	},
+	"basemapTypeInfo": {
+		"tiles": "Raster tiles: ready-made images that use fewer device resources.",
+		"vector": "Vector map: rendered on your device using WebGL. Stays sharp when zooming in, but may use more device resources."
+	},
+	"basemapNeedsKey": "This map needs an API key. Add your own in the settings.",
+	"basemapNeedsKeyShort": "needs an API key",
+	"regionWarningTitle": "Download worldwide data?",
+	"regionWarningText": "Worldwide node data takes up {{size}}, considerably more than data for Poland alone. The map may also run more slowly on older devices.",
+	"downloadAnyway": "Download anyway",
 	"attributionSources": "Sources",
 	"tilesAttribution": {
 		"CartoDB Dark": "Tiles: &copy; <a href=\"https://carto.com/attribution\">CARTO</a> Data: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
@@ -129,15 +159,15 @@
 		"OpenFreeMap": "Tiles: &copy; <a href=\"https://openfreemap.org\">OpenFreeMap</a> &copy; <a href=\"https://www.openmaptiles.org\">OpenMapTiles</a> Data: &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
 	},
 	"baseMapInfo": {
-		"CartoDB Dark": "Dark street map from CARTO. Free with no stated request limit, but not meant for very heavy traffic.",
-		"CartoDB Positron": "Light, minimalist street map from CARTO. Free with no stated request limit, but not meant for very heavy traffic.",
-		"OpenStreetMap": "Standard OpenStreetMap map from the official tile server. Meant for regular browsing, not bulk downloads, heavy caching or offline use.",
-		"Esri Hybrid": "Esri satellite imagery with boundaries and place labels overlaid.",
+		"CartoDB Dark": "Dark street map from CARTO. Needs an API key; the free tier covers non-commercial use up to 5 million tile requests a month, shared by all of a customer's keys.",
+		"CartoDB Positron": "Light, minimalist street map from CARTO. Needs an API key; the free tier covers non-commercial use up to 5 million tile requests a month, shared by all of a customer's keys.",
+		"OpenStreetMap": "Standard OpenStreetMap map from the official tile server. A best-effort service for interactive viewing: no bulk downloads or prefetching, and heavy use may be blocked.",
+		"Esri Hybrid": "Esri satellite imagery with boundaries and place labels overlaid. Needs an ArcGIS API key (free monthly tier). Esri's terms do not allow storing its map data, so it is meant for online use.",
 		"OpenTopoMap": "Topographic map served by a community server with limited bandwidth. Avoid generating heavy traffic.",
-		"MapTiler Outdoor": "MapTiler outdoor map with roads, trails and topographic information.",
-		"MapTiler Hybrid": "MapTiler satellite imagery with boundaries and local place labels overlaid.",
+		"MapTiler Outdoor": "MapTiler outdoor map with roads, trails and topographic information. Requires an API key. The free plan is for non-commercial use, has a monthly quota and allows only temporary caching.",
+		"MapTiler Hybrid": "MapTiler satellite imagery with boundaries and local place labels overlaid. Requires an API key. The free plan is for non-commercial use, has a monthly quota and allows only temporary caching.",
 		"CyclOSM": "Cycling map based on OpenStreetMap data. Uses the openstreetmap.fr community server, so keep traffic moderate.",
-		"Humanitarian OSM": "Humanitarian OpenStreetMap style developed by HOT. Uses the openstreetmap.fr community server, so keep traffic moderate.",
-		"OpenFreeMap": "Vector street map rendered by MapLibre. Free with no stated request limit, but requires WebGL support and may be heavier on the device."
+		"Humanitarian OSM": "OpenStreetMap style developed by HOT for humanitarian work. Uses the openstreetmap.fr community server, so keep traffic moderate.",
+		"OpenFreeMap": "Vector street map rendered by MapLibre. Free, requires no API key and has no stated request limit. Requires WebGL support and may use more device resources."
 	}
 }

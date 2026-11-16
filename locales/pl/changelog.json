@@ -4,9 +4,9 @@
 			"version": "0.13.0",
 			"date": "15.11.2026",
 			"changes": [
-				"Rozwiązano problem z wylądem przycisków.",
+				"Rozwiązano problem z wyglądem przycisków.",
 				"Przycisk dodawania węzła na polskiej mapie prowadzi teraz do instrukcji w języku polskim (docs.meshcorepolska.org).",
-				"Uporządkowano strukturę projektu i wydzielono wspólną logikę mapy na potrzeby wersji przeglądarkowej i mobilnej. Wkrótce dostępna będzie aplikacja mobilna na telefony z mapą.",
+				"Uporządkowano strukturę projektu i wydzielono wspólną logikę mapy na potrzeby wersji przeglądarkowej i mobilnej. Wkrótce dostępna będzie aplikacja mobilna z mapą.",
 				"Zaktualizowano zależności backendu i frontendu do najnowszej wersji."
 			]
 		},
@@ -14,7 +14,7 @@
 			"version": "0.12.0",
 			"date": "08.11.2026",
 			"changes": [
-				"Przygotowanie dla MeshCore Profiles: osadzane mapy na profilach i podgląd węzłów użytkownika.",
+				"Przygotowano integrację z MeshCore Profiles: osadzanie map na profilach i podgląd węzłów użytkownika.",
 				"Zaktualizowano zależności backendu do najnowszych wersji."
 			]
 		},
@@ -71,7 +71,7 @@
 				"Zaktualizowano frontendowy msgpackr do wersji 2.1.2 oraz zależności backendu.",
 				"Naprawiono pozycjonowanie popupów węzłów, aby górna nawigacja nie zasłaniała ich treści.",
 				"Zwiększono limit punktów wysokościowych w warstwie zasięgu, aby rozdzielczość „Wysoka” (144 kierunki) zachowywała pełne próbkowanie wzdłuż promienia przy zasięgu 20 km.",
-				"Dodano opcję wyglądu warstwy zasięgu: domyślnie pokazywane są kafelki (linie są opcją), w których im ciemniejszy kafelek, tym większa szansa odbioru.",
+				"Dodano wybór wyglądu warstwy zasięgu: domyślnie wyświetlane są kafelki, a opcjonalnie można wybrać linie. Im ciemniejszy kafelek, tym większa szansa odbioru.",
 				"Usunięto pole „Zasięg maksymalny” w narzędziu „Warstwa zasięgu”.",
 				"Pole mocy ERP w narzędziu zasięgu nazwano „Moc nadawania ERP (dBm)”."
 			]
@@ -122,7 +122,7 @@
 			"changes": [
 				"Tymczasowo wyłączono mapy MapTiler (Hybrid, Outdoor) - klucz API unieważniony do 26.09.2026. Domyślną mapą jest teraz Esri Hybrid.",
 				"Dodano automatyczny fallback na inną mapę bazową, gdy aktywna nie wczyta się poprawnie (Esri Hybrid -> CartoDB Dark -> OpenStreetMap).",
-				"Inne, drobne poprawki."
+				"Inne drobne poprawki."
 			]
 		},
 		{
@@ -138,7 +138,7 @@
 			"version": "0.7.0",
 			"date": "28.08.2026",
 			"changes": [
-				"Dostosowano się do przeniesienia się upstreamu danych z map.meshcore.dev na map.meshcore.io.",
+				"Dostosowano mapę do zmiany adresu źródła danych z map.meshcore.dev na map.meshcore.io.",
 				"Zaimplementowano klucz API CARTO wymagany teraz przez ich serwis map rastrowych (dotyczy warstw CartoDB Dark i CartoDB Positron).",
 				"Dodano przycisk „Dodaj kontakt” dla repeaterów, room serwerów i companionów, który dodaje kontakt bezpośrednio w aplikacji MeshCore przez protokół meshcore://.",
 				"Dodano obsługę map MapTiler (mapa hybrydowa i terenowa), wymagającą osobnego klucza API.",
@@ -226,7 +226,7 @@
 				"Polska jako domyślnie wybrany region przy pierwszym uruchomieniu.",
 				"Dane przesyłane w kompaktowym formacie MessagePack; przy domyślnym widoku pobierane są tylko węzły z Polski.",
 				"Wyszukiwanie węzłów po nazwie i kluczu publicznym, z obsługą klawiatury.",
-				"Frontend zbudowany w HTML, CSS i JavaScript bez frameworka aplikacyjnego, nowoczesny kod."
+				"Frontend zbudowany w HTML, CSS i JavaScript, bez frameworka aplikacyjnego."
 			]
 		}
 	]

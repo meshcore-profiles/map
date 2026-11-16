@@ -2,7 +2,8 @@
 import { t, tRaw, plural } from './i18n.js';
 import { escapeHtml } from './pathtools.js';
 import { PALETTE } from '/core/colors.js';
-import { defaultBaseMapName, getNextFallbackBaseMap, getMaplibreBaseMapLayer, maplibreBaseMapOptions, tileBaseMaps, baseMapAttributions } from './basemaps.js';
+import { resolveBasemap, withBasemapFailure } from '/core/basemaps.js';
+import { catalog, getMaplibreBaseMapLayer, maplibreBaseMapOptions, tileBaseMaps, baseMapAttributions } from './basemaps.js';
 
 const TYPE_ICONS = { repeater: 'repeater', roomServer: 'room-server' };
 const LABELLED_LIMIT = 8;
@@ -80,7 +81,9 @@ if (!cover) L.control.zoom({ position: 'topright' }).addTo(map);
 
 let attribution = null;
 let activeLayer = null;
-const useBaseMap = async name => {
+let failures = {};
+const useBaseMap = async () => {
+	const { active: name } = resolveBasemap({ catalog, selected: null, failures });
 	try {
 		const layer = maplibreBaseMapOptions[name] ? await getMaplibreBaseMapLayer(name) : tileBaseMaps[name];
 		if (activeLayer) map.removeLayer(activeLayer);
@@ -93,11 +96,14 @@ const useBaseMap = async name => {
 		map.attributionControl.addAttribution(attribution);
 	} catch (err) {
 		console.error(`Base map "${name}" failed:`, err);
-		const next = getNextFallbackBaseMap(name);
-		if (next) await useBaseMap(next);
+		const next = withBasemapFailure(failures, name, err?.status);
+		if (next === failures) return;
+
+		failures = next;
+		await useBaseMap();
 	}
 };
-void useBaseMap(defaultBaseMapName);
+void useBaseMap();
 
 const coverIcon = kind => L.divIcon({
 	html: `<span class="embed-pulse"></span><svg width="34" height="34"><use href="/icons/node-types.svg#${TYPE_ICONS[kind]}"></use></svg>`,

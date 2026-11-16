@@ -1,21 +1,24 @@
 /* global L */
-import { createBasemapCatalog, DEFAULT_BASEMAP_SELECTION, ESRI_HYBRID_NAME } from '/core/basemaps.js';
+import { createBasemapCatalog, ESRI_HYBRID_NAME, mergeApiKeys } from '/core/basemaps.js';
+import { loadCustomApiKeys } from './api-keys.js';
+import { readMapLanguage } from './preferences.js';
 import { t, tRaw } from './i18n.js';
 import { escapeHtml } from './pathtools.js';
 
-const mapLanguage = window.MAP_CONFIG.mapLanguage || 'local';
+// Language of the labels on the vector maps: the visitor's choice, else the site's.
+const mapLanguage = readMapLanguage() || window.MAP_CONFIG.mapLanguage || 'local';
 const ESRI_ROADS_MIN_ZOOM = 12;
 
-// Names, URLs, default and fallback order are shared with the mobile app (packages/core/src/basemaps.js).
+// Names, URLs, default and fallback order are shared with the mobile app (packages/core/src/basemaps.js). Keys the visitor entered replace the server's.
 const catalog = createBasemapCatalog({
-	esriApiKey: window.MAP_CONFIG.esriApiKey,
-	cartoApiKey: window.MAP_CONFIG.cartoApiKey,
-	maptilerApiKey: window.MAP_CONFIG.maptilerApiKey,
+	...mergeApiKeys({
+		esriApiKey: window.MAP_CONFIG.esriApiKey,
+		cartoApiKey: window.MAP_CONFIG.cartoApiKey,
+		maptilerApiKey: window.MAP_CONFIG.maptilerApiKey,
+	}, loadCustomApiKeys()),
 	maptilerHybridMapId: window.MAP_CONFIG.maptilerHybridMapId,
 	mapLanguage,
 });
-const { defaultName: defaultBaseMapName, nextFallback: getNextFallbackBaseMap, resolve: resolveBaseMapName, isMissingKey: isBaseMapMissingKey } = catalog;
-
 const maplibreBaseMapOptions = Object.fromEntries(catalog.basemaps
 	.filter(basemap => basemap.group === 'vector')
 	.map(basemap => [basemap.name, { style: basemap.url, maxZoom: basemap.maxZoom }]));
@@ -35,12 +38,6 @@ const maplibreBaseMapPromises = {};
 
 const baseMapAttributions = tRaw('map:tilesAttribution');
 const baseMapInfo = tRaw('map:baseMapInfo');
-
-const getBaseMapGroups = () => [
-	{ label: t('map:tileBaseMaps'), names: Object.keys(tileBaseMaps) },
-	{ label: t('map:vectorBaseMaps'), names: Object.keys(maplibreBaseMapOptions) },
-].filter(group => group.names.length);
-const getBaseMapNames = () => getBaseMapGroups().flatMap(group => group.names);
 
 let maplibreLoadPromise = null;
 const loadMaplibreGL = () => {
@@ -63,10 +60,24 @@ const loadMaplibreGL = () => {
 	return maplibreLoadPromise;
 };
 
-const loadEsriStyle = async url => {
-	const response = await fetch(url);
-	if (!response.ok) throw new Error(`Esri style request failed (${response.status})`);
+// The error carries the HTTP status (0 = no answer), which the fallback toast turns into an explanation.
+const fetchStyleJson = async url => {
+	let response;
+	try {
+		response = await fetch(url);
+	} catch {
+		throw Object.assign(new Error('Map style request failed (no connection)'), { status: 0 });
+	}
+	if (!response.ok) throw Object.assign(new Error(`Map style request failed (${response.status})`), { status: response.status });
+
 	const style = await response.json();
+	// Esri answers an invalid or exhausted token with an error object (its code is the HTTP-like status), not always with an error status.
+	if (style?.error?.code) throw Object.assign(new Error(`Map style request failed (${style.error.code})`), { status: Number(style.error.code) });
+	return style;
+};
+
+const loadEsriStyle = async url => {
+	const style = await fetchStyleJson(url);
 	if (!Array.isArray(style.layers) || !style.sources) throw new Error('Invalid Esri basemap style');
 
 	for (const layer of style.layers) {
@@ -115,9 +126,7 @@ const getMaplibreBaseMapLayer = async name => {
 					`<details class="map-attribution-details"><summary>${escapeHtml(t('map:attributionSources'))}</summary>` +
 					`<div class="map-attribution-sources">${sources.map(escapeHtml).join('<br>')}</div></details>`;
 			} else if (mapLanguage !== 'local') {
-				const response = await fetch(options.style);
-				if (!response.ok) throw new Error(`Map style request failed (${response.status})`);
-				options.style = localizeMapStyle(await response.json(), mapLanguage);
+				options.style = localizeMapStyle(await fetchStyleJson(options.style), mapLanguage);
 			}
 			const layer = L.maplibreGL({ attributionControl: false, ...options });
 			maplibreBaseMaps[name] = layer;
@@ -130,17 +139,11 @@ const getMaplibreBaseMapLayer = async name => {
 };
 
 export {
-	isBaseMapMissingKey,
-	getNextFallbackBaseMap,
+	catalog,
 	maplibreBaseMapOptions,
 	tileBaseMaps,
 	maplibreBaseMaps,
 	baseMapAttributions,
 	baseMapInfo,
-	getBaseMapGroups,
-	getBaseMapNames,
-	defaultBaseMapName,
-	DEFAULT_BASEMAP_SELECTION,
-	resolveBaseMapName,
 	getMaplibreBaseMapLayer
 };

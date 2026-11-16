@@ -20,11 +20,11 @@ const rasterStyle = ({ url, maxZoom, tileSize = 256, subdomains }, attribution) 
 };
 
 // The catalogue (names, URLs, key requirements, default and fallback order) is shared with the website; here each entry only gets a MapLibre style.
-// keys: the basemap API keys from /api/v1/app-config (null until it loads, which leaves the maps that need no key).
+// keys: the user's own basemap API keys (none means only the maps that need no key). The native map caches tiles on disk, so maps whose terms forbid storing them (Esri) are left out.
 // attributions: credits per map name (the website's "map:tilesAttribution"); the map's attribution button shows them, which the tile providers require.
 export const createBasemaps = (keys, region, attributions = {}) => {
 	const site = SITES[region];
-	const catalog = createBasemapCatalog({ ...keys, maptilerHybridMapId: site.maptilerHybridMapId, mapLanguage: site.mapLanguage });
+	const catalog = createBasemapCatalog({ ...keys, maptilerHybridMapId: site.maptilerHybridMapId, mapLanguage: site.mapLanguage, cachesTiles: true });
 	const all = catalog.basemaps.map(basemap => ({ ...basemap, style: basemap.group === 'tiles' ? rasterStyle(basemap, attributions[basemap.name]) : basemap.url }));
 
 	return { ...catalog, all, byName: name => all.find(basemap => basemap.name === name) };

@@ -1,8 +1,8 @@
 {
-	"toggleTitle": "Trasa po nazwach lub hashach",
+	"toggleTitle": "Trasa według nazw lub kluczy",
 	"closeAria": "Zamknij okno trasy",
-	"title": "Trasa po nazwach lub hashach",
-	"desc": "Wpisz nazwy repeaterów, początki ich kluczy publicznych (pierwsze 2, 4 lub 6 znaków) albo całe klucze - w kolejności zgodnej z trasą. Poszczególne wartości oddzielaj przecinkami, znakiem „>” lub nowymi wierszami.",
+	"title": "Trasa według nazw lub kluczy",
+	"desc": "Wpisz nazwy węzłów, początki ich kluczy publicznych (np. pierwsze 2, 4 lub 6 znaków) albo pełne klucze w kolejności przebiegu trasy. Oddziel je przecinkami, znakiem „>” lub nowymi wierszami.",
 	"inputPlaceholder": "np. Piła_Wodna_Rpt > 3dae > bf83e1",
 	"draw": "Narysuj trasę",
 	"notFound": "nie znaleziono",

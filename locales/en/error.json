@@ -1,5 +1,5 @@
 {
-	"nodesNotAvailable": "Node data is not available yet, please try again.",
-	"radioPresetsNotAvailable": "Radio presets are not available yet, please try again.",
-	"internalServerError": "An internal server error occurred, please try again."
+	"nodesNotAvailable": "Node data is not available yet. Please try again.",
+	"radioPresetsNotAvailable": "Radio presets are not available yet. Please try again.",
+	"internalServerError": "An internal server error occurred. Please try again."
 }

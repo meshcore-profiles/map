@@ -27,37 +27,6 @@
 	overscroll-behavior: contain;
 }
 
-.modal-close-btn {
-	position: absolute;
-	top: 14px;
-	right: 14px;
-	z-index: 1;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 34px;
-	height: 34px;
-	padding: 0;
-	border: none;
-	background: transparent;
-	color: var(--text-muted);
-	transition: color 0.15s ease, transform 0.15s var(--ease);
-	cursor: pointer;
-}
-
-.modal-close-btn:hover {
-	color: var(--red-bright);
-}
-
-.modal-close-btn:active {
-	transform: scale(0.9);
-}
-
-.modal-close-btn .icon {
-	width: 20px;
-	height: 20px;
-}
-
 .node-header {
 	display: flex;
 	align-items: center;

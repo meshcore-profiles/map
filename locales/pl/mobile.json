@@ -11,7 +11,7 @@
 		"downloading": "Pobieranie danych węzłów... {{percent}}%",
 		"failed": "Nie udało się pobrać danych. Sprawdź połączenie z internetem.",
 		"retry": "Ponów",
-		"cancelled": "Pobieranie anulowane."
+		"cancelled": "Anulowano pobieranie."
 	},
 	"offline": {
 		"usingCache": "Nie udało się odświeżyć danych. Wyświetlane są dane zapisane na urządzeniu."
@@ -19,7 +19,7 @@
 	"settings": {
 		"languageAuto": "Automatyczny",
 		"haptics": "Wibracje",
-		"hapticsDesc": "Krótkie wibracje przy dotyku, wyborze opcji i ustawianiu punktów.",
+		"hapticsDesc": "Krótkie wibracje przy dotykaniu przycisków, wybieraniu opcji i wskazywaniu punktów.",
 		"rotateTilt": "Obracanie i pochylanie mapy",
 		"rotateTiltDesc": "Umożliwia obracanie i pochylanie mapy dwoma palcami.",
 		"data": "Dane węzłów",
@@ -38,5 +38,9 @@
 		"title": "Narzędzia",
 		"picking": "Dotknij mapy...",
 		"routeDesc": "Rysowanie trasy na podstawie nazw węzłów lub początków ich kluczy publicznych."
+	},
+	"basemap": {
+		"needsKey": "Ta mapa wymaga klucza API. Dodaj własny w ustawieniach.",
+		"noCache": "Ta mapa jest niedostępna w aplikacji, ponieważ jej dostawca nie zezwala na zapisywanie danych mapowych."
 	}
 }
