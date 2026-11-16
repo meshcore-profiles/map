@@ -134,7 +134,7 @@
 			"dismiss": "Not now"
 		},
 		"title": "Become an app tester",
-		"intro": "We are preparing the MeshCore Map Android app with a native map, offline data, terrain and coverage analysis, and route measuring. Before it can be published on Google Play, Google requires a closed test with at least 12 people for 14 days.",
+		"intro": "We are working on the MeshCore Map Android app with a native map. It also works offline: saved node data and previously viewed parts of the map are available without internet. It also includes terrain and coverage analysis and route measuring. Before the app can be published on Google Play, Google requires a closed test with at least 12 people for 14 days.",
 		"howTitle": "How it works",
 		"how": "Sign up with the email address of the Google account you use in the Play Store. We will add you to the tester list and send you an install link. The test lasts 14 days; all you need to do is stay in it and open the app from time to time. Feedback is welcome: if something does not work or you have an idea, let us know.",
 		"screenshots": "App screenshots",

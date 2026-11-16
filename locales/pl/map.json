@@ -135,7 +135,7 @@
 			"dismiss": "Nie teraz"
 		},
 		"title": "Zostań testerem aplikacji",
-		"intro": "Przygotowujemy aplikację MeshCore Map na Androida z natywną mapą, danymi offline, analizą terenu i zasięgu oraz pomiarem tras. Zanim trafi do Google Play, Google wymaga zamkniętych testów z udziałem co najmniej 12 osób przez 14 dni.",
+		"intro": "Pracujemy nad aplikacją MeshCore Map na Androida z natywną mapą. Działa też offline: zapisane dane węzłów i wcześniej przeglądane fragmenty mapy są dostępne bez internetu. Do tego dochodzi analiza terenu i zasięgu oraz pomiar tras. Zanim aplikacja trafi do Google Play, Google wymaga zamkniętego testu z udziałem co najmniej 12 osób przez 14 dni.",
 		"howTitle": "Jak to wygląda",
 		"how": "Zapisz się adresem e-mail powiązanym z kontem Google, którego używasz w sklepie Play. Dodamy Cię do listy testerów i wyślemy link do instalacji. Test trwa 14 dni i wystarczy zostać w nim przez ten czas oraz od czasu do czasu otworzyć aplikację. Będziemy wdzięczni za każdą opinię: jeśli coś nie działa albo masz pomysł na usprawnienie, napisz do nas.",
 		"screenshots": "Zrzuty ekranu aplikacji",
