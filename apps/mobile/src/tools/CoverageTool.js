@@ -4,7 +4,7 @@ import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSample
 import { destinationPoint, formatDistance } from '@meshcore-map/core/geo';
 import { getElevationsChunked, loadRadioPresets } from '../data/appConfig';
 import { useI18n } from '../i18n';
-import { Button, Chip, ChipRow, ChipScroll, Field, Heading, Hint, Stat } from '../ui/controls';
+import { Button, Chip, ChipScroll, Dropdown, Field, Heading, Hint, Stat } from '../ui/controls';
 import { ToolPanel } from '../ui/ToolPanel';
 import { colors, spacing } from '../theme';
 import { coverageTileFeatures } from './coverageTiles';
@@ -197,11 +197,13 @@ export const CoverageTool = ({ ctx }) => {
 					{presets.length > 0 && (
 						<>
 							<Heading>{t('coverage:preset')}</Heading>
-							<ChipScroll>
-								{presets.filter(p => p.params.freq).map(p => (
-									<Chip key={p.name} label={p.name} selected={Number(form.freq) === p.params.freq && Number(form.sf) === p.params.sf && Number(form.bw) === p.params.bw} onPress={() => applyPreset(p)} />
-								))}
-							</ChipScroll>
+							<Dropdown
+								options={presets.filter(p => p.params.freq).map(p => ({ value: p.name, label: p.name }))}
+								value={presets.find(p => p.params.freq && Number(form.freq) === p.params.freq && Number(form.sf) === p.params.sf && Number(form.bw) === p.params.bw)?.name ?? null}
+								placeholder={t('coverage:presetCustom')}
+								accessibilityLabel={t('coverage:preset')}
+								onChange={name => applyPreset(presets.find(p => p.name === name))}
+							/>
 						</>
 					)}
 					<View style={styles.grid}>
@@ -218,14 +220,14 @@ export const CoverageTool = ({ ctx }) => {
 						{BANDWIDTHS.map(bw => <Chip key={bw} label={String(bw)} selected={Number(form.bw) === bw} onPress={() => setField('bw')(String(bw))} />)}
 					</ChipScroll>
 					<Heading>{t('coverage:resolution')}</Heading>
-					<ChipRow>
+					<ChipScroll>
 						{Object.keys(RESOLUTION_LABELS).map(key => <Chip key={key} label={t(RESOLUTION_LABELS[key])} selected={form.resolution === key} onPress={() => setField('resolution')(key)} />)}
-					</ChipRow>
+					</ChipScroll>
 					<Hint>{t('coverage:estimate', { points: estimate })}</Hint>
 					{error && <Text style={styles.error}>{error}</Text>}
 					<View style={styles.actions}>
 						<Button style={styles.action} label={busy ? (progress ? t('coverage:fetchingElevationProgress', progress) : t('coverage:fetchingElevation')) : t('coverage:compute')} disabled={busy} onPress={compute} />
-						{summary && origin && <Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} onPress={() => share(`coverage=${[origin.lat.toFixed(5), origin.lng.toFixed(5), form.txHeight, form.rxHeight, form.freq, form.resolution, form.margin, form.erp, form.sf, form.bw].join(',')}`)} />}
+						{summary && origin && <Button style={styles.action} variant="secondary" label={t('common:share')} onPress={() => share(`coverage=${[origin.lat.toFixed(5), origin.lng.toFixed(5), form.txHeight, form.rxHeight, form.freq, form.resolution, form.margin, form.erp, form.sf, form.bw].join(',')}`)} />}
 						<Button style={styles.action} variant="ghost" label={t('common:clear')} onPress={reset} />
 					</View>
 					{summary && (

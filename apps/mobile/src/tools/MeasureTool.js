@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { formatDistance, haversineDistance } from '@meshcore-map/core/geo';
 import { truncateKey } from '@meshcore-map/core/node-utils';
 import { useI18n } from '../i18n';
-import { Button, Hint } from '../ui/controls';
+import { Button, Chip, ChipScroll, Heading, Hint } from '../ui/controls';
 import { ToolPanel } from '../ui/ToolPanel';
 import { colors, spacing } from '../theme';
 import { buildPathFeatures } from './pathFeatures';
@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
 const COLOR = colors.blue;
 // How a node's point is labelled: its name, or the first 1-3 bytes of its public key (as in repeater path hashes), or a short key.
 const LABEL_MODES = ['name', '1', '2', '3', 'mid'];
+const LABEL_MODE_KEYS = { name: 'name', 1: 'bytes1', 2: 'bytes2', 3: 'bytes3', mid: 'mid' };
 
 export const MeasureTool = ({ ctx }) => {
 	const { t } = useI18n();
@@ -60,13 +61,18 @@ export const MeasureTool = ({ ctx }) => {
 					<Text style={styles.rowValue}>{formatDistance(s.distance)}</Text>
 				</View>
 			))}
+			{points.length > 0 && (
+				<>
+					<Heading>{t('measure:labelsHeading')}</Heading>
+					<ChipScroll>
+						{LABEL_MODES.map(mode => <Chip key={mode} label={t(`measure:labelModes.${LABEL_MODE_KEYS[mode]}`)} selected={labelMode === mode} onPress={() => setLabelMode(mode)} />)}
+					</ChipScroll>
+				</>
+			)}
 			<View style={styles.actions}>
-				<Button style={styles.action} variant="secondary" label={t(`measure:labelModes.${labelMode === 'name' ? 'name' : labelMode === 'mid' ? 'mid' : `bytes${labelMode}`}`)} onPress={() => setLabelMode(mode => LABEL_MODES[(LABEL_MODES.indexOf(mode) + 1) % LABEL_MODES.length])} />
 				<Button style={styles.action} variant="secondary" label={t('measure:undo')} disabled={points.length === 0} onPress={() => setPoints(current => current.slice(0, -1))} />
 				<Button style={styles.action} variant="ghost" label={t('common:clear')} disabled={points.length === 0} onPress={() => setPoints([])} />
-			</View>
-			<View style={styles.actions}>
-				<Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} disabled={points.length === 0} onPress={() => share(`measure=${points.map(p => `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`).join(';')}`)} />
+				<Button style={styles.action} variant="secondary" label={t('common:share')} disabled={points.length === 0} onPress={() => share(`measure=${points.map(p => `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`).join(';')}`)} />
 			</View>
 		</ToolPanel>
 	);

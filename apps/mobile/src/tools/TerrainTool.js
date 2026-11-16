@@ -162,7 +162,7 @@ export const TerrainTool = ({ ctx }) => {
 					{error && <Text style={styles.error}>{error}</Text>}
 					<View style={styles.actions}>
 						<Button style={styles.action} label={busy ? t('terrain:fetchingElevation') : t('terrain:analyze')} disabled={busy} onPress={analyze} />
-						<Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} disabled={!points.a || !points.b} onPress={() => share(`terrain=${points.a.lat.toFixed(5)},${points.a.lng.toFixed(5)},${heights.a};${points.b.lat.toFixed(5)},${points.b.lng.toFixed(5)},${heights.b}`)} />
+						<Button style={styles.action} variant="secondary" label={t('common:share')} disabled={!points.a || !points.b} onPress={() => share(`terrain=${points.a.lat.toFixed(5)},${points.a.lng.toFixed(5)},${heights.a};${points.b.lat.toFixed(5)},${points.b.lng.toFixed(5)},${heights.b}`)} />
 						<Button style={styles.action} variant="ghost" label={t('common:clear')} onPress={reset} />
 					</View>
 					{summary && (

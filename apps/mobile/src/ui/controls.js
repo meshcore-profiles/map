@@ -50,6 +50,11 @@ const styles = StyleSheet.create({
 	optionText: { flex: 1, gap: 2 },
 	optionLabel: { color: colors.text, fontSize: 15 },
 	optionInfo: { color: colors.textMuted, fontSize: 12, lineHeight: 16 },
+	dropdownHead: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg },
+	dropdownValue: { flex: 1, color: colors.text, fontSize: 15 },
+	dropdownPlaceholder: { color: colors.textMuted },
+	dropdownList: { maxHeight: 260, marginTop: spacing.xs, borderRadius: radius.sm },
+	dropdownItems: { gap: spacing.xs },
 	divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
 });
 
@@ -193,6 +198,36 @@ export const Option = ({ label, info, selected, disabled, onPress }) => {
 			</View>
 			{selected && <Icon name="check" size={20} color={accentBright} />}
 		</Pressable>
+	);
+};
+
+// A list that opens inline under the field (no overlay), so it works inside a scrolling panel; value null shows the placeholder.
+export const Dropdown = ({ options, value, onChange, placeholder, accessibilityLabel }) => {
+	const [open, setOpen] = useState(false);
+	const selected = options.find(option => option.value === value);
+
+	return (
+		<View>
+			<Pressable style={styles.dropdownHead} onPress={() => {
+				haptics.tap();
+				setOpen(current => !current);
+			}} accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ expanded: open }}>
+				<Text style={[styles.dropdownValue, !selected && styles.dropdownPlaceholder]} numberOfLines={1}>{selected ? selected.label : placeholder}</Text>
+				<Svg width={16} height={16} viewBox="0 0 24 24" style={open ? { transform: [{ rotate: '180deg' }] } : null}>
+					<Path d="M6 9l6 6 6-6" fill="none" stroke={colors.textMuted} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+				</Svg>
+			</Pressable>
+			{open && (
+				<ScrollView style={styles.dropdownList} contentContainerStyle={styles.dropdownItems} nestedScrollEnabled keyboardShouldPersistTaps="handled">
+					{options.map(option => (
+						<Option key={option.value} label={option.label} selected={option.value === value} onPress={() => {
+							setOpen(false);
+							onChange(option.value);
+						}} />
+					))}
+				</ScrollView>
+			)}
+		</View>
 	);
 };
 
