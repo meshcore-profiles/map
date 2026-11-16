@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Camera, Map as MapView } from '@maplibre/maplibre-react-native';
 import { SITES, toMaplibreView } from '@meshcore-map/core/sites';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ import { TopBar } from '../components/TopBar';
 import { DEFAULT_VIEW } from '../config';
 import { useAppConfig } from '../data/appConfig';
 import { configureMapCache } from '../data/mapCache';
+import { useI18n } from '../i18n';
 import { useNodes } from '../state/NodesContext';
 import { useMapLink } from '../state/useMapLink';
 import { useSettings } from '../state/SettingsContext';
@@ -27,7 +28,8 @@ import { RouteTool } from '../tools/RouteTool';
 import { TerrainTool } from '../tools/TerrainTool';
 import { haptics } from '../ui/haptics';
 import { DOCKED_MAX_HEIGHT } from '../ui/Sheet';
-import { colors } from '../theme';
+import { colors, pill, shadow } from '../theme';
+import { Icon } from '../ui/Icon';
 import { useBasemap } from './useBasemap';
 import { useSavedCamera } from './useSavedCamera';
 
@@ -36,6 +38,9 @@ const styles = StyleSheet.create({
 	map: { flex: 1 },
 	// The native map is light until its style loads; this keeps the dark app background in the meantime.
 	curtain: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.bg },
+	focusBanner: { position: 'absolute', left: 16, right: 16, alignItems: 'center' },
+	focusPill: { ...pill, maxWidth: '100%', ...shadow },
+	focusText: { flexShrink: 1, color: colors.text, fontSize: 14, fontWeight: '500' },
 });
 
 const NO_PADDING = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -48,11 +53,14 @@ export const MapScreen = () => {
 	const { nodes, byType, radioOptions, filtered } = useNodes();
 	const config = useAppConfig();
 	const { region } = settings;
+	const { t, tRaw, plural } = useI18n();
 
 	const cameraRef = useRef(null);
 	const sourceRef = useRef(null);
 	const pickerRef = useRef(null);
 	const [selected, setSelected] = useState(null);
+	// A set of nodes shown instead of the whole map ("Show on map" in the statistics); null shows the filtered nodes.
+	const [focused, setFocused] = useState(null);
 	const [sheet, setSheet] = useState(null);
 	const [toolId, setToolId] = useState(null);
 	const [toolsOpen, setToolsOpen] = useState(false);
@@ -111,13 +119,17 @@ export const MapScreen = () => {
 	}, []);
 
 	const showNode = useCallback(node => {
+		setFocused(null);
 		setSelected(node);
 		flyToNode(node);
 	}, [flyToNode]);
 
 	const showRepeaters = useCallback(list => {
 		setSheet(null);
-		if (list.length) fitTo(boundsOf(list.map(node => ({ lat: node.lat, lng: node.lon }))));
+		if (!list.length) return;
+
+		setFocused(list);
+		fitTo(boundsOf(list.map(node => ({ lat: node.lat, lng: node.lon }))));
 	}, [fitTo]);
 
 	const selectNodeFromStats = useCallback(node => {
@@ -208,12 +220,21 @@ export const MapScreen = () => {
 			{mapReady && (
 				<MapView style={styles.map} mapStyle={mapStyle} logo={false} attribution={false} compass={settings.rotateTilt} compassPosition={compassPosition} onDidFinishLoadingStyle={handleStyleLoaded} touchRotate={settings.rotateTilt} touchPitch={settings.rotateTilt} onPress={handleMapPress} onRegionDidChange={handleRegionDidChange} onDidFailLoadingMap={handleStyleFailed}>
 					<Camera ref={cameraRef} initialViewState={savedCamera ?? { center: view.center, zoom: view.zoom }} />
-					{styleEpoch > 0 && <NodeLayer key={`nodes-${styleEpoch}`} scope={styleEpoch} nodes={filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />}
+					{styleEpoch > 0 && <NodeLayer key={`nodes-${styleEpoch}`} scope={styleEpoch} nodes={focused ?? filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />}
 					{styleEpoch > 0 && overlay && <OverlayLayer key={`overlay-${styleEpoch}`} scope={styleEpoch} features={overlay} />}
 				</MapView>
 			)}
 			{mapReady && styleEpoch === 0 && <View pointerEvents="none" style={styles.curtain} />}
 			{mapReady && <MapAttribution html={attribution} />}
+
+			{focused && (
+				<View pointerEvents="box-none" style={[styles.focusBanner, { top: insets.top + 124 }]}>
+					<Pressable style={styles.focusPill} onPress={() => setFocused(null)} accessibilityRole="button" accessibilityLabel={t('common:close')}>
+						<Text style={styles.focusText}>{t('map:highlightedNodes', { count: focused.length, unit: plural(focused.length, tRaw('map:newNodeUnit')) })}</Text>
+						<Icon name="close" size={18} color={colors.textMuted} />
+					</Pressable>
+				</View>
+			)}
 
 			<TopBar nodes={filtered} filters={settings.filters} onSelectNode={showNode} onOpenSheet={setSheet} />
 
