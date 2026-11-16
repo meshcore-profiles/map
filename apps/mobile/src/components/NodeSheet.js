@@ -98,14 +98,14 @@ const Preset = ({ node }) => {
 	const [presets, setPresets] = useState(null);
 
 	useEffect(() => {
-		let cancelled = false;
-		loadRadioPresets().then(list => !cancelled && setPresets(list)).catch(err => {
+		let canceled = false;
+		loadRadioPresets().then(list => !canceled && setPresets(list)).catch(err => {
 			console.error('Failed to load radio presets:', err);
-			if (!cancelled) setPresets([]);
+			if (!canceled) setPresets([]);
 		});
 
 		return () => {
-			cancelled = true;
+			canceled = true;
 		};
 	}, []);
 

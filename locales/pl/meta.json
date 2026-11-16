@@ -1,7 +1,7 @@
 {
 	"title": "Mapa węzłów {{brand}}",
 	"heading": "Interaktywna mapa sieci {{brand}}",
-	"description": "Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie. Sprawdź lokalizacje klientów, repeaterów, room serwerów i czujników.",
+	"description": "Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie. Sprawdź lokalizacje companionów, repeaterów, room serwerów i czujników.",
 	"keywords": "meshcore, mapa meshcore, meshcore polska, map, mesh, lora, węzły meshcore, repeater meshcore",
 	"ogImageAlt": "{{brand}}: społeczność sieci mesh",
 	"webAppName": "Mapa {{brand}}"

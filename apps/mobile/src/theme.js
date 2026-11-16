@@ -1,6 +1,6 @@
 import { NODE_TYPE_ICON_NAMES, PALETTE } from '@meshcore-map/core/colors';
 
-// Neutral palette shared by both themes (public/css/global.css). Accent colours depend on the theme: see state/ThemeContext.js.
+// Neutral palette shared by both themes (public/css/global.css). Accent colors depend on the theme: see state/ThemeContext.js.
 export const colors = {
 	bg: '#12151c',
 	panel: 'rgba(26, 29, 38, 0.92)',

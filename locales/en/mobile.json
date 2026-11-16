@@ -11,7 +11,7 @@
 		"downloading": "Downloading node data... {{percent}}%",
 		"failed": "Could not download the data. Check your internet connection.",
 		"retry": "Retry",
-		"cancelled": "Download cancelled."
+		"canceled": "Download canceled."
 	},
 	"offline": {
 		"usingCache": "Could not refresh the data. Showing data saved on your device."

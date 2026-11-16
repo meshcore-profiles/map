@@ -1,6 +1,6 @@
 {
 	"nodeTypes": {
-		"client": "Klient",
+		"client": "Companion",
 		"repeater": "Repeater",
 		"roomServer": "Room serwer",
 		"sensor": "Czujnik"
@@ -101,7 +101,7 @@
 	"polandOnlyLabel": "Tylko Polska",
 	"totalCountTooltip": "Łączna liczba węzłów pasujących do filtrów",
 	"totalLabel": "razem: ",
-	"clientsCountTooltip": "Liczba klientów pasujących do filtrów",
+	"clientsCountTooltip": "Liczba companionów pasujących do filtrów",
 	"repeatersCountTooltip": "Liczba repeaterów pasujących do filtrów",
 	"roomServersCountTooltip": "Liczba room serwerów pasujących do filtrów",
 	"leafletTitle": "Biblioteka JS do map interaktywnych",

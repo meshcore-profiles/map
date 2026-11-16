@@ -509,11 +509,11 @@ const _titleBrand = site.shortName || site.brandName; %>
 
 			<div class="legend-col">
 				<div class="modal-title"><%= t('legend:mapTitle') %></div>
-				<div class="legend-row"><svg class="legend-icon update-recent" width="20" height="20"><use href="/icons/node-types.svg#client"></use></svg><span><%= t('map:updateStatus.recent') %></span></div>
-				<div class="legend-row"><svg class="legend-icon update-stale" width="20" height="20"><use href="/icons/node-types.svg#client"></use></svg><span><%= t('map:updateStatus.stale') %></span></div>
-				<div class="legend-row"><svg class="legend-icon update-old" width="20" height="20"><use href="/icons/node-types.svg#client"></use></svg><span><%= t('map:updateStatus.old') %></span></div>
-				<div class="legend-row"><svg class="legend-icon update-extinct" width="20" height="20"><use href="/icons/node-types.svg#client"></use></svg><span><%= t('map:updateStatus.extinct') %></span></div>
-				<div class="legend-row"><svg class="legend-icon" width="20" height="20"><use href="/icons/node-types.svg#client"></use></svg><span><%= t('map:updateStatus.none') %></span></div>
+				<div class="legend-row"><span class="legend-dot update-recent"></span><span><%= t('map:updateStatus.recent') %></span></div>
+				<div class="legend-row"><span class="legend-dot update-stale"></span><span><%= t('map:updateStatus.stale') %></span></div>
+				<div class="legend-row"><span class="legend-dot update-old"></span><span><%= t('map:updateStatus.old') %></span></div>
+				<div class="legend-row"><span class="legend-dot update-extinct"></span><span><%= t('map:updateStatus.extinct') %></span></div>
+				<div class="legend-row"><span class="legend-dot"></span><span><%= t('map:updateStatus.none') %></span></div>
 			</div>
 		</div>
 

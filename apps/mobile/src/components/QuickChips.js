@@ -39,7 +39,7 @@ export const QuickChips = memo(({ nodes, onStats }) => {
 			{nodes.length > 0 && (
 				<>
 					<Chip icon={NODE_TYPE_ICONS[2]} label={format(counts.repeaters)} accessibilityLabel={t('map:repeatersCountTooltip')} onPress={onStats} />
-					<Chip icon="user" label={format(counts.clients)} accessibilityLabel={t('map:clientsCountTooltip')} onPress={onStats} />
+					<Chip icon={NODE_TYPE_ICONS[1]} label={format(counts.clients)} accessibilityLabel={t('map:clientsCountTooltip')} onPress={onStats} />
 					<Chip icon={NODE_TYPE_ICONS[3]} label={format(counts.roomServers)} accessibilityLabel={t('map:roomServersCountTooltip')} onPress={onStats} />
 				</>
 			)}

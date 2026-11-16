@@ -27,7 +27,7 @@ const parse = html => {
 	return parts.map(part => ({ ...part, text: part.text.replaceAll('&copy;', '©') }));
 };
 
-// Always visible credits of the active basemap, as the website shows them (the licences of the tile providers require them); the links open the providers' terms.
+// Always visible credits of the active basemap, as the website shows them (the licenses of the tile providers require them); the links open the providers' terms.
 export const MapAttribution = memo(({ html }) => {
 	const { accentBright } = useTheme();
 	const insets = useSafeAreaInsets();

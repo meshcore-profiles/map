@@ -11,7 +11,7 @@
 		"downloading": "Pobieranie danych węzłów... {{percent}}%",
 		"failed": "Nie udało się pobrać danych. Sprawdź połączenie z internetem.",
 		"retry": "Ponów",
-		"cancelled": "Anulowano pobieranie."
+		"canceled": "Anulowano pobieranie."
 	},
 	"offline": {
 		"usingCache": "Nie udało się odświeżyć danych. Wyświetlane są dane zapisane na urządzeniu."

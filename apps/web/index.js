@@ -104,6 +104,7 @@ app.use(helmet({
 app.use(cors({ origin: SAFE_ORIGINS }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/core', express.static(path.join(__dirname, '../../packages/core/src')));
+app.use(require('./routes/AppLinks.js'));
 app.use((req, res, next) => {
 	req.site = resolveSite(req);
 	next();

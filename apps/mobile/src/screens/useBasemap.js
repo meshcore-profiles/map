@@ -55,7 +55,7 @@ export const useBasemap = ({ config, settings, update }) => {
 	const basemaps = useMemo(() => createBasemaps(mergeApiKeys(config?.basemaps, settings.apiKeys), settings.region, attributions), [config, settings.apiKeys, settings.region, attributions]);
 	// Maps that failed to load in this session. The wanted map is replaced only for the session: saving the fallback would keep the app on it for good, even after the keys are fixed or the network is back.
 	const [failures, setFailures] = useState({});
-	// The native side can report one failing style several times, so a failure is recognised against the latest value, not the one of the last render.
+	// The native side can report one failing style several times, so a failure is recognized against the latest value, not the one of the last render.
 	const failuresRef = useRef(failures);
 	useEffect(() => {
 		failuresRef.current = failures;
@@ -103,22 +103,22 @@ export const useBasemap = ({ config, settings, update }) => {
 	useEffect(() => {
 		if (!url || fetched[url]) return undefined;
 
-		let cancelled = false;
+		let canceled = false;
 		loadStyle(active, url)
-			.then(style => !cancelled && setFetched(current => ({ ...current, [url]: style })))
+			.then(style => !canceled && setFetched(current => ({ ...current, [url]: style })))
 			.catch(err => {
-				if (cancelled) return;
+				if (canceled) return;
 
 				console.warn(`Basemap "${active}" unavailable:`, err.message);
 				fail(active, err.status);
 			});
 
 		return () => {
-			cancelled = true;
+			canceled = true;
 		};
 	}, [url, fetched, active, fail]);
 
-	// Raster styles are built locally; comparing the serialised form keeps the map from reloading an identical one when the config arrives.
+	// Raster styles are built locally; comparing the serialized form keeps the map from reloading an identical one when the config arrives.
 	const rasterKey = url ? null : JSON.stringify(activeBasemap.style);
 	const rasterStyle = useMemo(() => activeBasemap.style, [rasterKey]);
 	const mapStyle = url ? fetched[url] ?? null : rasterStyle;

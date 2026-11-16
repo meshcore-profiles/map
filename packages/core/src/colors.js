@@ -1,4 +1,4 @@
-// Colours shared by the website (JS parts) and the mobile app. CSS keeps its own variables (public/css/global.css).
+// Colors shared by the website (JS parts) and the mobile app. CSS keeps its own variables (public/css/global.css).
 export const PALETTE = {
 	blue: '#4dabf7',
 	green: '#2dd881',

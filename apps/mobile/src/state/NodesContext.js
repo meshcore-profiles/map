@@ -66,7 +66,7 @@ export const NodesProvider = ({ children }) => {
 	const cancel = useCallback(() => {
 		abortRef.current?.abort();
 		setProgress(0);
-		setError(Object.assign(new Error('Download cancelled'), { cancelled: true }));
+		setError(Object.assign(new Error('Download canceled'), { canceled: true }));
 		setPhase(current => current === 'downloading' ? 'error' : 'ready');
 	}, []);
 

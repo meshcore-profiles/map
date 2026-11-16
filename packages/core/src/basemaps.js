@@ -1,4 +1,4 @@
-// Base map catalogue shared by the website (Leaflet) and the mobile app (MapLibre Native): names, URLs, key requirements, default and fallback order.
+// Base map catalog shared by the website (Leaflet) and the mobile app (MapLibre Native): names, URLs, key requirements, default and fallback order.
 // Each renderer turns the plain descriptors into its own layer type.
 // What a map shows, which is how the maps are grouped for the user (not how they are rendered): street and terrain maps are one group.
 export const BASEMAP_CATEGORIES = ['maps', 'satellite'];
@@ -50,7 +50,7 @@ export const OPENFREEMAP_NAME = 'OpenFreeMap';
 
 // group 'tiles': raster tiles (tileSize 512 means "@2x" tiles addressed one zoom level lower), group 'vector': a style document URL.
 // "forbidsCaching": the provider's terms do not allow storing its map data, so a client that caches tiles on disk (the app) leaves the map out.
-// "requires" names the key in the catalogue options that has to be present. {r} is the optional retina suffix of Leaflet.
+// "requires" names the key in the catalog options that has to be present. {r} is the optional retina suffix of Leaflet.
 const DEFINITIONS = [
 	{ name: CARTO_DARK_NAME, category: 'maps', group: 'tiles', requires: 'cartoApiKey', maxZoom: 20, subdomains: 'abcd', url: ({ cartoApiKey }) => `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoApiKey)}` },
 	{ name: CARTO_POSITRON_NAME, category: 'maps', group: 'tiles', requires: 'cartoApiKey', maxZoom: 20, subdomains: 'abcd', url: ({ cartoApiKey }) => `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(cartoApiKey)}` },

@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
 });
 
 const COLOR = colors.blue;
-// How a node's point is labelled: its name, or the first 1-3 bytes of its public key (as in repeater path hashes), or a short key.
+// How a node's point is labeled: its name, or the first 1-3 bytes of its public key (as in repeater path hashes), or a short key.
 const LABEL_MODES = ['name', '1', '2', '3', 'mid'];
 const LABEL_MODE_KEYS = { name: 'name', 1: 'bytes1', 2: 'bytes2', 3: 'bytes3', mid: 'mid' };
 

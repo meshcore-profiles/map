@@ -40,7 +40,7 @@ for (const [type, id] of Object.entries(NODE_TYPE_ICON_NAMES)) {
 	for (const [status, color] of Object.entries(STATUS_COLORS)) write(`${id}-${status}`, render(id, body => body.replaceAll('var(--node-color, #667b89)', color)));
 }
 
-// White person glyph drawn on a client's coloured disc when its name has no letter the map font can render (e.g. an emoji).
+// White person glyph drawn on a client's colored disc when its name has no letter the map font can render (e.g. an emoji).
 write('client-glyph', render(`${NODE_TYPE_ICON_NAMES[1]}-plain`, body => body.replaceAll('currentColor', '#fff')));
 
 const entries = names.map(name => `\t'${name}': require('../../assets/nodes/${name}.png'),`);

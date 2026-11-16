@@ -1,4 +1,4 @@
-// Accent colours of the two sites (the --red* variables in apps/web/public/css/themes/{global,poland}.css; test/themes.test.js keeps them in sync).
+// Accent colors of the two sites (the --red* variables in apps/web/public/css/themes/{global,poland}.css; test/themes.test.js keeps them in sync).
 export const THEMES = {
 	global: {
 		accent: '#6366f1',

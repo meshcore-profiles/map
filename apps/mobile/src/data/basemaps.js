@@ -19,7 +19,7 @@ const rasterStyle = ({ url, maxZoom, tileSize = 256, subdomains }, attribution) 
 	};
 };
 
-// The catalogue (names, URLs, key requirements, default and fallback order) is shared with the website; here each entry only gets a MapLibre style.
+// The catalog (names, URLs, key requirements, default and fallback order) is shared with the website; here each entry only gets a MapLibre style.
 // keys: the user's own basemap API keys (none means only the maps that need no key). The native map caches tiles on disk, so maps whose terms forbid storing them (Esri) are left out.
 // attributions: credits per map name (the website's "map:tilesAttribution"); the map's attribution button shows them, which the tile providers require.
 export const createBasemaps = (keys, region, attributions = {}) => {

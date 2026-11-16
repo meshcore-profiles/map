@@ -1,6 +1,6 @@
 {
 	"nodeTypes": {
-		"client": "Client",
+		"client": "Companion",
 		"repeater": "Repeater",
 		"roomServer": "Room server",
 		"sensor": "Sensor"
@@ -101,7 +101,7 @@
 	"polandOnlyLabel": "Poland only",
 	"totalCountTooltip": "Total number of nodes matching the filters",
 	"totalLabel": "total: ",
-	"clientsCountTooltip": "Number of clients matching the filters",
+	"clientsCountTooltip": "Number of companions matching the filters",
 	"repeatersCountTooltip": "Number of repeaters matching the filters",
 	"roomServersCountTooltip": "Number of room servers matching the filters",
 	"leafletTitle": "JS library for interactive maps",

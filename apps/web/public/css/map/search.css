@@ -40,6 +40,11 @@
 	cursor: pointer;
 }
 
+#search-results li svg {
+	flex-shrink: 0;
+	color: var(--red-bright);
+}
+
 #search-results li:hover, #search-results li.active {
 	background: var(--bg-panel-hover);
 }

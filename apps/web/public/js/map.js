@@ -36,8 +36,8 @@ const typeName = type => t(`map:nodeTypes.${NODE_TYPE_KEYS[type]}`);
 const statusDesc = status => t(`map:updateStatus.${status}`);
 
 const radioParamDesc = {
-	'bw': { unit: 'kHz', short: '' },
-	'freq': { unit: 'MHz', short: '' },
+	'bw': { unit: ' kHz', short: '' },
+	'freq': { unit: ' MHz', short: '' },
 	'sf': { unit: '', short: 'SF' },
 	'cr': { unit: '', short: 'CR' },
 };
@@ -351,7 +351,7 @@ const closeFiltersOnApplyCheckbox = document.getElementById('setting-close-filte
 const elevationSourceSelect = document.getElementById('setting-elevation-source');
 const elevationSourceDesc = document.getElementById('setting-elevation-desc');
 const coverageStyleSelect = document.getElementById('setting-coverage-style');
-initAppBanner();
+if (window.MAP_CONFIG.features?.appBanner) initAppBanner();
 const settingsTabs = initSettingsTabs(document.getElementById('settings-tabs'));
 initBasemapManager({
 	map,
@@ -756,7 +756,7 @@ const renderStats = () => {
 
 	statsCounts.innerHTML = `
 		<span class="pointer-help" title="${t('map:totalCountTooltip')}"><span class="stats-total-label">${t('map:totalLabel')}</span><b>${nodes.length}</b></span>&nbsp;|
-		<svg class="icon pointer-help"><title>${t('map:clientsCountTooltip')}</title><use href="/icons/icons.svg#user"></use></svg><b>${clients}</b>&nbsp;|
+		<svg class="icon icon-filled pointer-help"><title>${t('map:clientsCountTooltip')}</title><use href="/icons/node-types.svg#client-plain"></use></svg><b>${clients}</b>&nbsp;|
 		<svg class="icon icon-filled pointer-help"><title>${t('map:repeatersCountTooltip')}</title><use href="/icons/node-types.svg#repeater-plain"></use></svg><b>${repeaters}</b>&nbsp;|
 		<svg class="icon icon-filled pointer-help"><title>${t('map:roomServersCountTooltip')}</title><use href="/icons/node-types.svg#room-server-plain"></use></svg><b>${roomServers}</b>`;
 
@@ -977,7 +977,7 @@ const downloadNodes = async region => {
 		for (let offset = 0; offset < nodes.length; offset += CHUNK_SIZE) {
 			const end = Math.min(offset + CHUNK_SIZE, nodes.length);
 
-			if (abortController.signal.aborted) throw new DOMException('Cancelled by user', 'AbortError');
+			if (abortController.signal.aborted) throw new DOMException('Canceled by user', 'AbortError');
 
 			setLoadingStatus(t('map:processingNodes', { end, total: nodes.length }));
 			setLoadingProgress('process', end / nodes.length);
@@ -1002,7 +1002,7 @@ const downloadNodes = async region => {
 			}
 		}
 
-		if (abortController.signal.aborted) throw new DOMException('Cancelled by user', 'AbortError');
+		if (abortController.signal.aborted) throw new DOMException('Canceled by user', 'AbortError');
 
 		setLoadingStatus(t('map:fetchingPresets'));
 		setLoadingProgress('presets', 0);

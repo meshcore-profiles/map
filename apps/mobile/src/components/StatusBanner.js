@@ -46,7 +46,7 @@ export const StatusBanner = () => {
 
 	return (
 		<View style={styles.status} accessibilityLiveRegion="polite">
-			<Text style={styles.text} numberOfLines={2}>{error.cancelled ? t('mobile:loading.cancelled') : t('mobile:loading.failed')}</Text>
+			<Text style={styles.text} numberOfLines={2}>{error.canceled ? t('mobile:loading.canceled') : t('mobile:loading.failed')}</Text>
 			<Pressable onPress={() => refresh({ force: true })} accessibilityRole="button" hitSlop={8}>
 				<Text style={[styles.action, { color: accentBright }]}>{t('mobile:loading.retry')}</Text>
 			</Pressable>

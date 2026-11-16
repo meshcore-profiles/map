@@ -9,7 +9,7 @@ import { SITES, toMaplibreView } from '../src/sites.js';
 import { toastDuration } from '../src/toast.js';
 import { parseAppVersion } from '../src/version.js';
 
-test('basemap catalogue without keys defaults to the keyless OpenStreetMap', () => {
+test('basemap catalog without keys defaults to the keyless OpenStreetMap', () => {
 	const catalog = createBasemapCatalog({});
 	assert.equal(catalog.defaultName, OPENSTREETMAP_NAME);
 	assert.deepEqual(catalog.fallbackChain, [OPENSTREETMAP_NAME, OPENFREEMAP_NAME]);

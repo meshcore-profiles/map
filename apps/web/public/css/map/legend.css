@@ -86,6 +86,15 @@
 	flex-shrink: 0;
 }
 
+.legend-dot {
+	flex-shrink: 0;
+	width: 14px;
+	height: 14px;
+	margin: 3px;
+	border-radius: 50%;
+	background: var(--node-color, #667b89);
+}
+
 .legend-icon-plain {
 	color: var(--red-bright);
 }

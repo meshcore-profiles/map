@@ -16,7 +16,7 @@ const clientLabel = name => {
 	return TEXT_LABEL.test(label) ? label : '';
 };
 
-// GeoJSON feature built once per node, so changing filters does not recompute labels, colours and coordinates.
+// GeoJSON feature built once per node, so changing filters does not recompute labels, colors and coordinates.
 const toFeature = node => {
 	let feature = featureCache.get(node);
 	if (!feature) {

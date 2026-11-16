@@ -6,7 +6,7 @@ import { resolveBasemap, withBasemapFailure } from '/core/basemaps.js';
 import { catalog, getMaplibreBaseMapLayer, maplibreBaseMapOptions, tileBaseMaps, baseMapAttributions } from './basemaps.js';
 
 const TYPE_ICONS = { repeater: 'repeater', roomServer: 'room-server' };
-const LABELLED_LIMIT = 8;
+const LABELED_LIMIT = 8;
 const COVER_ZOOM = 11;
 const EARTH_RADIUS_KM = 6371.0088;
 const lang = window.MAP_CONFIG.languageCode;
@@ -138,7 +138,7 @@ const popupHtml = point => `
 		<a class="embed-popup__link" href="${window.MAP_CONFIG.homeUrl}?node=${point.k}" target="_blank" rel="noopener">${escapeHtml(t('embed:openNode'))}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
 	</div>`;
 
-const labelled = points.length <= LABELLED_LIMIT;
+const labeled = points.length <= LABELED_LIMIT;
 for (const point of points) {
 	if (cover) {
 		L.marker([point.a, point.o], { icon: coverIcon(point.t), interactive: false, keyboard: false }).addTo(map);
@@ -146,7 +146,7 @@ for (const point of points) {
 	}
 
 	L.marker([point.a, point.o], { icon: pinIcon(point.t), title: point.n, riseOnHover: true })
-		.bindTooltip(escapeHtml(point.n), { direction: 'bottom', permanent: labelled, className: 'embed-tip', opacity: 1 })
+		.bindTooltip(escapeHtml(point.n), { direction: 'bottom', permanent: labeled, className: 'embed-tip', opacity: 1 })
 		.bindPopup(popupHtml(point), { closeButton: false, className: 'embed-popup-wrap', offset: [0, -2], minWidth: 220, maxWidth: 280 })
 		.addTo(map);
 }
