@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '../state/ThemeContext';
-import { colors, MIN_TOUCH, radius, spacing } from '../theme';
+import { colors, MIN_TOUCH, radius, shadow, spacing } from '../theme';
 import { haptics } from './haptics';
 import { Icon } from './Icon';
 
@@ -53,8 +54,9 @@ const styles = StyleSheet.create({
 	dropdownHead: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg },
 	dropdownValue: { flex: 1, color: colors.text, fontSize: 15 },
 	dropdownPlaceholder: { color: colors.textMuted },
-	dropdownList: { maxHeight: 260, marginTop: spacing.xs, borderRadius: radius.sm },
-	dropdownItems: { gap: spacing.xs },
+	dropdownMenu: { position: 'absolute', maxHeight: 280, borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderStrong, backgroundColor: colors.panelSolid, overflow: 'hidden', ...shadow },
+	dropdownItem: { minHeight: MIN_TOUCH, flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.md },
+	dropdownItemText: { flex: 1, color: colors.text, fontSize: 15 },
 	divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
 });
 
@@ -201,32 +203,61 @@ export const Option = ({ label, info, selected, disabled, onPress }) => {
 	);
 };
 
-// A list that opens inline under the field (no overlay), so it works inside a scrolling panel; value null shows the placeholder.
+// A menu that floats over the screen under the field (above it when there is no room below), like a browser's select; it does not push the content.
+// Value null shows the placeholder.
 export const Dropdown = ({ options, value, onChange, placeholder, accessibilityLabel }) => {
-	const [open, setOpen] = useState(false);
+	const { accentBright } = useTheme();
+	const insets = useSafeAreaInsets();
+	const { height: windowHeight } = useWindowDimensions();
+	const headRef = useRef(null);
+	const [anchor, setAnchor] = useState(null);
 	const selected = options.find(option => option.value === value);
+
+	const open = () => {
+		haptics.tap();
+		headRef.current?.measureInWindow((x, y, width, height) => setAnchor({ x, y, width, height }));
+	};
+
+	const close = () => setAnchor(null);
+
+	// The menu is as tall as its rows (up to the cap) and opens on the side with more room.
+	const menuStyle = () => {
+		const gap = 4;
+		const wanted = Math.min(280, options.length * MIN_TOUCH);
+		const below = windowHeight - insets.bottom - (anchor.y + anchor.height) - gap - spacing.sm;
+		const above = anchor.y - insets.top - gap - spacing.sm;
+		const base = { left: anchor.x, width: anchor.width };
+
+		if (below >= wanted || below >= above) return { ...base, top: anchor.y + anchor.height + gap, maxHeight: Math.min(280, below) };
+
+		return { ...base, bottom: windowHeight - anchor.y + gap, maxHeight: Math.min(280, above) };
+	};
 
 	return (
 		<View>
-			<Pressable style={styles.dropdownHead} onPress={() => {
-				haptics.tap();
-				setOpen(current => !current);
-			}} accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ expanded: open }}>
+			<Pressable ref={headRef} collapsable={false} style={styles.dropdownHead} onPress={open} accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ expanded: Boolean(anchor) }}>
 				<Text style={[styles.dropdownValue, !selected && styles.dropdownPlaceholder]} numberOfLines={1}>{selected ? selected.label : placeholder}</Text>
-				<Svg width={16} height={16} viewBox="0 0 24 24" style={open ? { transform: [{ rotate: '180deg' }] } : null}>
+				<Svg width={16} height={16} viewBox="0 0 24 24">
 					<Path d="M6 9l6 6 6-6" fill="none" stroke={colors.textMuted} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
 				</Svg>
 			</Pressable>
-			{open && (
-				<ScrollView style={styles.dropdownList} contentContainerStyle={styles.dropdownItems} nestedScrollEnabled keyboardShouldPersistTaps="handled">
-					{options.map(option => (
-						<Option key={option.value} label={option.label} selected={option.value === value} onPress={() => {
-							setOpen(false);
-							onChange(option.value);
-						}} />
-					))}
-				</ScrollView>
-			)}
+			<Modal visible={Boolean(anchor)} transparent animationType="fade" onRequestClose={close} statusBarTranslucent navigationBarTranslucent>
+				<Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityLabel={accessibilityLabel} />
+				{anchor && (
+					<ScrollView style={[styles.dropdownMenu, menuStyle()]} keyboardShouldPersistTaps="handled" accessibilityRole="menu">
+						{options.map(option => (
+							<Pressable key={option.value} style={({ pressed }) => [styles.dropdownItem, pressed && { backgroundColor: colors.chip }]} onPress={() => {
+								haptics.select();
+								close();
+								onChange(option.value);
+							}} accessibilityRole="menuitem" accessibilityState={{ selected: option.value === value }}>
+								<Text style={[styles.dropdownItemText, option.value === value && { color: accentBright, fontWeight: '600' }]} numberOfLines={2}>{option.label}</Text>
+								{option.value === value && <Icon name="check" size={20} color={accentBright} />}
+							</Pressable>
+						))}
+					</ScrollView>
+				)}
+			</Modal>
 		</View>
 	);
 };
