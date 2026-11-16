@@ -135,12 +135,14 @@ app.use(timeout());
 const IndexRouter = require('./routes/Index.js');
 const APIRouter = require('./routes/Api.js');
 const NodeDeletionRouter = require('./routes/NodeDeletion.js');
+const TesterSignupRouter = require('./routes/TesterSignup.js');
 const EmbedRouter = require('./routes/Embed.js');
 
 app.use(IndexRouter);
 app.use(EmbedRouter);
 app.use('/api/v1', APIRouter);
 app.use('/api/v1', NodeDeletionRouter);
+app.use('/api/v1', TesterSignupRouter);
 
 
 // Error handling

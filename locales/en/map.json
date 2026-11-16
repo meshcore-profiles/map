@@ -93,7 +93,10 @@
 	"highlightedNodes": "Showing {{count}} {{unit}}",
 	"previewProfileNodes": "Nodes owned by {{owner}}: {{count}} (others are hidden)",
 	"previewNodes": "Nodes: {{count}} (others are hidden)",
-	"newNodeUnit": ["new node", "new nodes"],
+	"newNodeUnit": [
+		"new node",
+		"new nodes"
+	],
 	"noNodesInPeriod": "No nodes in the selected period.",
 	"showPolandOnly": "Show only Polish nodes",
 	"showAllWorld": "Show all nodes worldwide",
@@ -122,6 +125,38 @@
 		"text": "Open this link in the app for a native map and offline access to saved data.",
 		"open": "Open in app",
 		"dismiss": "Not now"
+	},
+	"testers": {
+		"banner": {
+			"title": "We are looking for MeshCore Map Android testers",
+			"text": "The app is coming to Google Play soon. Join the closed test and help us polish it.",
+			"join": "I want to help",
+			"dismiss": "Not now"
+		},
+		"title": "Become an app tester",
+		"intro": "We are preparing the MeshCore Map Android app with a native map, offline data, terrain and coverage analysis, and route measuring. Before it can be published on Google Play, Google requires a closed test with at least 12 people for 14 days.",
+		"howTitle": "How it works",
+		"how": "Sign up with the email address of the Google account you use in the Play Store. We will add you to the tester list and send you an install link. The test lasts 14 days; all you need to do is stay in it and open the app from time to time. Feedback is welcome: if something does not work or you have an idea, let us know.",
+		"screenshots": "App screenshots",
+		"emailLabel": "Google account email",
+		"emailPlaceholder": "your.address@gmail.com",
+		"consent": "I agree to the processing of my email address to add me to the closed test and to contact me about it. The address will be deleted once testing ends. I can ask for its removal at any time.",
+		"submit": "Sign up",
+		"close": "Close",
+		"loading": "Loading Cloudflare Turnstile...",
+		"waiting": "Waiting for verification...",
+		"sending": "Saving...",
+		"success": "Thank you! We saved your address and will get back to you with further instructions soon.",
+		"errors": {
+			"unavailable": "Sign-ups are temporarily unavailable. Please try again later.",
+			"invalidRequest": "Enter a valid email address and tick the consent box.",
+			"captcha": "Cloudflare Turnstile verification failed. Please try again.",
+			"expired": "Verification expired. Please try again.",
+			"load": "Could not load Cloudflare Turnstile. Check your connection and content blocker settings, then try again.",
+			"request": "Could not save your sign-up. Please try again.",
+			"rateLimited": "Too many attempts. Please try again later."
+		},
+		"zoom": "Enlarge screenshot"
 	},
 	"basemapCategories": {
 		"maps": "Maps",

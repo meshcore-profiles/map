@@ -1,7 +1,7 @@
 const axios = require('../../../global/services/axios.js');
 const secret = process.env.TURNSTILE_SECRET;
 
-module.exports = async (token, ip, hostname, publicKey) => {
+module.exports = async (token, ip, hostname, { action, cdata }) => {
 	if (typeof token !== 'string' || !token || token.length > 2048) return false;
 	if (!secret) return false;
 
@@ -19,8 +19,8 @@ module.exports = async (token, ip, hostname, publicKey) => {
 
 		if (data.metadata?.result_with_testing_key === true) return process.env.NODE_ENV !== 'production';
 
-		const valid = data.hostname === hostname && data.action === 'node-deletion' && data.cdata === publicKey;
-		if (!valid) console.warn(`Turnstile token mismatch: hostname=${data.hostname} (expected ${hostname}), action=${data.action}, cdata match=${data.cdata === publicKey}`);
+		const valid = data.hostname === hostname && data.action === action && (cdata === undefined || data.cdata === cdata);
+		if (!valid) console.warn(`Turnstile token mismatch: hostname=${data.hostname} (expected ${hostname}), action=${data.action} (expected ${action}), cdata match=${cdata === undefined || data.cdata === cdata}`);
 
 		return valid;
 	} catch (err) {

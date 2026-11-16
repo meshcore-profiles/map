@@ -321,6 +321,42 @@ const _titleBrand = site.shortName || site.brandName; %>
 	</div>
 </div>
 
+<% if (site.testerSignup) { %>
+<div class="modal-overlay" id="tester-overlay" hidden>
+	<div class="settings-panel" id="tester-panel" role="dialog" aria-modal="true" aria-labelledby="tester-title">
+		<button type="button" class="modal-close-btn" id="tester-close" aria-label="<%= t('common:close') %>">
+			<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#close"></use></svg>
+		</button>
+		<h2 class="tester-title" id="tester-title"><%= t('map:testers.title') %></h2>
+		<p class="tester-text"><%= t('map:testers.intro') %></p>
+		<div class="tester-shots" role="group" aria-label="<%= t('map:testers.screenshots') %>">
+			<button type="button" class="tester-shot" data-full="/images/app/screen-1-large.webp" aria-label="<%= t('map:testers.zoom') %> 1"><img src="/images/app/screen-1.webp" width="360" height="800" alt="" loading="lazy"></button>
+			<button type="button" class="tester-shot" data-full="/images/app/screen-2-large.webp" aria-label="<%= t('map:testers.zoom') %> 2"><img src="/images/app/screen-2.webp" width="360" height="800" alt="" loading="lazy"></button>
+			<button type="button" class="tester-shot" data-full="/images/app/screen-3-large.webp" aria-label="<%= t('map:testers.zoom') %> 3"><img src="/images/app/screen-3.webp" width="360" height="800" alt="" loading="lazy"></button>
+		</div>
+		<h3 class="tester-heading"><%= t('map:testers.howTitle') %></h3>
+		<p class="tester-text"><%= t('map:testers.how') %></p>
+		<form id="tester-form" novalidate>
+			<div id="tester-fields">
+				<label class="tester-label" for="tester-email"><%= t('map:testers.emailLabel') %></label>
+				<input type="email" id="tester-email" name="email" autocomplete="email" maxlength="254" required placeholder="<%= t('map:testers.emailPlaceholder') %>">
+				<label class="checkbox-label" id="tester-consent-label" for="tester-consent">
+					<input type="checkbox" id="tester-consent" required>
+					<span><%= t('map:testers.consent') %></span>
+				</label>
+			</div>
+			<div id="tester-captcha" hidden></div>
+			<p id="tester-status" role="status" aria-live="polite" hidden></p>
+			<div id="tester-actions">
+				<button type="button" class="region-warning-btn" id="tester-done" hidden><%= t('map:testers.close') %></button>
+				<button type="submit" class="region-warning-btn" id="tester-submit"><%= t('map:testers.submit') %></button>
+			</div>
+		</form>
+	</div>
+	<div id="tester-lightbox" tabindex="-1" role="dialog" aria-modal="true" hidden><img alt=""></div>
+</div>
+<% } %>
+
 <div class="modal-overlay" id="settings-overlay" hidden>
 	<div class="settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
 		<button type="button" class="modal-close-btn" id="settings-close-btn" aria-label="<%= t('settings:closeAria') %>">
@@ -727,6 +763,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 		turnstileSitekey: <%- JSON.stringify(process.env.TURNSTILE_SECRET ? process.env.TURNSTILE_SITEKEY || null : null) %>,
 		nodeDeletionUrl: <%- JSON.stringify(lp('/api/v1/node-deletion')) %>,
 		nodeDeletionEmail: <%- JSON.stringify(site.deletionEmail) %>,
+		testerSignupUrl: <%- JSON.stringify(site.testerSignup ? lp('/api/v1/tester-signup') : null) %>,
 		features: <%- JSON.stringify(features) %>,
 
 		languageCode: <%- JSON.stringify(languageCode) %>,

@@ -20,6 +20,7 @@ const poland = {
 	languageSwitcher: 'none',
 	showRegionToggle: true,
 	domain: 'mapa.meshcorepolska.org',
+	testerSignup: true,
 	deletionEmail: DELETION_EMAIL,
 	ogImage: 'https://meshcorepolska.org/images/brand/banner-og.jpg',
 	favicon: 'https://meshcorepolska.org/favicon.ico',

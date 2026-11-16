@@ -20,7 +20,7 @@ router.post('/node-deletion', limiter.nodeDeletionAttempts, limiter.nodeDeletion
 		return res.status(400).json({ success: false, status: 400, message: req.t('map:deletion.errors.invalidRequest') });
 	}
 
-	if (!(await verifyTurnstile(token, req.ip, req.hostname, publicKey))) {
+	if (!(await verifyTurnstile(token, req.ip, req.hostname, { action: 'node-deletion', cdata: publicKey }))) {
 		return res.status(400).json({ success: false, status: 400, message: req.t('map:deletion.errors.captcha') });
 	}
 

@@ -1,6 +1,16 @@
 {
 	"entries": [
 		{
+			"version": "0.14.0",
+			"date": "2026-11-16",
+			"changes": [
+				"Rebuilt the settings.",
+				"Rebuilt the map list and the overall map management logic.",
+				"Added sign-ups for the closed test of the MeshCore Map Android app (meshcorepolska.org only).",
+				"Other quality improvements."
+			]
+		},
+		{
 			"version": "0.13.0",
 			"date": "2026-11-15",
 			"changes": [

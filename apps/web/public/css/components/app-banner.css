@@ -1,4 +1,5 @@
-#app-banner {
+#app-banner,
+#tester-banner {
 	position: fixed;
 	right: 12px;
 	bottom: calc(12px + env(safe-area-inset-bottom));

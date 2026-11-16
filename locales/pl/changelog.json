@@ -1,6 +1,16 @@
 {
 	"entries": [
 		{
+			"version": "0.14.0",
+			"date": "16.11.2026",
+			"changes": [
+				"Przebudowano ustawienia.",
+				"Przebudowano listę z mapami oraz ogólną logikę zarządzania mapami.",
+				"Dodano zapisy na zamknięte testy aplikacji MeshCore Map na Androida.",
+				"Inne poprawki jakościowe."
+			]
+		},
+		{
 			"version": "0.13.0",
 			"date": "15.11.2026",
 			"changes": [
