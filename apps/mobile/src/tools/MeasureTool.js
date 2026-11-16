@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
 	rowText: { color: colors.text, flexShrink: 1 },
 	rowValue: { color: colors.textMuted },
 	actions: { flexDirection: 'row', gap: spacing.sm },
-	action: { flex: 1 },
+	action: { flex: 1, paddingHorizontal: spacing.sm },
 });
 
 const COLOR = colors.blue;

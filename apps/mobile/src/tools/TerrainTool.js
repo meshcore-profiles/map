@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
 	heights: { flexDirection: 'row', gap: spacing.sm },
 	heightField: { flex: 1 },
 	actions: { flexDirection: 'row', gap: spacing.sm },
-	action: { flex: 1 },
+	action: { flex: 1, paddingHorizontal: spacing.sm },
 	stats: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 	chart: { backgroundColor: colors.bg, borderRadius: radius.sm, overflow: 'hidden' },
 	legend: { flexDirection: 'row', justifyContent: 'space-between' },

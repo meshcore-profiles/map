@@ -19,9 +19,9 @@ const styles = StyleSheet.create({
 	grip: { paddingTop: spacing.sm },
 	handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.borderStrong },
 	header: { flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.lg, paddingRight: spacing.sm, paddingTop: spacing.sm },
-	title: { flex: 1, color: colors.text, fontSize: 18, fontWeight: '700' },
+	title: { flex: 1, color: colors.text, fontSize: 22, fontWeight: '700' },
 	close: { width: MIN_TOUCH, height: MIN_TOUCH, alignItems: 'center', justifyContent: 'center' },
-	content: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.lg, gap: spacing.md },
+	content: { paddingHorizontal: spacing.lg, paddingTop: 0, paddingBottom: spacing.lg, gap: spacing.md },
 	footer: { padding: spacing.lg, paddingTop: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
 });
 

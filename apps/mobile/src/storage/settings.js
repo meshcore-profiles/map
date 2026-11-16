@@ -17,6 +17,7 @@ export const createDefaultSettings = () => ({
 	rotateTilt: false,
 	haptics: true,
 	closeFiltersOnApply: true,
+	errorReporting: true,
 	elevationSource: 'sefinek',
 	coverageStyle: 'tiles',
 	filters: createDefaultFilters(),
@@ -35,6 +36,7 @@ const sanitize = saved => {
 		rotateTilt: saved?.rotateTilt === true,
 		haptics: saved?.haptics !== false,
 		closeFiltersOnApply: saved?.closeFiltersOnApply !== false,
+		errorReporting: saved?.errorReporting !== false,
 		elevationSource: ELEVATION_SOURCES.includes(saved?.elevationSource) ? saved.elevationSource : 'sefinek',
 		coverageStyle: saved?.coverageStyle === 'lines' ? 'lines' : 'tiles',
 		filters: {

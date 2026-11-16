@@ -22,6 +22,8 @@
 		"hapticsDesc": "Short vibrations when you tap buttons, select options or place points.",
 		"rotateTilt": "Map rotation and tilt",
 		"rotateTiltDesc": "Enables two-finger gestures to rotate and tilt the map.",
+		"errorReporting": "Error reporting",
+		"errorReportingDesc": "Sends anonymous crash reports (Bugsnag), which help fix them. The change applies immediately.",
 		"data": "Node data",
 		"updated": "Downloaded: {{time}}",
 		"neverUpdated": "No data downloaded yet",

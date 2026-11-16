@@ -14,8 +14,8 @@ const COLLAPSED_HEIGHT = 12 + MIN_TOUCH + spacing.sm;
 const styles = StyleSheet.create({
 	root: { position: 'absolute', left: 0, right: 0, bottom: 0 },
 	panel: { backgroundColor: colors.panelSolid, borderWidth: 1, borderBottomWidth: 0, borderColor: colors.border, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, ...shadow },
-	header: { flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.lg, gap: spacing.sm },
-	title: { flex: 1, color: colors.text, fontSize: 16, fontWeight: '700', paddingVertical: spacing.sm },
+	header: { flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.lg, gap: spacing.md },
+	title: { flex: 1, color: colors.text, fontSize: 22, fontWeight: '700' },
 	close: { width: MIN_TOUCH, height: MIN_TOUCH, alignItems: 'center', justifyContent: 'center' },
 	content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm, gap: spacing.md },
 });
@@ -52,7 +52,7 @@ export const ToolPanel = ({ title, icon, onClose, children }) => {
 				<View {...panHandlers}>
 					<SheetGrip />
 					<View style={styles.header}>
-						{icon && <Icon name={icon} size={20} color={accentBright} />}
+						{icon && <Icon name={icon} size={26} color={accentBright} />}
 						<Text style={styles.title} accessibilityRole="header">{title}</Text>
 						<Pressable onPress={onClose} style={styles.close} accessibilityRole="button" accessibilityLabel={t('close')}>
 							<Icon name="close" size={20} color={colors.textMuted} />

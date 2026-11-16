@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 	grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 	gridField: { flexGrow: 1, flexBasis: '45%' },
 	actions: { flexDirection: 'row', gap: spacing.sm },
-	action: { flex: 1 },
+	action: { flex: 1, paddingHorizontal: spacing.sm },
 	stats: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 	section: { color: colors.text, fontWeight: '700' },
 	error: { color: colors.redBright },

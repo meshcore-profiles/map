@@ -12,5 +12,6 @@
 		"bytes3": "3 bytes",
 		"mid": "Shortened key"
 	},
-	"undo": "Remove last point"
+	"undo": "Undo",
+	"labelsHeading": "Point labels"
 }

@@ -4,13 +4,14 @@ import { API_KEY_PROVIDERS, sanitizeApiKey } from '@meshcore-map/core/basemaps';
 import { useI18n } from '../i18n';
 import { useSettings } from '../state/SettingsContext';
 import { colors } from '../theme';
-import { Button, Field, Hint, Section } from '../ui/controls';
+import { Button, Field, Hint, Label, Section } from '../ui/controls';
 import { haptics } from '../ui/haptics';
 import { useToast } from '../ui/Toast';
 import { useTheme } from '../state/ThemeContext';
 
 const styles = StyleSheet.create({
 	error: { color: colors.redBright },
+	getKey: { fontSize: 14, fontWeight: '400' },
 });
 
 // The app caches tiles on disk, which Esri's terms do not allow, so there is no field for it.
@@ -58,8 +59,10 @@ export const ApiKeysSection = () => {
 			<Hint>{t('settings:apiKeysDesc')}</Hint>
 			{PROVIDERS.map(({ id, name, url }) => (
 				<Section key={id}>
+					<Label>
+						{name} <Text style={[styles.getKey, { color: accentBright }]} onPress={() => Linking.openURL(url)} accessibilityRole="link">({t('settings:apiKeysGet')})</Text>
+					</Label>
 					<Field
-						label={name}
 						value={drafts[id]}
 						onChangeText={value => setDrafts(current => ({ ...current, [id]: value }))}
 						placeholder={t('settings:apiKeysPlaceholder')}
@@ -71,7 +74,6 @@ export const ApiKeysSection = () => {
 					{invalid[id]
 						? <Hint style={styles.error}>{t('settings:apiKeysInvalid')}</Hint>
 						: settings.apiKeys[id] && drafts[id].trim() === settings.apiKeys[id] ? <Hint>{t('settings:apiKeysActive')}</Hint> : null}
-					<Text style={{ color: accentBright, fontSize: 14 }} onPress={() => Linking.openURL(url)} accessibilityRole="link">{t('settings:apiKeysGet')}</Text>
 				</Section>
 			))}
 			<Button variant="secondary" label={t('settings:apiKeysSave')} onPress={save} />

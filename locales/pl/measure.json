@@ -12,5 +12,6 @@
 		"bytes3": "3 bajty",
 		"mid": "Skrócony klucz"
 	},
-	"undo": "Usuń ostatni punkt"
+	"undo": "Cofnij",
+	"labelsHeading": "Etykiety punktów"
 }

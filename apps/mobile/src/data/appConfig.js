@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { pack, unpack } from 'msgpackr';
 import { createElevationProviders, fetchElevations, fetchElevationsChunked } from '@meshcore-map/core/elevation-providers';
 import { normalizeRadioPresets } from '@meshcore-map/core/presets';
-import { startBugsnag } from '../bugsnag';
 import { API_BASE, SEFINEK_API } from '../config';
 import { readJson, writeJson } from '../storage/files';
 import { apiFetch } from './http';
@@ -76,10 +75,7 @@ export const useAppConfig = () => {
 	const [config, setConfig] = useState(null);
 
 	useEffect(() => {
-		loadAppConfig().then(loaded => {
-			startBugsnag(loaded.bugsnagApiKey);
-			setConfig(loaded);
-		}).catch(err => console.error('Failed to load app config:', err));
+		loadAppConfig().then(setConfig).catch(err => console.error('Failed to load app config:', err));
 	}, []);
 
 	return config;

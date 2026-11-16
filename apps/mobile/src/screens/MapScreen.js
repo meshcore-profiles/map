@@ -17,6 +17,7 @@ import { TopBar } from '../components/TopBar';
 import { DEFAULT_VIEW } from '../config';
 import { useAppConfig } from '../data/appConfig';
 import { configureMapCache } from '../data/mapCache';
+import { syncBugsnag } from '../bugsnag';
 import { useI18n } from '../i18n';
 import { useNodes } from '../state/NodesContext';
 import { useMapLink } from '../state/useMapLink';
@@ -84,6 +85,10 @@ export const MapScreen = () => {
 	useEffect(() => {
 		configureMapCache();
 	}, []);
+
+	useEffect(() => {
+		if (ready && config) syncBugsnag(config.bugsnagApiKey, settings.errorReporting);
+	}, [ready, config, settings.errorReporting]);
 
 	// The camera jumps to the default view when the user narrows the map to Poland; widening to all nodes keeps the current view.
 	// The launch view (the saved one, else the region's default) is the Camera's initialViewState, so the first run only records the region.

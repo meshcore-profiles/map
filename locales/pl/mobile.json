@@ -22,6 +22,8 @@
 		"hapticsDesc": "Krótkie wibracje przy dotykaniu przycisków, wybieraniu opcji i wskazywaniu punktów.",
 		"rotateTilt": "Obracanie i pochylanie mapy",
 		"rotateTiltDesc": "Umożliwia obracanie i pochylanie mapy dwoma palcami.",
+		"errorReporting": "Raportowanie błędów",
+		"errorReportingDesc": "Wysyła anonimowe raporty o awariach aplikacji (Bugsnag), co pomaga je naprawiać. Zmiana działa od razu.",
 		"data": "Dane węzłów",
 		"updated": "Pobrano: {{time}}",
 		"neverUpdated": "Dane nie zostały jeszcze pobrane",
