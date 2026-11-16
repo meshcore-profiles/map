@@ -8,5 +8,6 @@
 	"toDateAria": "To date",
 	"backToRangesAria": "Back to ranges",
 	"noRepeatersInPeriod": "No new repeaters in this period.",
-	"showOnMap": "Show on map"
+	"showOnMap": "Show on map",
+	"showMore": "Show {{count}} more"
 }

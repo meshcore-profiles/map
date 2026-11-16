@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatTimeAgo, nodesInsertedSince, STATS_PERIOD_DAYS } from '@meshcore-map/core/nodes';
 import { useI18n } from '../i18n';
@@ -8,7 +8,7 @@ import { Button, Chip, ChipRow, Field } from '../ui/controls';
 import { Icon } from '../ui/Icon';
 import { Sheet } from '../ui/Sheet';
 
-const MAX_LISTED = 200;
+const LIST_CHUNK = 30;
 const DAY_MS = 86400000;
 
 // A day typed as YYYY-MM-DD, or NaN while the text is not a date yet.
@@ -33,6 +33,7 @@ export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, o
 	const { accentBright } = useTheme();
 	const [period, setPeriod] = useState('24h');
 	const [range, setRange] = useState({ from: '', to: '' });
+	const [shown, setShown] = useState(LIST_CHUNK);
 
 	const counts = useMemo(() => (visible ? Object.fromEntries(Object.entries(STATS_PERIOD_DAYS).map(([key, days]) => [key, nodesInsertedSince(nodes, days).length])) : {}), [visible, nodes]);
 	const recent = useMemo(() => {
@@ -47,6 +48,9 @@ export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, o
 			.filter(node => (Number.isNaN(from) || node.insertDate.getTime() >= from) && (Number.isNaN(to) || node.insertDate.getTime() < to + DAY_MS))
 			.sort((a, b) => b.insertDate - a.insertDate);
 	}, [visible, repeaters, period, range]);
+
+	// A new period or range starts the list from the top again.
+	useEffect(() => setShown(LIST_CHUNK), [period, range, visible]);
 
 	const ago = date => formatTimeAgo(date.getTime(), { t, tRaw, plural });
 
@@ -76,7 +80,7 @@ export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, o
 				</View>
 			)}
 			{recent.length === 0 && <Text style={styles.empty}>{t('stats:noRepeatersInPeriod')}</Text>}
-			{recent.slice(0, MAX_LISTED).map(node => (
+			{recent.slice(0, shown).map(node => (
 				<Pressable key={node.public_key} style={styles.row} onPress={() => onSelectNode(node)} accessibilityRole="button">
 					<Icon name="repeater-plain" size={26} color={colors.textMuted} />
 					<View style={styles.rowText}>
@@ -85,6 +89,7 @@ export const StatsSheet = ({ visible, onClose, nodes, repeaters, onSelectNode, o
 					</View>
 				</Pressable>
 			))}
+			{recent.length > shown && <Button variant="secondary" label={t('stats:showMore', { count: Math.min(LIST_CHUNK, recent.length - shown) })} onPress={() => setShown(current => current + LIST_CHUNK)} />}
 		</Sheet>
 	);
 };

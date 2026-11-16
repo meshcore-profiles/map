@@ -260,9 +260,6 @@ map.attributionControl.setPrefix(false);
 map.attributionControl.setPosition('bottomleft');
 L.DomEvent.disableScrollPropagation(map.attributionControl.getContainer());
 
-map.createPane('highlightPane');
-map.getPane('highlightPane').style.zIndex = 620;
-
 // Popups live outside the map pane (which is its own stacking context) so they can sit above the fixed stats bar; the pane mirrors the map pane's offset
 const popupPane = map.createPane('nodePopupPane', map.getContainer());
 popupPane.style.zIndex = 1001;
@@ -328,19 +325,6 @@ const icons = Object.fromEntries(['none', 'recent', 'stale', 'old', 'extinct'].m
 		popupAnchor: [0, -16],
 	})])),
 ]));
-
-const highlightIcons = Object.fromEntries(Object.keys(NODE_TYPE_ICON_NAMES).map(id => [id, L.divIcon({
-	html: `
-		<svg width="56" height="56" viewBox="0 0 56 56">
-			<circle class="highlight-marker-ping" cx="28" cy="28" r="17"></circle>
-			<circle class="highlight-marker-ring" cx="28" cy="28" r="17"></circle>
-			<use href="/icons/node-types.svg#${NODE_TYPE_ICON_NAMES[id]}" x="12" y="12" width="32" height="32"></use>
-		</svg>
-	`,
-	className: 'svg-node-icon highlight-marker-icon',
-	iconSize: [56, 56],
-	iconAnchor: [28, 28],
-})]));
 
 const langToggle = document.getElementById('lang-toggle');
 const langMenu = document.getElementById('lang-menu');
@@ -467,30 +451,34 @@ fromInsertDateInput.value = state.fromInsertDate;
 clusteringZoomInput.value = state.clusteringZoom;
 updateClusteringSlider();
 
-let highlightLayer = null;
+let markerClusterGroup = L.markerClusterGroup({
+	disableClusteringAtZoom: state.clusteringZoom,
+	chunkedLoading: true,
+});
+
+// A shown set of nodes replaces the whole map (the rest is hidden); clearing it brings the filtered nodes back.
+let focusedNodes = null;
 let highlightToast = null;
 
 const clearHighlight = () => {
-	if (highlightLayer) {
-		map.removeLayer(highlightLayer);
-		highlightLayer = null;
-	}
+	if (!focusedNodes) return;
+
+	focusedNodes = null;
+	refreshMap();
 };
 
 const showNodesHighlight = (nodes, message, onClose = clearHighlight) => {
-	clearHighlight();
 	if (highlightToast) dismissToast(highlightToast);
 
 	if (!nodes.length) {
+		clearHighlight();
 		showToast(t('map:noNodesInPeriod'), { status: 'info' });
 		return;
 	}
 
-	highlightLayer = L.featureGroup(nodes.map(node =>
-		L.marker(node.marker.getLatLng(), { icon: highlightIcons[node.type], pane: 'highlightPane' })
-			.bindTooltip(escapeHtml(node.adv_name)))).addTo(map);
-
-	map.fitBounds(highlightLayer.getBounds(), { padding: [60, 60], maxZoom: 15 });
+	focusedNodes = nodes;
+	refreshMap();
+	map.fitBounds(L.latLngBounds(nodes.map(node => node.marker.getLatLng())), { padding: [60, 60], maxZoom: 15 });
 
 	message ??= t('map:highlightedNodes', { count: nodes.length, unit: plural(nodes.length, tRaw('map:newNodeUnit')) });
 	highlightToast = showActionToast(message, { status: 'info', onClose });
@@ -549,11 +537,6 @@ document.getElementById('changelog-close-btn').addEventListener('click', () => c
 document.getElementById('contact-error-close-btn').addEventListener('click', () => contactErrorModal.close());
 
 const markerToNode = new WeakMap();
-
-let markerClusterGroup = L.markerClusterGroup({
-	disableClusteringAtZoom: state.clusteringZoom,
-	chunkedLoading: true,
-});
 
 const MOBILE_NODE_VIEW_BREAKPOINT = 700;
 const isMobileNodeView = () => window.innerWidth <= MOBILE_NODE_VIEW_BREAKPOINT;
@@ -692,9 +675,9 @@ const positionDropdown = (el, anchor = searchInline, { fullWidthOnMobile = true 
 	}
 };
 
-const refreshMap = () => {
+function refreshMap() {
 	markerClusterGroup.clearLayers();
-	const nodes = state.filteredNodes;
+	const nodes = focusedNodes ?? state.filteredNodes;
 
 	map.removeLayer(markerClusterGroup);
 
@@ -713,9 +696,14 @@ const refreshMap = () => {
 	markerClusterGroup.addLayers(markers);
 
 	map.addLayer(markerClusterGroup);
-};
+}
 
 function showNode(node) {
+	if (focusedNodes) {
+		clearHighlight();
+		if (highlightToast) dismissToast(highlightToast);
+	}
+
 	const zoom = 19;
 	const targetLatLng = node.marker.getLatLng();
 

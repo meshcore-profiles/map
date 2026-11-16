@@ -90,7 +90,7 @@
 	"unknownSize": "unknown size",
 	"noRadioData": "No data",
 	"shiftSearchHint": "Tip: press Shift to jump straight to search",
-	"highlightedNodes": "Highlighted {{count}} {{unit}}",
+	"highlightedNodes": "Showing {{count}} {{unit}}",
 	"previewProfileNodes": "Nodes owned by {{owner}}: {{count}} (others are hidden)",
 	"previewNodes": "Nodes: {{count}} (others are hidden)",
 	"newNodeUnit": ["new node", "new nodes"],
