@@ -90,7 +90,7 @@
 	"unknownSize": "nieznany rozmiar",
 	"noRadioData": "Brak danych",
 	"shiftSearchHint": "Wskazówka: wciśnij Shift, aby przejść od razu do wyszukiwania",
-	"highlightedNodes": "Pokazywanie {{count}} {{unit}}",
+	"highlightedNodes": "Wyświetlamy {{count}} {{unit}}",
 	"previewProfileNodes": "Węzły użytkownika {{owner}}: {{count}} (pozostałe są ukryte)",
 	"previewNodes": "Węzły: {{count}} (pozostałe są ukryte)",
 	"newNodeUnit": ["nowy węzeł", "nowe węzły", "nowych węzłów"],

@@ -9,5 +9,5 @@
 	"backToRangesAria": "Wróć do zakresów",
 	"noRepeatersInPeriod": "Brak nowych repeaterów w tym okresie.",
 	"showOnMap": "Pokaż na mapie",
-	"showMore": "Pokaż kolejne {{count}}"
+	"showMore": "Pokaż więcej ({{count}})"
 }

@@ -8,7 +8,7 @@
 	"elevationOpenElevation": "Open-Elevation (public)",
 	"elevationOpenMeteo": "Open-Meteo (public)",
 	"elevationDesc": "Your choice affects analysis accuracy and data download time.",
-	"elevationSefinekDesc": "GEDTM30 terrain model (~30 m, fusion of ICESat-2/GEDI/Copernicus/ALOS) with bilinear interpolation - currently probably the most accurate source.",
+	"elevationSefinekDesc": "GEDTM30 terrain model (~30 m, fusion of ICESat-2/GEDI/Copernicus/ALOS) with bilinear interpolation. Likely the most accurate of the available sources.",
 	"elevationOpenElevationDesc": "SRTM data (~30-90 m). Free public API with no availability guarantee - can be overloaded or temporarily unreachable.",
 	"coverageStyleLabel": "Coverage layer style",
 	"coverageStyleTiles": "Tiles",

@@ -8,7 +8,7 @@
 	"elevationOpenElevation": "Open-Elevation (publiczne)",
 	"elevationOpenMeteo": "Open-Meteo (publiczne)",
 	"elevationDesc": "Wybór wpływa na dokładność analizy i czas pobierania danych.",
-	"elevationSefinekDesc": "Model terenu GEDTM30 (~30 m, fuzja ICESat-2/GEDI/Copernicus/ALOS) z interpolacją dwuliniową - obecnie raczej najdokładniejsze źródło.",
+	"elevationSefinekDesc": "Model terenu GEDTM30 (~30 m, fuzja ICESat-2/GEDI/Copernicus/ALOS) z interpolacją dwuliniową. Prawdopodobnie najdokładniejsze z dostępnych źródeł.",
 	"elevationOpenElevationDesc": "Dane SRTM (~30-90 m). Darmowe publiczne API bez gwarancji dostępności. Bywa przeciążone lub tymczasowo niedostępne.",
 	"coverageStyleLabel": "Wygląd warstwy zasięgu",
 	"coverageStyleTiles": "Kafelki",
