@@ -6,7 +6,7 @@
 	"plansBullet1": "Users who submit their companion or repeater details will get their own profile.",
 	"plansBullet2": "Selected profile information will be shown directly on the map, making it easy to see who a given node belongs to.",
 	"plansBullet3": "Repeater owners will be able to upload photos, which will then be displayed publicly on the site.",
-	"plansBeta": "A test version of the configurator is currently available only to members of the <a href=\"https://meshcorepolska.org/discord\" target=\"_blank\" rel=\"noopener\">MeshCore Polska Discord</a> server (the <code>/konfigurator</code> command by <code>Sefi#6347</code>). <a href=\"https://beta.sefinek.net/meshcore-pl/kontakty/6a43efd454feb8be5679e0a6\" target=\"_blank\" rel=\"noopener\">See an example</a>.",
+	"plansBeta": "A test version of the configurator is currently available only to members of the <a href=\"https://meshcorepolska.org/discord\" target=\"_blank\" rel=\"noopener\">MeshCore Polska Discord</a> server (the <code>/konfigurator</code> command by <code>Sefi#6347</code>). <a href=\"https://sefinek.net/meshcore-pl/kontakty/6a43efd454feb8be5679e0a6\" target=\"_blank\" rel=\"noopener\">See an example</a>.",
 	"typeTitle": "Type",
 	"mapTitle": "Map",
 	"siteVersion": "Site version: v",

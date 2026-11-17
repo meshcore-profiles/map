@@ -23,7 +23,7 @@ The `meshcoreprofiles.com` service already serves the global node map at `map.me
 - Selected profile information will be shown directly on the map, making it easy to see who owns a given node.
 - Repeater owners will be able to upload photos of their devices, which will then be publicly displayed on the site.
 
-A test version of the configurator is currently available only to members of the [MeshCore Polska Discord](https://meshcorepolska.org/discord) server (the `/konfigurator` command by `Sefi#6347`). [See an example profile](https://beta.sefinek.net/meshcore-pl/kontakty/6a43efd454feb8be5679e0a6).
+A test version of the configurator is currently available only to members of the [MeshCore Polska Discord](https://meshcorepolska.org/discord) server (the `/konfigurator` command by `Sefi#6347`). [See an example profile](https://sefinek.net/meshcore-pl/kontakty/6a43efd454feb8be5679e0a6).
 
 ## Requirements
 - Node.js >=20.19.0
