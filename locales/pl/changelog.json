@@ -1,6 +1,18 @@
 {
 	"entries": [
 		{
+			"version": "0.15.0",
+			"date": "17.11.2026",
+			"changes": [
+				"Dodano ustawienie pozwalające ukryć przycisk dodawania węzła (plus) w prawym dolnym rogu mapy.",
+				"Przyciski kopiowania pokazują teraz na chwilę ptaszek po skopiowaniu, a następnie wracają do ikony kopiowania.",
+				"Etykieta na znaczniku klienta jest większa: sama emotka wypełnia znacznik, a inicjały są czytelniejsze.",
+				"Link „Zgłoś usunięcie węzła” podświetla się po najechaniu, tak jak pozostałe linki w oknie węzła.",
+				"Zaktualizowano MapLibre GL JS do wersji 6.19.0 oraz zależności backendu do najnowszych wersji.",
+				"Inne poprawki jakościowe."
+			]
+		},
+		{
 			"version": "0.14.0",
 			"date": "16.11.2026",
 			"changes": [

@@ -1,6 +1,18 @@
 {
 	"entries": [
 		{
+			"version": "0.15.0",
+			"date": "2026-11-17",
+			"changes": [
+				"Added a setting to hide the add node (plus) button in the bottom-right corner of the map.",
+				"Copy buttons now show a check mark for a moment after copying, then return to the copy icon.",
+				"A client's marker now shows its label larger: a lone emoji fills the marker and initials are easier to read.",
+				"The \"Report node deletion\" link now highlights on hover like the other links in the node window.",
+				"Updated MapLibre GL JS to 6.19.0 and backend dependencies to their latest versions.",
+				"Other quality improvements."
+			]
+		},
+		{
 			"version": "0.14.0",
 			"date": "2026-11-16",
 			"changes": [

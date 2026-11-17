@@ -2,11 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { toastDuration } from '@meshcore-map/core/toast';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, pill, shadow, spacing } from '../theme';
+import { colors, pill, shadow, spacing, TOP_BAR_HEIGHT } from '../theme';
 import { Icon } from './Icon';
-
-// Below the search bar and the quick chips, so a toast never covers the map buttons in the corner.
-const TOP_BAR_HEIGHT = 124;
 
 const STATUS_COLORS = { error: colors.redBright, success: colors.green, info: colors.blue };
 const STATUS_ICONS = { error: 'close', success: 'check', info: 'info' };

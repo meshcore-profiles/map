@@ -2,7 +2,9 @@ import { StyleSheet, View } from 'react-native';
 import { BASEMAP_CATEGORIES } from '@meshcore-map/core/basemaps';
 import { useI18n } from '../i18n';
 import { spacing } from '../theme';
-import { Heading, Hint, Option } from '../ui/controls';
+import { Option } from '../ui/Choice';
+import { Hint } from '../ui/Field';
+import { Heading } from '../ui/Section';
 import { Sheet } from '../ui/Sheet';
 
 const styles = StyleSheet.create({

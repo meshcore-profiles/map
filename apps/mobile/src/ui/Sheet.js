@@ -1,7 +1,8 @@
-import { Animated, BackHandler, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from './Icon';
+import { Backdrop, OverlayModal } from './Overlay';
 import { useSheetMotion } from './useSheetMotion';
 import { colors, MIN_TOUCH, radius, shadow, spacing } from '../theme';
 import { useI18n } from '../i18n';
@@ -12,7 +13,6 @@ export const DOCKED_EXPANDED_MAX_HEIGHT = 0.88;
 
 const styles = StyleSheet.create({
 	root: { flex: 1, justifyContent: 'flex-end' },
-	backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
 	sheet: { backgroundColor: colors.panelSolid, borderWidth: 1, borderBottomWidth: 0, borderColor: colors.border, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg },
 	docked: { position: 'absolute', left: 0, right: 0, bottom: 0 },
 	dockedSheet: shadow,
@@ -50,18 +50,16 @@ export const Sheet = ({ visible, title, onClose, children, footer }) => {
 	const { translateY, backdropOpacity, panHandlers, close } = useSheetMotion({ visible, onClose });
 
 	return (
-		<Modal visible={visible} transparent animationType="none" onRequestClose={close} statusBarTranslucent navigationBarTranslucent>
+		<OverlayModal visible={visible} onRequestClose={close}>
 			<KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-				<Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
-					<Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityLabel={t('close')} />
-				</Animated.View>
+				<Backdrop opacity={backdropOpacity} onPress={close} label={t('close')} />
 				<Animated.View style={[styles.sheet, { maxHeight: height * 0.88, paddingBottom: insets.bottom, transform: [{ translateY }] }]}>
 					<SheetHeader title={title} close={close} panHandlers={panHandlers} />
 					<ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">{children}</ScrollView>
 					{footer && <View style={styles.footer}>{footer}</View>}
 				</Animated.View>
 			</KeyboardAvoidingView>
-		</Modal>
+		</OverlayModal>
 	);
 };
 

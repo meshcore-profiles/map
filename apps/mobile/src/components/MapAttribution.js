@@ -1,8 +1,9 @@
 import { memo, useMemo } from 'react';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../state/ThemeContext';
 import { colors, radius, spacing } from '../theme';
+import { openLink } from '../ui/openLink';
 
 const styles = StyleSheet.create({
 	root: { position: 'absolute', left: spacing.sm, right: 72, alignItems: 'flex-start' },
@@ -40,7 +41,7 @@ export const MapAttribution = memo(({ html }) => {
 			<View style={styles.box} pointerEvents="box-none">
 				<Text style={styles.text}>
 					{parts.map((part, index) => (part.url
-						? <Text key={index} style={{ color: accentBright }} onPress={() => Linking.openURL(part.url).catch(err => console.warn('Link not opened:', err.message))}>{part.text}</Text>
+						? <Text key={index} style={{ color: accentBright }} onPress={() => openLink(part.url)}>{part.text}</Text>
 						: part.text))}
 				</Text>
 			</View>

@@ -1,6 +1,7 @@
-import { Linking, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { GITHUB_URL } from '@meshcore-map/core/sites';
 import Constants from 'expo-constants';
+import { BUILD } from '../config';
 import { useAppConfig } from '../data/appConfig';
 import { useI18n } from '../i18n';
 import { ApiKeysSection } from './ApiKeysSection';
@@ -8,8 +9,13 @@ import { useNodes, useNodesStatus } from '../state/NodesContext';
 import { useSettings } from '../state/SettingsContext';
 import { useRegionSwitch } from '../state/useRegionSwitch';
 import { ELEVATION_SOURCES } from '../storage/settings';
-import { Button, Divider, Dropdown, Hint, Label, Section, SegmentedControl, SwitchRow } from '../ui/controls';
+import { Button } from '../ui/Button';
+import { SegmentedControl, SwitchRow } from '../ui/Choice';
+import { Dropdown } from '../ui/Dropdown';
+import { Hint, Label } from '../ui/Field';
+import { Divider, Section } from '../ui/Section';
 import { Sheet } from '../ui/Sheet';
+import { openLink } from '../ui/openLink';
 import { colors } from '../theme';
 
 const ELEVATION_KEYS = {
@@ -17,6 +23,9 @@ const ELEVATION_KEYS = {
 	'open-elevation': ['settings:elevationOpenElevation', 'settings:elevationOpenElevationDesc'],
 	'open-meteo': ['settings:elevationOpenMeteo', 'settings:elevationOpenMeteoDesc'],
 };
+
+const pad = value => String(value).padStart(2, '0');
+const formatBuildTime = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 
 const styles = StyleSheet.create({
 	value: { color: colors.text, fontSize: 16 },
@@ -97,8 +106,9 @@ export const SettingsSheet = ({ visible, onClose }) => {
 			)}
 
 			<Divider />
-			<Button variant="secondary" icon="github" label={t('common:githubRepoTitle')} onPress={() => Linking.openURL(GITHUB_URL)} />
+			<Button variant="secondary" icon="github" label={t('common:githubRepoTitle')} onPress={() => openLink(GITHUB_URL)} />
 			<Hint style={styles.version}>{t('mobile:settings.version', { version: Constants.expoConfig?.version ?? '' })}</Hint>
+			{BUILD.time && <Hint style={styles.version}>{t('mobile:settings.build', { time: formatBuildTime(BUILD.time), commit: BUILD.commit ?? '?' })}</Hint>}
 		</Sheet>
 	);
 };

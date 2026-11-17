@@ -1,15 +1,15 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useI18n } from '../i18n';
 import { colors, radius, shadow, spacing } from '../theme';
-import { Button } from './controls';
+import { Button } from './Button';
+import { Backdrop, OverlayModal } from './Overlay';
 
 const MAX_WIDTH = 420;
 const SIDE_BY_SIDE_MAX_LABEL = 16;
 
 const styles = StyleSheet.create({
 	root: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
-	backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0, 0, 0, 0.6)' },
 	dialog: { width: '100%', maxWidth: MAX_WIDTH, backgroundColor: colors.panelSolid, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.md, ...shadow },
 	title: { color: colors.text, fontSize: 20, fontWeight: '700' },
 	body: { gap: spacing.md },
@@ -28,9 +28,9 @@ export const Dialog = ({ visible, title, onClose, children, actions = [] }) => {
 	const ordered = stacked ? [...actions].reverse() : actions;
 
 	return (
-		<Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
+		<OverlayModal visible={visible} animationType="fade" onRequestClose={onClose}>
 			<View style={styles.root}>
-				<Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={t('common:close')} />
+				<Backdrop onPress={onClose} label={t('common:close')} />
 				<View style={styles.dialog} accessibilityViewIsModal>
 					<Text style={styles.title} accessibilityRole="header">{title}</Text>
 					<ScrollView style={{ maxHeight: height * 0.6 }} contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">{children}</ScrollView>
@@ -41,7 +41,7 @@ export const Dialog = ({ visible, title, onClose, children, actions = [] }) => {
 					)}
 				</View>
 			</View>
-		</Modal>
+		</OverlayModal>
 	);
 };
 

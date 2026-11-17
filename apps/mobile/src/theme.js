@@ -20,6 +20,8 @@ export const NODE_TYPE_ICONS = Object.fromEntries(Object.entries(NODE_TYPE_ICON_
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24 };
 export const radius = { sm: 8, md: 12, lg: 20 };
 export const MIN_TOUCH = 44;
+// Height of the search bar and the quick chips; floating messages (toasts, the focus banner) sit below it.
+export const TOP_BAR_HEIGHT = 124;
 
 export const pill = { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44, paddingVertical: 10, paddingLeft: 14, paddingRight: 18, borderRadius: 999, borderWidth: 1, borderColor: colors.borderStrong, backgroundColor: colors.panelSolid };
 

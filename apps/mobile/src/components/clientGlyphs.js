@@ -8,7 +8,9 @@ const TEXT_LABEL = /^[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{N}]+
 
 const VIEW_SIZE = 96;
 const IMAGE_SIZE = 192;
-const CLIENT_CIRCLE_DP = 26;
+// The client disc on the map and the text on it keep the proportions of the website marker (CLIENT_ICON), so the label looks the same relative to the disc on both.
+export const CLIENT_CIRCLE_DP = 26;
+export const CLIENT_LABEL_DP = CLIENT_CIRCLE_DP * CLIENT_ICON.fontSize / CLIENT_ICON.size;
 const BATCH = 12;
 const SETTLE_MS = 60;
 

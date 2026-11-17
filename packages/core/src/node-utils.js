@@ -42,7 +42,7 @@ export const getNameIconLabel = name => {
 };
 
 // Geometry of a client marker (a colored disc with the label of the node's name), in viewBox units. The site draws it as SVG, the app rasterizes the label with the same numbers.
-export const CLIENT_ICON = { size: 512, fontSize: 150, emojiFontSize: 290 };
+export const CLIENT_ICON = { size: 512, fontSize: 185, emojiFontSize: 290 };
 
 // A lone emoji gets the whole disc, letters and initials a smaller size so two of them fit.
 export const clientIconFontSize = label => (/^\p{Emoji_Presentation}$/u).test(label) ? CLIENT_ICON.emojiFontSize : CLIENT_ICON.fontSize;

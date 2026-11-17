@@ -1,9 +1,10 @@
-import { Linking, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SITES } from '@meshcore-map/core/sites';
 import { useI18n } from '../i18n';
 import { spacing } from '../theme';
 import { Fab, FAB_SIZE } from '../ui/Fab';
+import { openLink } from '../ui/openLink';
 import { StatusBanner } from './StatusBanner';
 
 const styles = StyleSheet.create({
@@ -32,7 +33,7 @@ export const MapControls = ({ region, features, showAddButton, toolsOpen, onTogg
 				<Fab icon={toolsOpen ? 'close' : 'wrench'} label={t('settings:tabTools')} onPress={onToggleTools} />
 				<Fab icon="info" label={t('legend:toggleTitle')} onPress={onOpenLegend} />
 				<Fab icon="layers" label={t('map:basemapToggleTitle')} onPress={onOpenBasemap} />
-				{showAddButton && <Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(SITES[region].addNodeUrl)} />}
+				{showAddButton && <Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => openLink(SITES[region].addNodeUrl)} />}
 			</View>
 			<View style={[styles.status, { bottom, right: spacing.md * 2 + FAB_SIZE }]}>
 				<StatusBanner />

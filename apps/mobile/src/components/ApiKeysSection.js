@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Linking, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { API_KEY_PROVIDERS, sanitizeApiKey } from '@meshcore-map/core/basemaps';
 import { useI18n } from '../i18n';
 import { useSettings } from '../state/SettingsContext';
 import { colors } from '../theme';
-import { Button, Field, Hint, Label, Section } from '../ui/controls';
+import { Button } from '../ui/Button';
+import { Field, Hint, Label } from '../ui/Field';
+import { Section } from '../ui/Section';
 import { haptics } from '../ui/haptics';
 import { useToast } from '../ui/Toast';
+import { openLink } from '../ui/openLink';
 import { useTheme } from '../state/ThemeContext';
 
 const styles = StyleSheet.create({
@@ -60,7 +63,7 @@ export const ApiKeysSection = () => {
 			{PROVIDERS.map(({ id, name, url }) => (
 				<Section key={id}>
 					<Label>
-						{name} <Text style={[styles.getKey, { color: accentBright }]} onPress={() => Linking.openURL(url)} accessibilityRole="link">({t('settings:apiKeysGet')})</Text>
+						{name} <Text style={[styles.getKey, { color: accentBright }]} onPress={() => openLink(url)} accessibilityRole="link">({t('settings:apiKeysGet')})</Text>
 					</Label>
 					<Field
 						value={drafts[id]}

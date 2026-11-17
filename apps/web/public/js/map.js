@@ -2,7 +2,7 @@
 import { unpack } from '../vendor/msgpackr/msgpackr.js';
 import { toCanvas as qrToCanvas } from '../vendor/qrcode/qrcode.js';
 import * as ntools from './node-utils.js';
-import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, countByType, createStatusThresholds, formatTimeAgo, indexNode, prepareNode, searchNodes } from '/core/nodes.js';
+import { collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, countByType, createStatusThresholds, indexNode, prepareNode, searchNodes } from '/core/nodes.js';
 import { t, tRaw, plural } from './i18n.js';
 import { initApiKeySettings } from './api-keys.js';
 import { initModal } from './modal.js';
@@ -13,10 +13,8 @@ import { initMapLanguageSetting, readFlag, readSavedView, saveView, writeFlag } 
 import { initNodeDeletionDialog } from './node-deletion.js';
 import { initTesterSignup } from './tester-signup.js';
 import { initRadioFilters } from './radio-filters.js';
-import { buildContactUrl } from '/core/contact.js';
 import { NODE_TYPE_ICON_NAMES } from '/core/colors.js';
-import { normalizeRadioPresets } from '/core/presets.js';
-import { loadRadioFilters, radioValue } from '/core/radio-filter-utils.js';
+import { loadRadioFilters } from '/core/radio-filter-utils.js';
 import { buildFilterParams, parseSharedFilters } from '/core/filter-share.js';
 import { initLegendPanel } from './legend.js';
 import { initStatsModal } from './stats.js';
@@ -25,113 +23,14 @@ import { initMeasureTool } from './measure.js';
 import { initRouteTool } from './route.js';
 import { initTerrainTool } from './terrain.js';
 import { initCoverageTool } from './coverage.js';
+import { getNodePopupHTML, getShareUrl, timeAgo } from './node-popup.js';
+import { getPresets } from './radio-presets.js';
 import { escapeHtml } from './pathtools.js';
 import { initBasemapManager } from './basemap-manager.js';
 import { showToast, updateToast, showActionToast, dismissToast } from './toast.js';
 import { COPY_FEEDBACK_MS } from '/core/toast.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
-
-let presets = [];
-
-const typeName = type => t(`map:nodeTypes.${NODE_TYPE_KEYS[type]}`);
-const statusDesc = status => t(`map:updateStatus.${status}`);
-
-const radioParamDesc = {
-	'bw': { unit: ' kHz', short: '' },
-	'freq': { unit: ' MHz', short: '' },
-	'sf': { unit: '', short: 'SF' },
-	'cr': { unit: '', short: 'CR' },
-};
-const radioParamLabel = key => t(`map:radioParams.${key}`);
-
-const statusBadgeClass = {
-	'none': 'badge-status-none',
-	'recent': 'badge-status-recent',
-	'stale': 'badge-status-stale',
-	'old': 'badge-status-old',
-	'extinct': 'badge-status-extinct',
-};
-
-const columnOrder = ['public_key', 'link', 'inserted_date', 'updated_date', 'coords', 'preset', 'params'];
-const paramOrder = ['freq', 'bw', 'sf', 'cr'];
-
-const timeAgo = msec => formatTimeAgo(msec, { t, tRaw, plural });
-
-const getRadioParamKeys = params => paramOrder.filter(key => radioValue(params, key) !== 'unknown');
-
-const findPreset = params => presets.find(p =>
-	params.sf === p.params.sf &&
-	params.freq === p.params.freq &&
-	params.bw === p.params.bw
-) ?? {};
-
-const getPresetLabel = params => {
-	if (!['freq', 'sf', 'bw'].every(key => radioValue(params, key) !== 'unknown')) return t('map:noRadioData');
-	return findPreset(params).name || t('map:customPreset');
-};
-
-const withCopyButton = (displayHtml, copyValue, btnTitle, textTitle = '') => `
-	<span class="copy-cell">
-		<span class="copy-cell-text"${textTitle ? ` title="${textTitle}"` : ''}>${displayHtml}</span>
-		<button type="button" class="copy-icon-btn" title="${btnTitle}" aria-label="${btnTitle}" data-copy-value="${escapeHtml(copyValue)}">
-			<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#copy"></use></svg>
-		</button>
-	</span>`;
-
-const columns = {
-	coords: {
-		label: t('map:columns.coords'),
-		value: val => withCopyButton(
-			`<a href="https://google.com/maps/place/${val.replace(' ', '')}" class="coords-link" target="_blank" rel="noopener nofollow">${val}</a>`,
-			val,
-			t('map:copyCoords')
-		),
-	},
-	inserted_date: {
-		label: t('map:columns.insertedDate'),
-		value: val => {
-			const dt = new Date(val);
-			return `<time datetime="${val}" title="${ntools.formatDateTime(dt)}">${timeAgo(dt.getTime())}</time>`;
-		},
-	},
-	updated_date: {
-		label: t('map:columns.updatedDate'),
-		value: val => {
-			const dt = new Date(val);
-			return `<time datetime="${val}" title="${ntools.formatDateTime(dt)}">${timeAgo(dt.getTime())}</time>`;
-		},
-	},
-	public_key: {
-		label: t('map:columns.publicKey'),
-		value: val => withCopyButton(
-			escapeHtml(ntools.truncateKey(val)),
-			val,
-			t('map:copyPublicKey'),
-			escapeHtml(val)
-		),
-	},
-	preset: {
-		label: t('map:columns.preset'),
-		value: getPresetLabel,
-	},
-	params: {
-		label: t('map:columns.params'),
-		value: val => {
-			const keys = getRadioParamKeys(val);
-			if (!keys.length) return t('map:noRadioData');
-			return `<span class="param-chips">${keys.map(key => {
-				const paramKey = radioParamDesc[key];
-				const text = `${paramKey.short}${val[key]}${paramKey.unit}`;
-				return `<span class="param-chip" title="${radioParamLabel(key)}">${escapeHtml(text)}</span>`;
-			}).join('')}</span>`;
-		},
-	},
-	link: {
-		label: t('map:columns.link'),
-		value: uint8arr => `<button type="button" class="copy-link-btn" data-copy-value="meshcore://${ntools.bytesToHex(uint8arr)}">${t('map:copyLinkButton')}</button>`,
-	},
-};
 
 const svgIconCache = new Map();
 const getSvgIcon = (text, color) => {
@@ -150,91 +49,6 @@ const getSvgIcon = (text, color) => {
 	return icon;
 };
 
-const getTable = node => '<table class="node-info"><tbody>' +
-	'<tr>' + columnOrder.flatMap(key => node[key] || key === 'preset' || key === 'params' ? [`<td><b>${columns[key].label}</b></td><td>${columns[key].value ? columns[key].value(node[key]) : node[key]}</td>`] : []).join('</tr><tr>') + '</tr>' +
-'</tbody></table>';
-
-const discordTimestamp = date => `<t:${Math.floor(date.getTime() / 1000)}:R>`;
-const getShareUrl = node => `${location.origin}${location.pathname}?node=${node.public_key}`;
-
-const getNodeInfoText = node => {
-	const lines = [`# [${node.adv_name}](${getShareUrl(node)}) (${typeName(node.type)})`, ''];
-
-	lines.push(`- **${t('map:columns.publicKey')}:** \`${node.public_key}\``);
-	if (node.status) lines.push(`- **${t('map:infoStatus')}:** ${statusDesc(node.status)}`);
-	lines.push(`- **${t('map:columns.insertedDate')}:** ${ntools.formatDateTime(node.insertDate)} (${discordTimestamp(node.insertDate)})`);
-	if (node.updatedDate) lines.push(`- **${t('map:columns.updatedDate')}:** ${ntools.formatDateTime(node.updatedDate)} (${discordTimestamp(node.updatedDate)})`);
-	lines.push(`- **${t('map:columns.coords')}:** \`${node.coords}\` ([${t('common:mapWord')}](https://google.com/maps/place/${node.coords.replace(' ', '')}))`);
-
-	lines.push(`- **${t('map:columns.preset')}:** ${getPresetLabel(node.params)}`);
-	const radioKeys = getRadioParamKeys(node.params);
-	if (radioKeys.length) {
-		lines.push(`- **${t('map:columns.params')}:**`);
-		for (const key of radioKeys) {
-			const paramKey = radioParamDesc[key];
-			lines.push(`  - ${radioParamLabel(key)}: ${node.params[key]}${paramKey.unit}`);
-		}
-	} else {
-		lines.push(`- **${t('map:columns.params')}:** ${t('map:noRadioData')}`);
-	}
-
-	return lines.join('\n');
-};
-
-const getNodePopupHTML = node => {
-	const userActionUrl = encodeURI(localStorage.getItem('userActionUrl') || '');
-	const userActionLabel = localStorage.getItem('userActionLabel') || '';
-	const userActionAnchor = userActionUrl ? `<a target="_blank" rel="noopener noreferrer" href="https://${userActionUrl}?nodes=${node.public_key}">${userActionLabel}</a>` : '';
-	const qrValue = buildContactUrl(node);
-	const statusClass = statusBadgeClass[node.status] || '';
-	const shareUrl = getShareUrl(node);
-	const canAddContact = CONTACT_ADDABLE_TYPES.includes(node.type);
-
-	return `
-		<div class="node-header">
-			<div class="node-qr" data-qr-value="${escapeHtml(qrValue)}"></div>
-			<div class="node-header-info">
-				<div class="node-title">
-					<span class="node-title-text">${escapeHtml(node.adv_name)}</span>
-					<button type="button" class="copy-icon-btn" title="${t('map:copyName')}" aria-label="${t('map:copyName')}" data-copy-value="${escapeHtml(node.adv_name)}">
-						<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#copy"></use></svg>
-					</button>
-				</div>
-				<div class="node-badges">
-					<span class="badge">${typeName(node.type)}</span>
-					${node.status ? `<span class="badge ${statusClass}"><span class="badge-dot"></span>${statusDesc(node.status)}</span>` : ''}
-				</div>
-			</div>
-		</div>
-		${getTable(node)}
-		<div class="user-actions">
-			<div class="user-actions-left">
-				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}" title="${t('map:shareTitle')}">${t('common:share')}</button>
-				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}" title="${t('map:copyInfoTitle')}">${t('map:copyInfo')}</button>
-				${canAddContact ? `<a class="action-link-btn" href="${escapeHtml(qrValue)}" title="${t('map:addContactTitle')}" data-meshcore-link>${t('map:addContact')}</a>` : ''}
-			</div>
-			<div class="user-actions-right">
-				<button type="button" class="node-deletion-btn" data-delete-node="${escapeHtml(node.public_key)}" data-node-name="${escapeHtml(node.adv_name)}" title="${t('map:reportDeletionTitle')}">${t('map:reportDeletion')}</button>
-				${userActionAnchor}
-			</div>
-		</div>`;
-};
-
-const getPresets = async signal => {
-	if (presets.length) return presets;
-
-	const res = await fetch('/api/v1/radio-presets', { signal });
-	if (!res.ok) throw new Error(`Radio presets request failed (${res.status})`);
-
-	presets = normalizeRadioPresets((await res.json()).data);
-
-	presets.unshift({
-		name: t('map:allPresetsOption'),
-		params: {},
-	});
-
-	return presets;
-};
 
 
 const urlParams = Object.fromEntries(new URLSearchParams(location.search));

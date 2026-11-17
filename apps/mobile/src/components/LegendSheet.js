@@ -6,7 +6,8 @@ import { NODE_STATUSES, NODE_TYPE_KEYS, NODE_TYPES } from '@meshcore-map/core/no
 import { useI18n } from '../i18n';
 import { useNodes } from '../state/NodesContext';
 import { colors, NODE_TYPE_ICONS, spacing } from '../theme';
-import { Button, Divider, Heading } from '../ui/controls';
+import { Button } from '../ui/Button';
+import { Divider, Heading } from '../ui/Section';
 import { Icon } from '../ui/Icon';
 import { Sheet } from '../ui/Sheet';
 

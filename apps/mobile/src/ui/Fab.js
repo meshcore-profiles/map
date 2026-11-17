@@ -1,7 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { useTheme } from '../state/ThemeContext';
 import { colors, shadow } from '../theme';
-import { haptics } from './haptics';
 import { Icon } from './Icon';
 import { Tooltip } from './Tooltip';
 
@@ -16,10 +15,7 @@ export const Fab = ({ icon, label, onPress, primary }) => {
 	const { accent, accentBright } = useTheme();
 
 	return (
-		<Tooltip text={label} onPress={() => {
-			haptics.tap();
-			onPress?.();
-		}} accessibilityRole="button" accessibilityLabel={label} style={({ pressed }) => [styles.fab, primary && { backgroundColor: accent, borderColor: accentBright }, pressed && styles.pressed]}>
+		<Tooltip text={label} onPress={onPress} accessibilityLabel={label} style={({ pressed }) => [styles.fab, primary && { backgroundColor: accent, borderColor: accentBright }, pressed && styles.pressed]}>
 			<Icon name={icon} size={22} color={primary ? '#fff' : colors.text} />
 		</Tooltip>
 	);

@@ -4,7 +4,9 @@ import { formatTimeAgo, nodesInsertedSince, STATS_PERIOD_DAYS } from '@meshcore-
 import { useI18n } from '../i18n';
 import { useTheme } from '../state/ThemeContext';
 import { colors, MIN_TOUCH, radius, spacing } from '../theme';
-import { Button, Chip, ChipRow, Field } from '../ui/controls';
+import { Button } from '../ui/Button';
+import { Chip, ChipRow } from '../ui/Chip';
+import { Field } from '../ui/Field';
 import { Icon } from '../ui/Icon';
 import { Sheet } from '../ui/Sheet';
 

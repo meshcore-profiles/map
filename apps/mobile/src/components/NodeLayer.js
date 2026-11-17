@@ -3,7 +3,7 @@ import { GeoJSONSource, Images, Layer } from '@maplibre/maplibre-react-native';
 import { getColourForName } from '@meshcore-map/core/node-utils';
 import { useTheme } from '../state/ThemeContext';
 import { NODE_TYPE_ICON_NAMES } from '@meshcore-map/core/colors';
-import { GLYPH_ICON_SIZE, glyphImageName, splitClientLabel } from './clientGlyphs';
+import { CLIENT_CIRCLE_DP, CLIENT_LABEL_DP, GLYPH_ICON_SIZE, glyphImageName, splitClientLabel } from './clientGlyphs';
 import { NODE_IMAGES } from './nodeImages';
 
 const featureCache = new WeakMap();
@@ -76,13 +76,13 @@ const CLUSTER_LABEL_LAYOUT = {
 
 const CLIENT_PAINT = {
 	'circle-color': ['get', 'color'],
-	'circle-radius': 13,
+	'circle-radius': CLIENT_CIRCLE_DP / 2,
 };
 
 const CLIENT_LABEL_LAYOUT = {
 	'text-field': ['get', 'label'],
 	'text-font': ['Noto Sans Bold'],
-	'text-size': 14,
+	'text-size': CLIENT_LABEL_DP,
 	'text-allow-overlap': true,
 	'text-ignore-placement': true,
 };

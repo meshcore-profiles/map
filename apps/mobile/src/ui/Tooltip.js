@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, shadow, spacing } from '../theme';
 import { haptics } from './haptics';
+import { Backdrop, OverlayModal } from './Overlay';
+import { Touchable } from './Touchable';
 
 const GAP = 6;
 const MIN_ROOM_ABOVE = 56;
@@ -50,16 +52,16 @@ export const Tooltip = ({ text, onPress, children, ...props }) => {
 
 	return (
 		<>
-			<Pressable ref={ref} collapsable={false} onPress={onPress ?? show} onLongPress={onPress ? show : undefined} accessibilityHint={onPress ? undefined : text} {...props}>
+			<Touchable ref={ref} collapsable={false} haptic={onPress ? 'tap' : null} onPress={onPress ?? show} onLongPress={onPress ? show : undefined} accessibilityHint={onPress ? undefined : text} {...props}>
 				{children}
-			</Pressable>
+			</Touchable>
 			{anchor && (
-				<Modal transparent animationType="fade" onRequestClose={close} statusBarTranslucent navigationBarTranslucent>
-					<Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityLabel={text} />
+				<OverlayModal animationType="fade" onRequestClose={close}>
+					<Backdrop dimmed={false} onPress={close} label={text} />
 					<View style={[styles.bubble, bubbleStyle()]} pointerEvents="none" onLayout={event => setBubbleWidth(event.nativeEvent.layout.width)} accessibilityLiveRegion="polite">
 						<Text style={styles.text}>{text}</Text>
 					</View>
-				</Modal>
+				</OverlayModal>
 			)}
 		</>
 	);

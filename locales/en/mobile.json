@@ -32,7 +32,8 @@
 		"neverUpdated": "No data downloaded yet",
 		"nodesCount": "Saved nodes: {{count}}",
 		"refresh": "Refresh data",
-		"version": "Version {{version}}"
+		"version": "Version {{version}}",
+		"build": "Build {{time}} ({{commit}})"
 	},
 	"filters": {
 		"anyTime": "Any time",

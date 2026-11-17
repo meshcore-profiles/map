@@ -32,7 +32,8 @@
 		"neverUpdated": "Dane nie zostały jeszcze pobrane",
 		"nodesCount": "Liczba zapisanych węzłów: {{count}}",
 		"refresh": "Odśwież dane",
-		"version": "Wersja {{version}}"
+		"version": "Wersja {{version}}",
+		"build": "Kompilacja {{time}} ({{commit}})"
 	},
 	"filters": {
 		"anyTime": "Bez ograniczeń",

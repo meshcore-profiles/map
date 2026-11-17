@@ -12,7 +12,7 @@ import { useI18n } from '../i18n';
 import { NodeDeletionDialog } from './NodeDeletionDialog';
 import { useTheme } from '../state/ThemeContext';
 import { colors, NODE_TYPE_ICONS, radius, spacing } from '../theme';
-import { Button } from '../ui/controls';
+import { Button } from '../ui/Button';
 import { useDialog } from '../ui/Dialog';
 import { haptics } from '../ui/haptics';
 import { Icon } from '../ui/Icon';
@@ -147,7 +147,7 @@ const NodePanel = ({ node, visible, onClose, onExited }) => {
 		setCopied(true);
 	};
 
-	const share = () => Share.share({ message: `${node.adv_name}\n${API_BASE}/?node=${node.public_key}` });
+	const share = () => Share.share({ message: `${node.adv_name}\n${API_BASE}/?node=${node.public_key}` }).catch(err => console.warn('Share failed:', err.message));
 
 	const addContact = async () => {
 		try {

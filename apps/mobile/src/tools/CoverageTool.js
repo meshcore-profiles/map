@@ -4,7 +4,11 @@ import { buildRayPoints, computeCoverage, computeLinkBudgetRangeM, computeSample
 import { destinationPoint, formatDistance } from '@meshcore-map/core/geo';
 import { getElevationsChunked, loadRadioPresets } from '../data/appConfig';
 import { useI18n } from '../i18n';
-import { Button, Chip, ChipScroll, Dropdown, Field, Heading, Hint, Stat } from '../ui/controls';
+import { Button } from '../ui/Button';
+import { Chip, ChipScroll } from '../ui/Chip';
+import { Dropdown } from '../ui/Dropdown';
+import { Field, Hint } from '../ui/Field';
+import { Heading, Stat } from '../ui/Section';
 import { ToolPanel } from '../ui/ToolPanel';
 import { colors, spacing } from '../theme';
 import { coverageTileFeatures } from './coverageTiles';

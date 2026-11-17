@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 import { useI18n } from '../i18n';
 import { spacing } from '../theme';
-import { Button, Field } from '../ui/controls';
+import { Button } from '../ui/Button';
+import { Field } from '../ui/Field';
 
 const styles = StyleSheet.create({
 	row: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
