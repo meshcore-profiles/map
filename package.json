@@ -33,6 +33,7 @@
     "update": "npm run pull && npm ci --omit=dev -w apps/web && pm2 restart mcmap"
   },
   "allowScripts": {
+    "@bugsnag/cli@3.10.7": true,
     "msgpackr-extract@3.0.7": true
   },
   "devDependencies": {
