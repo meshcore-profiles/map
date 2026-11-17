@@ -127,8 +127,8 @@
 	},
 	"testers": {
 		"banner": {
-			"title": "We are looking for MeshCore Map Android testers",
-			"text": "The app is coming to Google Play soon. Join the closed test and help us polish it.",
+			"title": "Invitation to test the app",
+			"text": "We are looking for testers of the MeshCore Map Android app. It is coming to Google Play soon. Join the test and help us polish it.",
 			"join": "I want to help",
 			"dismiss": "Not now"
 		},
@@ -144,8 +144,8 @@
 		"close": "Close",
 		"loading": "Loading Cloudflare Turnstile...",
 		"waiting": "Waiting for verification...",
-		"sending": "Saving...",
-		"success": "Thank you! We saved your address and will get back to you with further instructions soon.",
+		"sending": "Saving, please wait...",
+		"success": "Thank you very much! Your address has been saved. We will get back to you soon, so keep an eye out for an e-mail.",
 		"errors": {
 			"unavailable": "Sign-ups are temporarily unavailable. Please try again later.",
 			"invalidRequest": "Enter a valid email address and tick the consent box.",

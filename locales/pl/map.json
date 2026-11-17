@@ -128,8 +128,8 @@
 	},
 	"testers": {
 		"banner": {
-			"title": "Szukamy testerów aplikacji MeshCore Map na Androida",
-			"text": "Aplikacja trafi wkrótce do Google Play. Dołącz do zamkniętych testów i pomóż nam ją dopracować.",
+			"title": "Zaproszenie do testów aplikacji",
+			"text": "Szukamy testerów aplikacji MeshCore Map na Androida. Aplikacja trafi wkrótce do Google Play. Dołącz do testów i pomóż nam ją dopracować.",
 			"join": "Chcę pomóc",
 			"dismiss": "Nie teraz"
 		},
@@ -145,8 +145,8 @@
 		"close": "Zamknij",
 		"loading": "Wczytywanie Cloudflare Turnstile...",
 		"waiting": "Oczekiwanie na weryfikację...",
-		"sending": "Zapisywanie...",
-		"success": "Dziękujemy! Zapisaliśmy Twój adres. Wkrótce odezwiemy się z dalszymi instrukcjami.",
+		"sending": "Zapisywanie, proszę czekać...",
+		"success": "Serdecznie dziękujemy! Twój adres został zapisany. Wkrótce się do Ciebie odezwiemy, oczekuj wiadomości e-mail.",
 		"errors": {
 			"unavailable": "Zapisy są chwilowo niedostępne. Spróbuj ponownie później.",
 			"invalidRequest": "Podaj poprawny adres e-mail i zaznacz zgodę.",

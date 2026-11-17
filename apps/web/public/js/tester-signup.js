@@ -70,6 +70,8 @@ export const initTesterSignup = () => {
 			clearChallenge();
 			submit.disabled = false;
 			setStatus('');
+			const banner = document.getElementById('tester-banner');
+			if (banner) banner.style.display = '';
 			if (opener?.isConnected) opener.focus();
 		},
 	});
@@ -212,6 +214,7 @@ export const initTesterSignup = () => {
 	join.textContent = t('map:testers.banner.join');
 	join.addEventListener('click', () => {
 		opener = join;
+		banner.style.display = 'none';
 		modal.open();
 		email.focus();
 	});
