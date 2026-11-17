@@ -16,6 +16,9 @@
 	"offline": {
 		"usingCache": "Nie udało się odświeżyć danych. Wyświetlane są dane zapisane na urządzeniu."
 	},
+	"deletion": {
+		"yes": "Tak, jestem"
+	},
 	"settings": {
 		"languageAuto": "Automatyczny",
 		"haptics": "Wibracje",

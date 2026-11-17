@@ -35,6 +35,10 @@
 	height: 24px;
 }
 
+#fab-primary[hidden] {
+	display: none;
+}
+
 #fab-primary {
 	background: var(--brand-gradient, var(--red));
 	color: #fff;

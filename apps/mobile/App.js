@@ -7,6 +7,7 @@ import { MapScreen } from './src/screens/MapScreen';
 import { NodesProvider } from './src/state/NodesContext';
 import { SettingsProvider } from './src/state/SettingsContext';
 import { ThemeProvider } from './src/state/ThemeContext';
+import { DialogProvider } from './src/ui/Dialog';
 import { ErrorBoundary } from './src/ui/ErrorBoundary';
 import { ToastProvider } from './src/ui/Toast';
 
@@ -22,12 +23,14 @@ export default function App() {
 				<SettingsProvider>
 					<ThemeProvider>
 						<I18nProvider>
-							<ToastProvider>
-								<NodesProvider>
-									<MapScreen />
-									<StatusBar style="light" />
-								</NodesProvider>
-							</ToastProvider>
+							<DialogProvider>
+								<ToastProvider>
+									<NodesProvider>
+										<MapScreen />
+										<StatusBar style="light" />
+									</NodesProvider>
+								</ToastProvider>
+							</DialogProvider>
 						</I18nProvider>
 					</ThemeProvider>
 				</SettingsProvider>

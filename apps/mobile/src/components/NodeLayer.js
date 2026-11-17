@@ -1,36 +1,30 @@
 import { memo, useMemo } from 'react';
 import { GeoJSONSource, Images, Layer } from '@maplibre/maplibre-react-native';
-import { getColourForName, getNameIconLabel } from '@meshcore-map/core/node-utils';
+import { getColourForName } from '@meshcore-map/core/node-utils';
 import { useTheme } from '../state/ThemeContext';
 import { NODE_TYPE_ICON_NAMES } from '@meshcore-map/core/colors';
+import { GLYPH_ICON_SIZE, glyphImageName, splitClientLabel } from './clientGlyphs';
 import { NODE_IMAGES } from './nodeImages';
 
 const featureCache = new WeakMap();
 
-// Letters the map's glyph font covers. Anything else (emoji, symbols, other scripts) would draw an empty disc, so it gets the person glyph instead.
-const TEXT_LABEL = /^[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{N}]+$/u;
 const CLIENT_GLYPH = 'client-glyph';
-
-const clientLabel = name => {
-	const label = getNameIconLabel(name);
-	return TEXT_LABEL.test(label) ? label : '';
-};
 
 // GeoJSON feature built once per node, so changing filters does not recompute labels, colors and coordinates.
 const toFeature = node => {
 	let feature = featureCache.get(node);
 	if (!feature) {
 		const isClient = node.type === 1;
-		const label = isClient ? clientLabel(node.adv_name) : '';
+		const { text, glyph } = isClient ? splitClientLabel(node) : { text: '', glyph: '' };
 		feature = {
 			type: 'Feature',
 			geometry: { type: 'Point', coordinates: [node.lon, node.lat] },
 			properties: {
 				key: node.public_key,
 				type: node.type,
-				icon: isClient ? (label ? '' : CLIENT_GLYPH) : `${NODE_TYPE_ICON_NAMES[node.type]}-${node.status}`,
+				icon: isClient ? (text ? '' : (glyph ? glyphImageName(glyph) : CLIENT_GLYPH)) : `${NODE_TYPE_ICON_NAMES[node.type]}-${node.status}`,
 				color: isClient ? getColourForName(node.adv_name) : '',
-				label,
+				label: text,
 			},
 		};
 		featureCache.set(node, feature);
@@ -95,7 +89,7 @@ const CLIENT_LABEL_LAYOUT = {
 
 const BADGE_LAYOUT = {
 	'icon-image': ['get', 'icon'],
-	'icon-size': ['case', IS_CLIENT, 0.2, 0.34],
+	'icon-size': ['case', ['==', ['get', 'icon'], CLIENT_GLYPH], 0.2, IS_CLIENT, GLYPH_ICON_SIZE, 0.34],
 	'icon-allow-overlap': true,
 	'icon-ignore-placement': true,
 };
@@ -103,15 +97,16 @@ const BADGE_LAYOUT = {
 const WHITE = { 'text-color': '#fff' };
 
 // scope: unique per loaded style, so a freshly mounted copy never shares source or layer ids with the previous one (the native side would drop them together).
-export const NodeLayer = memo(({ scope, nodes, selected, clusteringZoom, sourceRef, onPress }) => {
+export const NodeLayer = memo(({ scope, nodes, glyphImages, selected, clusteringZoom, sourceRef, onPress }) => {
 	const theme = useTheme();
 	const data = useMemo(() => ({ type: 'FeatureCollection', features: nodes.map(toFeature) }), [nodes]);
 	const paints = useMemo(() => createThemedPaints(theme), [theme]);
+	const images = useMemo(() => ({ ...NODE_IMAGES, ...glyphImages }), [glyphImages]);
 	const highlight = useMemo(() => ({ type: 'FeatureCollection', features: selected ? [toFeature(selected)] : [] }), [selected]);
 
 	return (
 		<>
-			<Images images={NODE_IMAGES} />
+			<Images images={images} />
 			<GeoJSONSource id={`nodes-${scope}`} ref={sourceRef} data={data} cluster clusterRadius={50} clusterMaxZoom={clusteringZoom - 1} onPress={onPress}>
 				<Layer id={`node-clusters-halo-${scope}`} type="circle" filter={CLUSTERS} paint={paints.clusterHalo} />
 				<Layer id={`node-clusters-${scope}`} type="circle" filter={CLUSTERS} paint={paints.cluster} />

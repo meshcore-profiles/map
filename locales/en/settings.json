@@ -36,6 +36,8 @@
 	"rememberViewDesc": "Restores your last map view when you return. A position specified in a link takes precedence.",
 	"showScaleLabel": "Show the map scale",
 	"showScaleDesc": "A metric scale bar in the bottom-left corner of the map.",
+	"showAddButtonLabel": "Show the add node button",
+	"showAddButtonDesc": "The plus button in the bottom-right corner of the map that leads to the add node instructions.",
 	"hapticsLabel": "Haptic feedback",
 	"hapticsDesc": "A short vibration when you tap buttons, on devices that support it.",
 	"mapAppearanceGroup": "Appearance",

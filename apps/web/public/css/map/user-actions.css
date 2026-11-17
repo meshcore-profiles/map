@@ -35,10 +35,16 @@ time {
 	background: none;
 	color: var(--red-bright);
 	font: inherit;
-	text-decoration: underline;
+	transition: color 0.15s ease;
 	cursor: pointer;
 }
 
 .node-deletion-btn:hover {
-	color: var(--text);
+	color: var(--red-light);
+	text-decoration: underline;
+}
+
+.node-deletion-btn:active {
+	color: var(--red-dark);
+	text-decoration: none;
 }

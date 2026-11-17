@@ -18,7 +18,7 @@ const TOOL_FABS = [
 	{ id: 'measure', icon: 'ruler', title: 'measure:toggleTitle' },
 ];
 
-export const MapControls = ({ region, features, toolsOpen, onToggleTools, onOpenTool, onOpenBasemap, onOpenLegend }) => {
+export const MapControls = ({ region, features, showAddButton, toolsOpen, onToggleTools, onOpenTool, onOpenBasemap, onOpenLegend }) => {
 	const { t } = useI18n();
 	const insets = useSafeAreaInsets();
 	const bottom = insets.bottom + spacing.md;
@@ -32,7 +32,7 @@ export const MapControls = ({ region, features, toolsOpen, onToggleTools, onOpen
 				<Fab icon={toolsOpen ? 'close' : 'wrench'} label={t('settings:tabTools')} onPress={onToggleTools} />
 				<Fab icon="info" label={t('legend:toggleTitle')} onPress={onOpenLegend} />
 				<Fab icon="layers" label={t('map:basemapToggleTitle')} onPress={onOpenBasemap} />
-				<Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(SITES[region].addNodeUrl)} />
+				{showAddButton && <Fab primary icon="plus" label={t('map:addNodeTitle')} onPress={() => Linking.openURL(SITES[region].addNodeUrl)} />}
 			</View>
 			<View style={[styles.status, { bottom, right: spacing.md * 2 + FAB_SIZE }]}>
 				<StatusBanner />

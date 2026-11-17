@@ -36,6 +36,8 @@
 	"rememberViewDesc": "Przy kolejnym otwarciu przywraca ostatni widok mapy. Pozycja podana w linku ma pierwszeństwo.",
 	"showScaleLabel": "Pokaż skalę mapy",
 	"showScaleDesc": "Metryczna podziałka w lewym dolnym rogu mapy.",
+	"showAddButtonLabel": "Pokaż przycisk dodawania węzła",
+	"showAddButtonDesc": "Przycisk plusa w prawym dolnym rogu mapy, który prowadzi do instrukcji dodania węzła.",
 	"hapticsLabel": "Wibracje przy dotknięciu",
 	"hapticsDesc": "Krótka wibracja po naciśnięciu przycisku na urządzeniach, które obsługują tę funkcję.",
 	"mapAppearanceGroup": "Wygląd",

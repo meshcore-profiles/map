@@ -1,11 +1,12 @@
 import { memo, useCallback, useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createDefaultFilters } from '@meshcore-map/core/nodes';
 import { useI18n } from '../i18n';
 import { useTheme } from '../state/ThemeContext';
 import { colors, MIN_TOUCH, spacing } from '../theme';
 import { Icon } from '../ui/Icon';
+import { Tooltip } from '../ui/Tooltip';
 import { BrandLogo } from './BrandLogo';
 import { QuickChips } from './QuickChips';
 import { SearchBar } from './SearchBar';
@@ -37,13 +38,13 @@ export const TopBar = memo(({ nodes, filters, onSelectNode, onOpenSheet }) => {
 	return (
 		<View style={[styles.root, { top: insets.top + spacing.sm }]}>
 			<SearchBar nodes={nodes} onSelect={onSelectNode} leading={<BrandLogo />}>
-				<Pressable style={styles.button} onPress={openFilters} accessibilityRole="button" accessibilityLabel={t('filters:toggleTitle')}>
+				<Tooltip text={t('filters:toggleTitle')} style={styles.button} onPress={openFilters} accessibilityRole="button" accessibilityLabel={t('filters:toggleTitle')}>
 					<Icon name="filter" size={22} color={filtersOn ? accentBright : colors.text} />
 					{filtersOn && <View style={[styles.activeDot, { backgroundColor: accentBright }]} />}
-				</Pressable>
-				<Pressable style={styles.button} onPress={openSettings} accessibilityRole="button" accessibilityLabel={t('settings:title')}>
+				</Tooltip>
+				<Tooltip text={t('settings:title')} style={styles.button} onPress={openSettings} accessibilityRole="button" accessibilityLabel={t('settings:title')}>
 					<Icon name="settings" size={22} color={colors.text} />
-				</Pressable>
+				</Tooltip>
 			</SearchBar>
 			<QuickChips nodes={nodes} onStats={openStats} />
 		</View>

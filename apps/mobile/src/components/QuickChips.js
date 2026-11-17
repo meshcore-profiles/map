@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 import { countByType } from '@meshcore-map/core/nodes';
 import { useI18n } from '../i18n';
 import { useSettings } from '../state/SettingsContext';
@@ -7,6 +7,7 @@ import { useTheme } from '../state/ThemeContext';
 import { useRegionSwitch } from '../state/useRegionSwitch';
 import { colors, NODE_TYPE_ICONS, shadow, spacing } from '../theme';
 import { Icon } from '../ui/Icon';
+import { Tooltip } from '../ui/Tooltip';
 
 const styles = StyleSheet.create({
 	row: { gap: spacing.sm, paddingVertical: spacing.sm, paddingHorizontal: spacing.xs },
@@ -18,10 +19,10 @@ const Chip = ({ icon, label, onPress, accessibilityLabel, accent }) => {
 	const { accentBright } = useTheme();
 
 	return (
-		<Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? label} style={({ pressed }) => [styles.chip, accent && { borderColor: accentBright }, pressed && { opacity: 0.8 }]}>
+		<Tooltip text={accessibilityLabel ?? label} onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? label} style={({ pressed }) => [styles.chip, accent && { borderColor: accentBright }, pressed && { opacity: 0.8 }]}>
 			{icon && <Icon name={icon} size={16} color={accent ? accentBright : colors.text} />}
 			<Text style={styles.text}>{label}</Text>
-		</Pressable>
+		</Tooltip>
 	);
 };
 

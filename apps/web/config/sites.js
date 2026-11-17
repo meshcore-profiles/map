@@ -1,6 +1,5 @@
 const { SITES, GITHUB_URL } = require('../../../packages/core/src/sites.js');
-
-const DELETION_EMAIL = 'recrof@gmail.com';
+const { DELETION_EMAIL } = require('../../../packages/core/src/deletion.js');
 const DISCORD_URL = 'https://meshcorepolska.org/discord';
 
 // Site data shared with the mobile app lives in packages/core/src/sites.js; this file adds what only the server and the views need.

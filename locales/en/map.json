@@ -107,7 +107,6 @@
 	"clientsCountTooltip": "Number of companions matching the filters",
 	"repeatersCountTooltip": "Number of repeaters matching the filters",
 	"roomServersCountTooltip": "Number of room servers matching the filters",
-	"leafletTitle": "JS library for interactive maps",
 	"loadingBasemap": "Loading map...",
 	"basemapLoaded": "Map loaded",
 	"basemapFallback": "Map \"{{failed}}\" is unavailable: {{reason}}. Using \"{{fallback}}\".",

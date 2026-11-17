@@ -3,7 +3,7 @@ const MAP_LANGUAGE_KEY = 'mapLanguage';
 export const MAP_LANGUAGES = ['local', 'pl', 'en'];
 
 // Keys restored by "Reset settings" (filters and tool data stay).
-export const SETTING_KEYS = ['closeFiltersOnApply', 'elevationSource', 'coverageStyle', 'customApiKeys', 'baseMapSelected', 'haptics', 'rememberView', 'showScale', MAP_LANGUAGE_KEY, VIEW_KEY];
+export const SETTING_KEYS = ['closeFiltersOnApply', 'elevationSource', 'coverageStyle', 'customApiKeys', 'baseMapSelected', 'haptics', 'rememberView', 'showScale', 'showAddButton', MAP_LANGUAGE_KEY, VIEW_KEY];
 
 const read = key => {
 	try {

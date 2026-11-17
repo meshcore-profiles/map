@@ -28,6 +28,7 @@ import { initCoverageTool } from './coverage.js';
 import { escapeHtml } from './pathtools.js';
 import { initBasemapManager } from './basemap-manager.js';
 import { showToast, updateToast, showActionToast, dismissToast } from './toast.js';
+import { COPY_FEEDBACK_MS } from '/core/toast.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
 
@@ -139,7 +140,7 @@ const getSvgIcon = (text, color) => {
 	if (icon) return icon;
 
 	icon = L.divIcon({
-		html: `<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><ellipse cx="256" cy="256" rx="256" ry="256" fill="${color}"/><text x="256" y="256" dominant-baseline="central" text-anchor="middle" fill="#fff" font-size="150" font-weight="bold" font-family="sans-serif">${text}</text></svg>`,
+		html: ntools.clientIconSvg(text, color),
 		className: 'svg-node-icon',
 		iconSize: [32, 32],
 		iconAnchor: [17, 17],
@@ -1196,6 +1197,9 @@ const bindFlagSetting = (id, key, fallback, onChange) => {
 };
 
 bindFlagSetting('setting-show-scale', 'showScale', false, enabled => enabled ? scaleControl.addTo(map) : scaleControl.remove());
+bindFlagSetting('setting-show-add-button', 'showAddButton', true, enabled => {
+	document.getElementById('fab-primary').hidden = !enabled;
+});
 bindFlagSetting('setting-remember-view', 'rememberView', false, enabled => {
 	rememberView = enabled;
 	if (enabled) saveView(map.getCenter(), map.getZoom());
@@ -1330,9 +1334,28 @@ langToggle?.addEventListener('keydown', e => {
 	langMenu.querySelector('a').focus();
 });
 
+// An icon button shows a check mark for a moment after copying, then goes back to the copy icon.
+const markCopied = button => {
+	const use = button.querySelector('use');
+	if (!use) return;
+
+	clearTimeout(button.copiedTimer);
+	use.setAttribute('href', '/icons/icons.svg#check');
+	button.classList.add('copied');
+	button.copiedTimer = setTimeout(() => {
+		use.setAttribute('href', '/icons/icons.svg#copy');
+		button.classList.remove('copied');
+	}, COPY_FEEDBACK_MS);
+};
+
 document.addEventListener('click', e => {
 	const copyBtn = e.target.closest('.copy-link-btn, .copy-icon-btn');
-	if (copyBtn) void navigator.clipboard.writeText(copyBtn.dataset.copyValue).then(() => showToast(t('common:copiedToClipboard')));
+	if (copyBtn) {
+		void navigator.clipboard.writeText(copyBtn.dataset.copyValue).then(() => {
+			showToast(t('common:copiedToClipboard'));
+			markCopied(copyBtn);
+		});
+	}
 });
 
 const showContactError = detail => {

@@ -1,14 +1,15 @@
 import { useCallback } from 'react';
-import { Alert } from 'react-native';
 import { formatBytes } from '@meshcore-map/core/node-utils';
 import { API_BASE } from '../config';
 import { fetchRegionInfo, hasCachedRegion } from '../data/nodesRepository';
 import { useI18n } from '../i18n';
+import { useDialog } from '../ui/Dialog';
 import { useSettings } from './SettingsContext';
 
 export const useRegionSwitch = () => {
 	const { t } = useI18n();
 	const { settings, update } = useSettings();
+	const { confirm } = useDialog();
 
 	return useCallback(async region => {
 		if (region === settings.region) return;
@@ -20,20 +21,14 @@ export const useRegionSwitch = () => {
 				if (bytes) size = t('map:aboutSize', { size: formatBytes(bytes) });
 			} catch { /* offline - show the unknown size */ }
 
-			const confirmed = await new Promise(resolve => {
-				Alert.alert(
-					t('map:regionWarningTitle'),
-					t('map:regionWarningText', { size }),
-					[
-						{ text: t('common:cancel'), style: 'cancel', onPress: () => resolve(false) },
-						{ text: t('map:downloadAnyway'), onPress: () => resolve(true) },
-					],
-					{ cancelable: true, onDismiss: () => resolve(false) }
-				);
+			const confirmed = await confirm({
+				title: t('map:regionWarningTitle'),
+				message: t('map:regionWarningText', { size }),
+				confirmLabel: t('map:downloadAnyway'),
 			});
 			if (!confirmed) return;
 		}
 
 		update({ region });
-	}, [settings.region, update, t]);
+	}, [settings.region, update, confirm, t]);
 };

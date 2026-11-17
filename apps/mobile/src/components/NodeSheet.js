@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { NODE_TYPE_COLORS, STATUS_COLORS } from '@meshcore-map/core/colors';
 import { buildContactUrl } from '@meshcore-map/core/contact';
 import { CONTACT_ADDABLE_TYPES, NODE_TYPE_KEYS, formatTimeAgo } from '@meshcore-map/core/nodes';
 import { truncateKey } from '@meshcore-map/core/node-utils';
+import { COPY_FEEDBACK_MS } from '@meshcore-map/core/toast';
 import { API_BASE } from '../config';
 import { loadRadioPresets } from '../data/appConfig';
 import { useI18n } from '../i18n';
+import { NodeDeletionDialog } from './NodeDeletionDialog';
 import { useTheme } from '../state/ThemeContext';
 import { colors, NODE_TYPE_ICONS, radius, spacing } from '../theme';
 import { Button } from '../ui/controls';
+import { useDialog } from '../ui/Dialog';
 import { haptics } from '../ui/haptics';
 import { Icon } from '../ui/Icon';
 import { QrCode } from '../ui/QrCode';
+import { Tooltip } from '../ui/Tooltip';
 import { DockedSheet } from '../ui/Sheet';
 
 const styles = StyleSheet.create({
@@ -35,6 +39,8 @@ const styles = StyleSheet.create({
 	keyText: { flex: 1, color: colors.text, fontFamily: 'monospace', fontSize: 13 },
 	copy: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 	actions: { flexDirection: 'row', gap: spacing.sm },
+	report: { alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' },
+	reportText: { color: colors.redBright, fontSize: 14, fontWeight: '600' },
 	action: { flex: 1 },
 });
 
@@ -118,10 +124,20 @@ const NodePanel = ({ node, visible, onClose, onExited }) => {
 	const { t } = useI18n();
 	const { accentBright } = useTheme();
 	const [copied, setCopied] = useState(false);
+	const [deleting, setDeleting] = useState(false);
+	const dialog = useDialog();
 
 	useEffect(() => {
 		setCopied(false);
+		setDeleting(false);
 	}, [node.public_key]);
+
+	useEffect(() => {
+		if (!copied) return undefined;
+
+		const timer = setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
+		return () => clearTimeout(timer);
+	}, [copied]);
 
 	const radio = Object.keys(RADIO_FORMATS).filter(key => node.radio[key] !== 'unknown');
 
@@ -137,47 +153,53 @@ const NodePanel = ({ node, visible, onClose, onExited }) => {
 		try {
 			await Linking.openURL(buildContactUrl(node));
 		} catch {
-			Alert.alert(t('map:addContactErrorTitle'), t('map:addContactErrorText'));
+			dialog.notify({ title: t('map:addContactErrorTitle'), message: t('map:addContactErrorText') });
 		}
 	};
 
 	return (
-		<DockedSheet
-			title={node.adv_name}
-			visible={visible}
-			onClose={onClose}
-			onExited={onExited}
-			footer={(
-				<View style={styles.actions}>
-					<Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} onPress={share} />
-					{CONTACT_ADDABLE_TYPES.includes(node.type) && <Button style={styles.action} icon="plus" label={t('map:addContact')} onPress={addContact} />}
+		<>
+			<DockedSheet
+				title={node.adv_name}
+				visible={visible}
+				onClose={onClose}
+				onExited={onExited}
+				footer={(
+					<View style={styles.actions}>
+						<Button style={styles.action} variant="secondary" icon="link" label={t('common:share')} onPress={share} />
+						{CONTACT_ADDABLE_TYPES.includes(node.type) && <Button style={styles.action} icon="plus" label={t('map:addContact')} onPress={addContact} />}
+					</View>
+				)}
+			>
+				<Meta node={node} />
+				<View style={styles.header}>
+					<View style={styles.qr} accessible accessibilityLabel={t('map:addContact')}>
+						<QrCode value={buildContactUrl(node)} size={QR_SIZE} />
+					</View>
+					<Info node={node} />
 				</View>
-			)}
-		>
-			<Meta node={node} />
-			<View style={styles.header}>
-				<View style={styles.qr} accessible accessibilityLabel={t('map:addContact')}>
-					<QrCode value={buildContactUrl(node)} size={QR_SIZE} />
-				</View>
-				<Info node={node} />
-			</View>
-			<Preset node={node} />
-			{radio.length > 0 && (
-				<View style={styles.radio}>
-					{radio.map(key => (
-						<View key={key} style={styles.radioChip} accessible accessibilityLabel={`${t(`map:radioParams.${key}`)}: ${node.params[key]}`}>
-							<Text style={styles.radioText}>{RADIO_FORMATS[key](node.params[key])}</Text>
-						</View>
-					))}
-				</View>
-			)}
-			<Pressable style={styles.key} onPress={copyKey} accessibilityRole="button" accessibilityLabel={t('map:copyPublicKey')}>
-				<Text style={styles.keyText} numberOfLines={1}>{truncateKey(node.public_key, 12)}</Text>
-				<View style={styles.copy}>
-					<Icon name={copied ? 'check' : 'copy'} size={18} color={copied ? colors.green : accentBright} />
-				</View>
-			</Pressable>
-		</DockedSheet>
+				<Preset node={node} />
+				{radio.length > 0 && (
+					<View style={styles.radio}>
+						{radio.map(key => (
+							<Tooltip key={key} text={t(`map:radioParams.${key}`)} style={styles.radioChip} accessibilityLabel={`${t(`map:radioParams.${key}`)}: ${node.params[key]}`}>
+								<Text style={styles.radioText}>{RADIO_FORMATS[key](node.params[key])}</Text>
+							</Tooltip>
+						))}
+					</View>
+				)}
+				<Tooltip text={t('map:copyPublicKey')} style={styles.key} onPress={copyKey} accessibilityRole="button" accessibilityLabel={t('map:copyPublicKey')}>
+					<Text style={styles.keyText} numberOfLines={1}>{truncateKey(node.public_key, 12)}</Text>
+					<View style={styles.copy}>
+						<Icon name={copied ? 'check' : 'copy'} size={18} color={copied ? colors.green : accentBright} />
+					</View>
+				</Tooltip>
+				<Pressable style={styles.report} onPress={() => setDeleting(true)} accessibilityRole="button" accessibilityHint={t('map:reportDeletionTitle')}>
+					<Text style={styles.reportText}>{t('map:reportDeletion')}</Text>
+				</Pressable>
+			</DockedSheet>
+			<NodeDeletionDialog node={node} visible={deleting} onClose={() => setDeleting(false)} />
+		</>
 	);
 };
 

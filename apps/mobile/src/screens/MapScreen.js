@@ -8,6 +8,7 @@ import { FiltersSheet } from '../components/FiltersSheet';
 import { LegendSheet } from '../components/LegendSheet';
 import { MapAttribution } from '../components/MapAttribution';
 import { MapControls } from '../components/MapControls';
+import { useClientGlyphs } from '../components/clientGlyphs';
 import { NodeLayer } from '../components/NodeLayer';
 import { NodeSheet } from '../components/NodeSheet';
 import { OverlayLayer } from '../components/OverlayLayer';
@@ -62,6 +63,7 @@ export const MapScreen = () => {
 	const [selected, setSelected] = useState(null);
 	// A set of nodes shown instead of the whole map ("Show on map" in the statistics); null shows the filtered nodes.
 	const [focused, setFocused] = useState(null);
+	const glyphs = useClientGlyphs(focused ?? filtered);
 	const [sheet, setSheet] = useState(null);
 	const [toolId, setToolId] = useState(null);
 	const [toolsOpen, setToolsOpen] = useState(false);
@@ -225,10 +227,11 @@ export const MapScreen = () => {
 			{mapReady && (
 				<MapView style={styles.map} mapStyle={mapStyle} logo={false} attribution={false} compass={settings.rotateTilt} compassPosition={compassPosition} onDidFinishLoadingStyle={handleStyleLoaded} touchRotate={settings.rotateTilt} touchPitch={settings.rotateTilt} onPress={handleMapPress} onRegionDidChange={handleRegionDidChange} onDidFailLoadingMap={handleStyleFailed}>
 					<Camera ref={cameraRef} initialViewState={savedCamera ?? { center: view.center, zoom: view.zoom }} />
-					{styleEpoch > 0 && <NodeLayer key={`nodes-${styleEpoch}`} scope={styleEpoch} nodes={focused ?? filtered} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />}
+					{styleEpoch > 0 && <NodeLayer key={`nodes-${styleEpoch}`} scope={styleEpoch} nodes={focused ?? filtered} glyphImages={glyphs.images} selected={selected} clusteringZoom={settings.filters.clusteringZoom} sourceRef={sourceRef} onPress={handleNodePress} />}
 					{styleEpoch > 0 && overlay && <OverlayLayer key={`overlay-${styleEpoch}`} scope={styleEpoch} features={overlay} />}
 				</MapView>
 			)}
+			{glyphs.rasterizer}
 			{mapReady && styleEpoch === 0 && <View pointerEvents="none" style={styles.curtain} />}
 			{mapReady && <MapAttribution html={attribution} />}
 
@@ -244,7 +247,7 @@ export const MapScreen = () => {
 			<TopBar nodes={filtered} filters={settings.filters} onSelectNode={showNode} onOpenSheet={setSheet} />
 
 			{!ActiveTool && !selected && (
-				<MapControls region={region} features={config?.features} toolsOpen={toolsOpen} onToggleTools={toggleTools} onOpenTool={openTool} onOpenBasemap={openBasemapSheet} onOpenLegend={openLegendSheet} />
+				<MapControls region={region} showAddButton={settings.showAddButton} features={config?.features} toolsOpen={toolsOpen} onToggleTools={toggleTools} onOpenTool={openTool} onOpenBasemap={openBasemapSheet} onOpenLegend={openLegendSheet} />
 			)}
 
 			{ActiveTool && <ActiveTool ctx={toolContext} />}

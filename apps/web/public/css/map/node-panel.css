@@ -248,6 +248,10 @@ a.coords-link:active {
 	color: var(--red-bright);
 }
 
+.copy-icon-btn.copied {
+	color: var(--green-bright);
+}
+
 .copy-icon-btn .icon {
 	width: 15px;
 	height: 15px;

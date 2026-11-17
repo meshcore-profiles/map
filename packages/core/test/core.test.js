@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { haversineDistance, destinationPoint, parseLatLng, formatDistance, curvatureDrop } from '../src/geo.js';
-import { escapeHtml, truncateKey, formatBytes, resolveNodeByQuery, getNameIconLabel } from '../src/node-utils.js';
+import { escapeHtml, truncateKey, formatBytes, resolveNodeByQuery, getNameIconLabel, clientIconSvg, clientIconFontSize, CLIENT_ICON } from '../src/node-utils.js';
 import { radioValue, createRadioMatcher, updateRadioSelection } from '../src/radio-filter-utils.js';
 import { createDefaultFilters, collectFilteredNodes, prepareNodes, prepareNodesAsync, searchNodes, timeAgoParts } from '../src/nodes.js';
 import { createI18n } from '../src/i18n.js';
@@ -43,6 +43,10 @@ test('node-utils', () => {
 	assert.equal(getNameIconLabel('🛰 Sat'), '🛰S');
 	assert.equal(getNameIconLabel('𝗠esh'), '𝗠');
 	assert.equal(getNameIconLabel('   '), '');
+	assert.match(clientIconSvg('🛰', 'red'), /<text[^>]*>🛰<\/text>/u);
+	assert.ok(!clientIconSvg('<', 'red').includes('><</text>'));
+	assert.equal(clientIconFontSize('🐱'), CLIENT_ICON.emojiFontSize);
+	assert.equal(clientIconFontSize('FB'), CLIENT_ICON.fontSize);
 	const nodes = [{ adv_name: 'Alpha', public_key: 'AB12' }, { adv_name: 'Beta', public_key: 'CD34' }];
 	assert.equal(resolveNodeByQuery('cd', nodes), nodes[1]);
 	assert.equal(resolveNodeByQuery('', nodes), null);

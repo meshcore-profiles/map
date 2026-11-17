@@ -1,7 +1,7 @@
 const express = require('express');
 const limiter = require('../middlewares/ratelimit.js');
 const verifyTurnstile = require('../services/turnstile.js');
-const getDeletionMailUrl = require('../utils/nodeDeletionMail.js');
+const { buildDeletionMailUrl } = require('../../../packages/core/src/deletion.js');
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.post('/node-deletion', limiter.nodeDeletionAttempts, limiter.nodeDeletion
 	}
 
 	const t = key => req.t(key, { lng: ['pl', 'en'].includes(language) ? language : req.language });
-	res.json({ success: true, status: 200, message: 'OK', data: { mailto: getDeletionMailUrl(publicKey, t, req.site.domain) } });
+	res.json({ success: true, status: 200, message: 'OK', data: { mailto: buildDeletionMailUrl(publicKey, t, req.site.domain) } });
 });
 
 router.use('/node-deletion', (err, req, res, _next) => {

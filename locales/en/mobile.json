@@ -16,6 +16,9 @@
 	"offline": {
 		"usingCache": "Could not refresh the data. Showing data saved on your device."
 	},
+	"deletion": {
+		"yes": "Yes, I am"
+	},
 	"settings": {
 		"languageAuto": "Automatic",
 		"haptics": "Haptic feedback",
