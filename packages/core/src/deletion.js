@@ -1,5 +1,5 @@
 // The e-mail a node owner sends to have the node removed. The site prepares it on the server (after the captcha), the app builds it on the device.
-export const DELETION_EMAIL = 'recrof+meshcore-map-delele@gmail.com';
+export const DELETION_EMAIL = 'recrof+meshcore-map-delete@gmail.com';
 
 const SUBJECT = 'MeshCore Map node deletion request';
 
