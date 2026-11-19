@@ -1,5 +1,6 @@
 node_modules
 .env
+/scripts/testers.csv
 .expo
 apps/mobile/dist
 apps/mobile/android
