@@ -21,25 +21,37 @@ const installUrl = process.env.TESTER_INSTALL_URL || `https://play.google.com/ap
 
 const escapeHtml = text => text.replace(/[&<>"']/g, char => `&#${char.charCodeAt(0)};`);
 const SUBJECT = 'MeshCore Map na Androida: zaproszenie do zamkniętych testów';
-const PARAGRAPHS = [
-	'Cześć!',
-	'Dziękujemy za zgłoszenie do zamkniętych testów aplikacji MeshCore Map na Androida! Twój adres e-mail został dodany do listy testerów. Zapraszamy do sprawdzenia aplikacji i pomocy w jej przygotowaniu do publicznego wydania.',
-	'Aby dołączyć do testów, otwórz poniższy link na telefonie z Androidem. Upewnij się, że korzystasz z konta Google powiązanego z adresem e-mail podanym przy zgłoszeniu. Następnie zaakceptuj udział w teście i przejdź do instalacji aplikacji w Google Play:',
-	installUrl,
-	'Jeśli nie widzisz możliwości dołączenia do testów lub instalacji aplikacji, sprawdź wybrane konto Google. Jeśli problem nadal występuje, odpisz na tę wiadomość, a pomożemy.',
-	'Testy potrwają 14 dni. Pozostań w programie testowym przez cały ten okres i regularnie korzystaj z aplikacji. Sprawdź, jak działa podczas przeglądania mapy i w codziennym użytkowaniu, oraz instaluj dostępne aktualizacje.',
-	'Każda uwaga pomoże nam dopracować aplikację. Jeśli zauważysz błąd, coś będzie niejasne lub masz pomysł na usprawnienie, odpisz na tę wiadomość. Przy zgłaszaniu problemu podaj model telefonu, wersję Androida i opisz kroki prowadzące do jego wystąpienia. Jeśli możesz, dołącz też zrzut ekranu.',
-	'Pamiętaj, że to wersja testowa: może zawierać błędy, a niektóre funkcje mogą wymagać dopracowania. Stale pracujemy nad poprawkami, dlatego Twoje doświadczenia i zgłoszenia są dla nas szczególnie ważne.',
-	'Twój adres e-mail zostanie usunięty po zakończeniu testów. Możesz poprosić o jego usunięcie wcześniej, odpisując na tę wiadomość.',
-	'Dziękujemy za poświęcony czas!',
-	'Pozdrawiamy,',
-	'Zespół MeshCore Polska',
-];
+const MESSAGE_TEXT = `Cześć!
+
+Dziękujemy za zgłoszenie do zamkniętych testów aplikacji MeshCore Map na Androida! Twój adres e-mail został dodany do listy testerów. Zapraszamy do sprawdzenia aplikacji i pomocy w jej przygotowaniu do publicznego wydania.
+
+Aby dołączyć do testów, otwórz poniższy link na telefonie z Androidem. Upewnij się, że korzystasz z konta Google powiązanego z adresem e-mail podanym przy zgłoszeniu. Następnie zaakceptuj udział w teście i przejdź do instalacji aplikacji w Google Play:
+
+${installUrl}
+
+Jeśli nie widzisz możliwości dołączenia do testów lub instalacji aplikacji, sprawdź wybrane konto Google. Jeśli problem nadal występuje, odpisz na tę wiadomość, a pomożemy.
+
+Testy potrwają 14 dni. Pozostań w programie testowym przez cały ten okres i regularnie korzystaj z aplikacji. Sprawdź, jak działa podczas przeglądania mapy i w codziennym użytkowaniu, oraz instaluj dostępne aktualizacje.
+
+Pamiętaj, że to wersja testowa: może zawierać błędy, a niektóre funkcje mogą wymagać dopracowania. Stale pracujemy nad poprawkami, dlatego Twoje doświadczenia i zgłoszenia są dla nas szczególnie ważne.
+
+Jeśli zauważysz błąd, coś będzie niejasne lub masz pomysł na usprawnienie, odpisz na tę wiadomość. Przy zgłaszaniu problemu podaj model telefonu, wersję Androida i opisz kroki prowadzące do jego wystąpienia. Jeśli możesz, dołącz też zrzut ekranu.
+
+Obecnie występują problemy z Google Play Console: próba przesłania nowej wersji aplikacji do zamkniętych testów kończy się nieoczekiwanym błędem. Sprawa została już zgłoszona do Google. Z tego powodu na razie udostępniliśmy testerom nieco starszą wersję aplikacji.
+
+Przez cały okres testów będziemy na bieżąco informować Cię drogą mailową o sytuacji, dostępności nowych wersji i innych ważnych zmianach.
+
+Twój adres e-mail zostanie usunięty po zakończeniu testów. Możesz poprosić o jego usunięcie wcześniej, odpisując na tę wiadomość.
+
+Dziękujemy za poświęcony czas!
+
+Pozdrawiamy,
+Zespół MeshCore Polska`;
 
 const MESSAGE = {
 	subject: SUBJECT,
-	text: PARAGRAPHS.join('\n\n'),
-	html: PARAGRAPHS.map(paragraph => paragraph === installUrl ? `<p><a href="${escapeHtml(installUrl)}">${escapeHtml(installUrl)}</a></p>` : `<p>${escapeHtml(paragraph)}</p>`).join('\n'),
+	text: MESSAGE_TEXT,
+	html: MESSAGE_TEXT.split('\n\n').map(paragraph => paragraph === installUrl ? `<p><a href="${escapeHtml(installUrl)}">${escapeHtml(installUrl)}</a></p>` : `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`).join('\n'),
 };
 const resolveSender = () => {
 	const configured = process.env.MAILER_FROM?.trim();
