@@ -7,7 +7,7 @@ const redisStore = prefix => new RedisStore({ sendCommand: (...args) => RedisCli
 
 export const global = rateLimit({
 	windowMs: 40 * 1000,
-	limit: 52,
+	limit: 24,
 	standardHeaders: 'draft-7',
 	legacyHeaders: false,
 	store: redisStore('mcprof-map:ratelimit:global:'),
