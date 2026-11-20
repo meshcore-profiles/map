@@ -1,7 +1,7 @@
-const express = require('express');
-const limiter = require('../middlewares/ratelimit.js');
-const verifyTurnstile = require('../services/turnstile.js');
-const TesterSignup = require('../models/testerSignup.model.js');
+import express from 'express';
+import * as limiter from '../middlewares/ratelimit.js';
+import verifyTurnstile from '../services/turnstile.js';
+import TesterSignup from '../models/testerSignup.model.js';
 
 const router = express.Router();
 const EMAIL_REGEX = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
@@ -51,4 +51,4 @@ router.use('/tester-signup', (err, req, res, _next) => {
 	});
 });
 
-module.exports = router;
+export default router;

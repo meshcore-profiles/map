@@ -1,7 +1,7 @@
-const axios = require('../../../global/services/axios.js');
+import axios from '../../../global/services/axios.js';
 const secret = process.env.TURNSTILE_SECRET;
 
-module.exports = async (token, ip, hostname, { action, cdata }) => {
+export default async (token, ip, hostname, { action, cdata }) => {
 	if (typeof token !== 'string' || !token || token.length > 2048) return false;
 	if (!secret) return false;
 

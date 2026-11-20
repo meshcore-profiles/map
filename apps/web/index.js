@@ -1,17 +1,18 @@
-process.loadEnvFile(`${__dirname}/../../.env`);
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const crypto = require('node:crypto');
-const path = require('node:path');
+import '../../loadEnv.js';
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import crypto from 'node:crypto';
+import path from 'node:path';
 // The version lives in the root package.json only (the shared global/ code reads it too).
-const { version } = require('../../package.json');
-const { parseAppVersion } = require('../../packages/core/src/version.js');
+import pkg from '../../package.json' with { type: 'json' };
+import { parseAppVersion } from '../../packages/core/src/version.js';
 
+const { version } = pkg;
 const { DOMAIN, NODE_ENV, PORT, SITE_MODE } = process.env;
 const isProd = NODE_ENV === 'production';
 const siteMode = (SITE_MODE || 'auto').toLowerCase();
-const SITES = require('./config/sites.js');
+import * as SITES from './config/sites.js';
 
 const resolveSite = req => {
 	if (siteMode === 'poland') return SITES.poland;
@@ -21,18 +22,20 @@ const resolveSite = req => {
 
 // Node data itself is fetched/cached into Redis by the meshcore-profiles/cronjobs worker;
 // this app only reads it (see global/services/nodeCache.js).
-const MongooseConnection = require('../../global/database/mongoose.js');
-const RedisClient = require('../../global/services/redis.js');
+import MongooseConnection from '../../global/database/mongoose.js';
+import RedisClient from '../../global/services/redis.js';
 
 // Middleware imports
-const timeout = require('./middlewares/timeout.js');
-const logger = require('../../global/middlewares/morgan.js');
-const limiter = require('./middlewares/ratelimit.js');
-const language = require('./middlewares/language.js');
-const languageNegotiation = require('./middlewares/languageNegotiation.js');
-const { detectLanguagePrefix, isLanguageAgnosticPath } = require('../../global/utils/languageResolver.js');
-const { SUPPORTED } = require('../../global/services/i18n.js');
-const HttpError = require('./utils/httpError.js');
+import timeout from './middlewares/timeout.js';
+import logger from '../../global/middlewares/morgan.js';
+import * as limiter from './middlewares/ratelimit.js';
+import language from './middlewares/language.js';
+import languageNegotiation from './middlewares/languageNegotiation.js';
+import { detectLanguagePrefix, isLanguageAgnosticPath } from '../../global/utils/languageResolver.js';
+import { SUPPORTED } from '../../global/services/i18n.js';
+import HttpError from './utils/httpError.js';
+import features from './config/features.js';
+import AppLinksRouter from './routes/AppLinks.js';
 
 // Create an Express app
 const app = express();
@@ -40,14 +43,14 @@ const app = express();
 // Configure the app
 if (isProd) app.set('trust proxy', 1);
 // Absolute paths, so the start directory does not matter (`node .` from the repo root works like `npm start`).
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(import.meta.dirname, 'views'));
 app.set('view engine', 'ejs');
 app.locals.domain = `${process.env.DOMAIN}${isProd ? '' : `:${process.env.PORT}`}`;
 // package.json holds "x.y.z+YYYYMMDD": the version and the release date are shown separately.
 const release = parseAppVersion(version);
 app.locals.v = release.version;
 app.locals.releaseDate = release.date;
-app.locals.features = require('./config/features.js');
+app.locals.features = features;
 
 // Safe origins allowed to read this app's resources cross-origin (e.g. the flasher app loading static JS)
 const SAFE_ORIGINS = [
@@ -102,9 +105,9 @@ app.use(helmet({
 	},
 }));
 app.use(cors({ origin: SAFE_ORIGINS }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/core', express.static(path.join(__dirname, '../../packages/core/src')));
-app.use(require('./routes/AppLinks.js'));
+app.use(express.static(path.join(import.meta.dirname, 'public')));
+app.use('/core', express.static(path.join(import.meta.dirname, '../../packages/core/src')));
+app.use(AppLinksRouter);
 app.use((req, res, next) => {
 	req.site = resolveSite(req);
 	next();
@@ -132,11 +135,11 @@ app.use(timeout());
 
 
 // Routes
-const IndexRouter = require('./routes/Index.js');
-const APIRouter = require('./routes/Api.js');
-const NodeDeletionRouter = require('./routes/NodeDeletion.js');
-const TesterSignupRouter = require('./routes/TesterSignup.js');
-const EmbedRouter = require('./routes/Embed.js');
+import IndexRouter from './routes/Index.js';
+import APIRouter from './routes/Api.js';
+import NodeDeletionRouter from './routes/NodeDeletion.js';
+import TesterSignupRouter from './routes/TesterSignup.js';
+import EmbedRouter from './routes/Embed.js';
 
 app.use(IndexRouter);
 app.use(EmbedRouter);

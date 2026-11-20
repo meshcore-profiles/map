@@ -1,6 +1,6 @@
-const i18nextMiddleware = require('i18next-http-middleware');
-const { i18next, resources } = require('../../../global/services/i18n.js');
-const { LANGUAGES, langPath } = require('../../../global/utils/languageResolver.js');
+import i18nextMiddleware from 'i18next-http-middleware';
+import { i18next, resources } from '../../../global/services/i18n.js';
+import { LANGUAGES, langPath } from '../../../global/utils/languageResolver.js';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -22,4 +22,4 @@ const applyLocals = (req, res, next) => {
 	next();
 };
 
-module.exports = [i18nextMiddleware.handle(i18next), applyLocals];
+export default [i18nextMiddleware.handle(i18next), applyLocals];

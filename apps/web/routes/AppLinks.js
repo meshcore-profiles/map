@@ -1,5 +1,8 @@
-const router = require('express').Router();
-const { expo } = require('../../mobile/app.json');
+import { Router } from 'express';
+import appJson from '../../mobile/app.json' with { type: 'json' };
+
+const router = Router();
+const { expo } = appJson;
 
 // Digital Asset Links: lets Android verify that the app may open links of both sites (the intent filter in apps/mobile/app.json has autoVerify).
 // The release key comes from app.json; ANDROID_PLAY_CERT_SHA256 (comma separated) adds the Play App Signing key from the Play Console.
@@ -17,4 +20,4 @@ router.get('/.well-known/assetlinks.json', (req, res) => {
 	res.set('Cache-Control', 'public, max-age=3600').type('application/json').json(assetLinks);
 });
 
-module.exports = router;
+export default router;

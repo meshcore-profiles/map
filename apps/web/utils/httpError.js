@@ -1,4 +1,4 @@
-module.exports = (res, status, err) => {
+export default (res, status, err) => {
 	if (err) console.error(err);
 	res.status(status).end();
 };

@@ -1,7 +1,7 @@
-const express = require('express');
-const limiter = require('../middlewares/ratelimit.js');
-const verifyTurnstile = require('../services/turnstile.js');
-const { buildDeletionMailUrl } = require('../../../packages/core/src/deletion.js');
+import express from 'express';
+import * as limiter from '../middlewares/ratelimit.js';
+import verifyTurnstile from '../services/turnstile.js';
+import { buildDeletionMailUrl } from '../../../packages/core/src/deletion.js';
 
 const router = express.Router();
 
@@ -39,4 +39,4 @@ router.use('/node-deletion', (err, req, res, _next) => {
 	});
 });
 
-module.exports = router;
+export default router;

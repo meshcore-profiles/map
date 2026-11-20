@@ -1,5 +1,7 @@
-const router = require('express').Router();
-const HttpError = require('../utils/httpError.js');
+import { Router } from 'express';
+import HttpError from '../utils/httpError.js';
+
+const router = Router();
 
 const MAX_NODES = 24;
 const MAX_NAME_LENGTH = 64;
@@ -57,4 +59,4 @@ router.get('/embed', (req, res) => {
 	res.render('embed.ejs', { points, cover: req.query.view === 'cover' });
 });
 
-module.exports = router;
+export default router;

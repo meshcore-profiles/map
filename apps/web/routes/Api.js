@@ -1,8 +1,10 @@
-const router = require('express').Router();
-const { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate } = require('../../../global/services/nodeCache.js');
-const getRadioPresets = require('../services/radioPresets.js');
-const features = require('../config/features.js');
-const StatsDaily = require('../../../global/database/models/statsDaily.model.js');
+import { Router } from 'express';
+import { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate } from '../../../global/services/nodeCache.js';
+import getRadioPresets from '../services/radioPresets.js';
+import features from '../config/features.js';
+import StatsDaily from '../../../global/database/models/statsDaily.model.js';
+
+const router = Router();
 
 const MAX_HISTORY_DAYS = 365;
 const DEFAULT_HISTORY_DAYS = 90;
@@ -95,4 +97,4 @@ router.get('/stats/history', async (req, res) => {
 	}
 });
 
-module.exports = router;
+export default router;

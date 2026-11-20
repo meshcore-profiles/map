@@ -1,6 +1,6 @@
 {
   "name": "meshcore-map",
-  "version": "0.15.0+20261117",
+  "version": "0.15.1+20261120",
   "private": true,
   "homepage": "https://map.meshcoreprofiles.com",
   "bugs": {
@@ -12,6 +12,7 @@
   },
   "license": "MIT",
   "author": "Sefinek <contact@sefinek.net> (https://sefinek.net)",
+  "type": "module",
   "main": "apps/web/index.js",
   "workspaces": [
     "apps/*",

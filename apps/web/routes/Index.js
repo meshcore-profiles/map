@@ -1,5 +1,7 @@
-const router = require('express').Router();
-const { LANGUAGES, langPath } = require('../../../global/utils/languageResolver.js');
+import { Router } from 'express';
+import { LANGUAGES, langPath } from '../../../global/utils/languageResolver.js';
+
+const router = Router();
 
 router.get('/', (req, res) => res.render('index.ejs'));
 if (process.env.NODE_ENV !== 'production') router.get('/test', (req, res) => res.render('test.ejs'));
@@ -49,4 +51,4 @@ router.get('/manifest.webmanifest', (req, res) => {
 	});
 });
 
-module.exports = router;
+export default router;

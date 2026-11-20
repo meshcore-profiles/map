@@ -1,11 +1,11 @@
-const path = require('node:path');
-const { setTimeout: sleep } = require('node:timers/promises');
+import '../loadEnv.js';
+import nodemailer from 'nodemailer';
+import { setTimeout as sleep } from 'node:timers/promises';
 
-process.loadEnvFile(path.join(__dirname, '../.env'));
-
-const { expo } = require('../apps/mobile/app.json');
-const connection = require('../global/database/mongoose.js');
-const TesterSignup = require('../apps/web/models/testerSignup.model.js');
+import appJson from '../apps/mobile/app.json' with { type: 'json' };
+import connection from '../global/database/mongoose.js';
+import TesterSignup from '../apps/web/models/testerSignup.model.js';
+const { expo } = appJson;
 
 const DELAY_MS = 2000;
 
@@ -63,7 +63,6 @@ const resolveSender = () => {
 const createTransporter = () => {
 	const missing = ['MAILER_HOST', 'MAILER_PORT', 'MAILER_AUTH_USER', 'MAILER_AUTH_PASSWD'].filter(name => !process.env[name]);
 	if (missing.length) throw new Error(`Missing in .env: ${missing.join(', ')}`);
-	const nodemailer = require('nodemailer');
 	const port = Number(process.env.MAILER_PORT);
 
 	return nodemailer.createTransport({

@@ -1,11 +1,11 @@
-const rateLimit = require('express-rate-limit');
-const { RedisStore } = require('rate-limit-redis');
-const RedisClient = require('../../../global/services/redis.js');
-const HttpError = require('../utils/httpError.js');
+import rateLimit from 'express-rate-limit';
+import { RedisStore } from 'rate-limit-redis';
+import RedisClient from '../../../global/services/redis.js';
+import HttpError from '../utils/httpError.js';
 
 const redisStore = prefix => new RedisStore({ sendCommand: (...args) => RedisClient.sendCommand(args), prefix });
 
-exports.global = rateLimit({
+export const global = rateLimit({
 	windowMs: 40 * 1000,
 	limit: 52,
 	standardHeaders: 'draft-7',
@@ -16,7 +16,7 @@ exports.global = rateLimit({
 
 const deletionLimitHandler = (req, res) => res.status(429).json({ success: false, status: 429, message: req.t('map:deletion.errors.rateLimited') });
 
-exports.nodeDeletionAttempts = rateLimit({
+export const nodeDeletionAttempts = rateLimit({
 	windowMs: 10 * 60 * 1000,
 	limit: 10,
 	standardHeaders: 'draft-7',
@@ -26,7 +26,7 @@ exports.nodeDeletionAttempts = rateLimit({
 	handler: deletionLimitHandler,
 });
 
-exports.nodeDeletion = rateLimit({
+export const nodeDeletion = rateLimit({
 	windowMs: 24 * 60 * 60 * 1000,
 	limit: 3,
 	standardHeaders: 'draft-7',
@@ -39,7 +39,7 @@ exports.nodeDeletion = rateLimit({
 
 const testerSignupLimitHandler = (req, res) => res.status(429).json({ success: false, status: 429, message: req.t('map:testers.errors.rateLimited') });
 
-exports.testerSignup = rateLimit({
+export const testerSignup = rateLimit({
 	windowMs: 60 * 60 * 1000,
 	limit: 5,
 	standardHeaders: 'draft-7',

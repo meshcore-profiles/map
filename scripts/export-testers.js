@@ -1,5 +1,6 @@
-const path = require('node:path');
-const { writeFile } = require('node:fs/promises');
+import '../loadEnv.js';
+import path from 'node:path';
+import { writeFile } from 'node:fs/promises';
 
 const args = process.argv.slice(2);
 if (args.length > 1 || args.some(arg => arg.startsWith('-'))) {
@@ -8,12 +9,11 @@ if (args.length > 1 || args.some(arg => arg.startsWith('-'))) {
 	process.exit(help ? 0 : 1);
 }
 
-const outputPath = args.length ? path.resolve(args[0]) : path.join(__dirname, 'testers.csv');
+const outputPath = args.length ? path.resolve(args[0]) : path.join(import.meta.dirname, 'testers.csv');
 
-process.loadEnvFile(path.join(__dirname, '../.env'));
 
-const connection = require('../global/database/mongoose.js');
-const TesterSignup = require('../apps/web/models/testerSignup.model.js');
+import connection from '../global/database/mongoose.js';
+import TesterSignup from '../apps/web/models/testerSignup.model.js';
 
 const main = async () => {
 	await connection.asPromise();

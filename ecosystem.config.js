@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
 	apps: [{
 		name: 'mcmap',
 		cwd: './apps/web',
@@ -24,3 +24,6 @@ module.exports = {
 		},
 	}],
 };
+
+export default config;
+export { config as 'module.exports' };
