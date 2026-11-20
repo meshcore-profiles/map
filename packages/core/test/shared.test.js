@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createRequire } from 'node:module';
+import { global, poland } from '../../../apps/web/config/sites.js';
 import { appIdentityHeaders, normalizeCertSha1 } from '../src/app-identity.js';
 import { buildAndroidIntentUrl, isAndroid, isMapLink } from '../src/app-link.js';
 import { BASEMAP_CATEGORIES, basemapFailureReason, CARTO_DARK_NAME, createBasemapCatalog, ESRI_HYBRID_NAME, MAPTILER_HYBRID_NAME, mergeApiKeys, normalizeBasemapSelection, OPENFREEMAP_NAME, OPENSTREETMAP_NAME, resolveBasemap, sanitizeApiKey, sanitizeCustomApiKeys, withBasemapFailure } from '../src/basemaps.js';
@@ -152,7 +152,6 @@ test('own API keys are validated and replace the server ones', () => {
 test('a site defines its default view and the server config reuses it', () => {
 	assert.deepEqual(toMaplibreView(SITES.pl.defaultView), { center: [19.325, 52.1537], zoom: 6 });
 
-	const { poland, global } = createRequire(import.meta.url)('../../../apps/web/config/sites.js');
 	assert.deepEqual(poland.defaultView, SITES.pl.defaultView);
 	assert.equal(global.brandNameHtml, SITES.all.brandName);
 	assert.equal(poland.brandNameHtml, 'MeshCore <strong>Polska</strong>');
