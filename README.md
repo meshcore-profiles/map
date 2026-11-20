@@ -26,7 +26,7 @@ The `meshcoreprofiles.com` service already serves the global node map at `map.me
 A test version of the configurator is currently available only to members of the [MeshCore Polska Discord](https://meshcorepolska.org/discord) server (the `/konfigurator` command by `Sefi#6347`). [See an example profile](https://sefinek.net/meshcore-pl/kontakty/6a43efd454feb8be5679e0a6).
 
 ## Requirements
-- Node.js >=20.19.0
+- Node.js >= 26.0.0
 - MongoDB
 - Redis
 - Internet access to fetch source data

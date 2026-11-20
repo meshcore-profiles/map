@@ -8,7 +8,7 @@ export default [
 		languageOptions: {
 			ecmaVersion: 'latest',
 			globals: {
-				...globals.node,
+				...globals.nodeBuiltin,
 			},
 		},
 		rules: {
@@ -66,6 +66,7 @@ export default [
 		files: ['apps/mobile/**/*.js'],
 		languageOptions: {
 			sourceType: 'module',
+			globals: { ...globals.commonjs, __dirname: 'readonly' },
 			parserOptions: { ecmaFeatures: { jsx: true } },
 		},
 	},
