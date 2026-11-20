@@ -8,24 +8,8 @@ import path from 'node:path';
 import pkg from '../../package.json' with { type: 'json' };
 import { parseAppVersion } from '../../packages/core/src/version.js';
 
-const { version } = pkg;
-const { DOMAIN, NODE_ENV, PORT, SITE_MODE } = process.env;
-const isProd = NODE_ENV === 'production';
-const siteMode = (SITE_MODE || 'auto').toLowerCase();
-import * as SITES from './config/sites.js';
-
-const resolveSite = req => {
-	if (siteMode === 'poland') return SITES.poland;
-	if (siteMode === 'global') return SITES.global;
-	return SITES.HOSTS[req.hostname] || SITES.default;
-};
-
-// Node data itself is fetched/cached into Redis by the meshcore-profiles/cronjobs worker;
-// this app only reads it (see global/services/nodeCache.js).
 import MongooseConnection from '../../global/database/mongoose.js';
 import RedisClient from '../../global/services/redis.js';
-
-// Middleware imports
 import timeout from './middlewares/timeout.js';
 import logger from '../../global/middlewares/morgan.js';
 import * as limiter from './middlewares/ratelimit.js';
@@ -36,6 +20,23 @@ import { SUPPORTED } from '../../global/services/i18n.js';
 import HttpError from './utils/httpError.js';
 import features from './config/features.js';
 import AppLinksRouter from './routes/AppLinks.js';
+import * as SITES from './config/sites.js';
+import IndexRouter from './routes/Index.js';
+import APIRouter from './routes/Api.js';
+import NodeDeletionRouter from './routes/NodeDeletion.js';
+import TesterSignupRouter from './routes/TesterSignup.js';
+import EmbedRouter from './routes/Embed.js';
+
+const { version } = pkg;
+const { DOMAIN, NODE_ENV, PORT, SITE_MODE } = process.env;
+const isProd = NODE_ENV === 'production';
+const siteMode = (SITE_MODE || 'auto').toLowerCase();
+
+const resolveSite = req => {
+	if (siteMode === 'poland') return SITES.poland;
+	if (siteMode === 'global') return SITES.global;
+	return SITES.HOSTS[req.hostname] || SITES.default;
+};
 
 // Create an Express app
 const app = express();
@@ -135,12 +136,6 @@ app.use(timeout());
 
 
 // Routes
-import IndexRouter from './routes/Index.js';
-import APIRouter from './routes/Api.js';
-import NodeDeletionRouter from './routes/NodeDeletion.js';
-import TesterSignupRouter from './routes/TesterSignup.js';
-import EmbedRouter from './routes/Embed.js';
-
 app.use(IndexRouter);
 app.use(EmbedRouter);
 app.use('/api/v1', APIRouter);

@@ -565,8 +565,8 @@ function renderSearchResults() {
 
 	searchResultsEl.hidden = searchResults.length === 0;
 	if (!searchResultsEl.hidden) positionDropdown(searchResultsEl);
-	searchResultsEl.innerHTML = searchResults.map(node => `
-		<li>
+	searchResultsEl.innerHTML = searchResults.map((node, index) => `
+		<li data-index="${index}">
 			<svg width="22" height="22"><use href="/icons/node-types.svg#${NODE_TYPE_ICON_NAMES[node.type]}-plain"></use></svg>
 			<div class="search-text">
 				<h6>${highlightString(node.adv_name, state.search)}</h6>
@@ -575,13 +575,23 @@ function renderSearchResults() {
 		</li>
 	`).join('');
 
-	[...searchResultsEl.children].forEach((li, index) => {
-		li.addEventListener('click', () => showNode(searchResults[index]));
-		li.addEventListener('mouseenter', () => setSearchActiveIndex(index));
-	});
-
 	setSearchActiveIndex(0);
 }
+
+const getSearchResultIndex = e => {
+	const index = e.target.closest('li[data-index]')?.dataset.index;
+	return index === undefined ? -1 : Number(index);
+};
+
+searchResultsEl.addEventListener('click', e => {
+	const node = searchResults[getSearchResultIndex(e)];
+	if (node) showNode(node);
+});
+
+searchResultsEl.addEventListener('mouseover', e => {
+	const index = getSearchResultIndex(e);
+	if (index !== -1) setSearchActiveIndex(index);
+});
 
 let previewKeys = null;
 
