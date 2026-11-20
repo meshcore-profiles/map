@@ -1292,7 +1292,6 @@ downloadNodes(state.region).then(() => {
 
 	if (urlParams.coverage) {
 		const parts = urlParams.coverage.split(',');
-		if (parts.length === 11) parts.splice(5, 1); // legacy links carried the removed max-range field
 		const [lat, lng, txHeight, rxHeight, freq, resolution, terrainMargin, erp, sf, bw] = parts;
 		const parsedLat = Number(lat), parsedLng = Number(lng);
 

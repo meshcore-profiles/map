@@ -3,8 +3,7 @@
 // What a map shows, which is how the maps are grouped for the user (not how they are rendered): street and terrain maps are one group.
 export const BASEMAP_CATEGORIES = ['maps', 'satellite'];
 
-// Older versions stored the literal "Default" when the user had not chosen a map; the selection is now null for that.
-export const normalizeBasemapSelection = value => typeof value === 'string' && value && value !== 'Default' ? value : null;
+export const normalizeBasemapSelection = value => (typeof value === 'string' && value ? value : null);
 
 // Providers whose maps need a key. A visitor can enter their own (website: localStorage, app: settings); it replaces the one the server hands out,
 // so a shared key that ran out of quota, or one the visitor's plan does not cover, does not lock the map.

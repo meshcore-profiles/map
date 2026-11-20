@@ -51,14 +51,13 @@ test('a map that fails is replaced by the next one by priority', () => {
 	assert.equal(resolveBasemap({ catalog, selected: null, failures }).active, ESRI_HYBRID_NAME);
 });
 
-test('maps are grouped by what they show and the legacy "Default" selection means no choice', () => {
+test('maps are grouped by what they show and an empty selection means no choice', () => {
 	const catalog = createBasemapCatalog({ cartoApiKey: 'abcdefgh' });
 	const categories = catalog.listed.map(item => item.category);
 	assert.deepEqual([...new Set(categories)], BASEMAP_CATEGORIES);
 	assert.deepEqual(categories, [...categories].sort((a, b) => BASEMAP_CATEGORIES.indexOf(a) - BASEMAP_CATEGORIES.indexOf(b)));
 	assert.deepEqual(catalog.listed.filter(item => item.isDefault).map(item => item.name), [CARTO_DARK_NAME]);
 
-	assert.equal(normalizeBasemapSelection('Default'), null);
 	assert.equal(normalizeBasemapSelection(''), null);
 	assert.equal(normalizeBasemapSelection(undefined), null);
 	assert.equal(normalizeBasemapSelection(OPENSTREETMAP_NAME), OPENSTREETMAP_NAME);
