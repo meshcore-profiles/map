@@ -18,6 +18,8 @@ import { loadRadioFilters } from '/core/radio-filter-utils.js';
 import { buildFilterParams, parseSharedFilters } from '/core/filter-share.js';
 import { MAX_EMBED_NODES } from '/core/embed.js';
 import { initLegendPanel } from './legend.js';
+import { initLoadingOverlay } from './loading.js';
+import { initRegionWarning } from './region-warning.js';
 import { initStatsModal } from './stats.js';
 import { initChangelogModal } from './changelog.js';
 import { initMeasureTool } from './measure.js';
@@ -146,15 +148,8 @@ const icons = Object.fromEntries(['none', 'recent', 'stale', 'old', 'extinct'].m
 const langToggle = document.getElementById('lang-toggle');
 const langMenu = document.getElementById('lang-menu');
 
-const loadingOverlay = document.getElementById('loading-overlay');
-const loadingStatus = document.getElementById('loading-status');
-const loadingProgressBar = document.getElementById('loading-progress-bar');
-const loadingMeta = document.getElementById('loading-meta');
-const loadingCancelBtn = document.getElementById('loading-cancel-btn');
-const regionWarningOverlay = document.getElementById('region-warning-overlay');
-const regionWarningConfirmBtn = document.getElementById('region-warning-confirm');
-const regionWarningCancelBtn = document.getElementById('region-warning-cancel');
-const regionWarningSizeEl = document.getElementById('region-warning-size');
+const loading = initLoadingOverlay();
+const regionWarning = initRegionWarning({ apiUrl });
 const contactErrorTextEl = document.getElementById('contact-error-text');
 const contactErrorModal = initModal(null, 'contact-error-overlay', { closeOnOutsideClick: true });
 initNodeDeletionDialog();
@@ -430,39 +425,6 @@ map.on('click', e => {
 	if (activePicker?.onMap) activePicker.onMap(e.latlng);
 });
 
-const LOADING_PHASES = {
-	connect: { from: 0, to: 5 },
-	download: { from: 5, to: 55 },
-	unpack: { from: 55, to: 60 },
-	process: { from: 60, to: 90 },
-	presets: { from: 90, to: 100 },
-};
-
-const setLoading = loading => {
-	loadingOverlay.hidden = !loading;
-	if (loading) {
-		loadingStatus.textContent = '';
-		loadingProgressBar.style.width = '0%';
-		loadingMeta.textContent = '';
-	}
-};
-
-const setLoadingStatus = text => {
-	loadingStatus.textContent = text;
-};
-
-const setLoadingProgress = (phase, fraction = 1) => {
-	const { from, to } = LOADING_PHASES[phase];
-	const pct = from + (to - from) * Math.min(1, Math.max(0, fraction));
-	loadingProgressBar.style.width = `${pct}%`;
-};
-
-const renderDownloadMeta = (receivedBytes, totalBytes, elapsedSec) => {
-	const sizeText = totalBytes ? `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)}` : ntools.formatBytes(receivedBytes);
-	const speed = elapsedSec > 0 ? receivedBytes / elapsedSec : 0;
-	loadingMeta.textContent = `${sizeText} · ${ntools.formatBytes(speed)}/s`;
-};
-
 const positionDropdown = (el, anchor = searchInline, { fullWidthOnMobile = true } = {}) => {
 	const rect = anchor.getBoundingClientRect();
 	el.style.top = `${rect.bottom + 10}px`;
@@ -736,9 +698,9 @@ const downloadNodes = async region => {
 	currentDownloadAbort = abortController;
 
 	try {
-		setLoading(true);
+		loading.setLoading(true);
 
-		setLoadingStatus(t('map:connecting'));
+		loading.setStatus(t('map:connecting'));
 		const nodesReq = await fetch(apiUrl(region), { signal: abortController.signal });
 
 		if (!nodesReq.ok) {
@@ -755,9 +717,9 @@ const downloadNodes = async region => {
 
 		const dataUpdatedAt = nodesReq.headers.get('X-Data-Updated');
 		const totalBytes = Number(nodesReq.headers.get('Content-Length')) || 0;
-		setLoadingProgress('connect');
+		loading.setProgress('connect');
 
-		setLoadingStatus(t('map:downloading'));
+		loading.setStatus(t('map:downloading'));
 		const reader = nodesReq.body.getReader();
 		const chunks = [];
 		let receivedBytes = 0;
@@ -769,12 +731,12 @@ const downloadNodes = async region => {
 
 			chunks.push(value);
 			receivedBytes += value.length;
-			setLoadingProgress('download', totalBytes ? receivedBytes / totalBytes : 0);
-			renderDownloadMeta(receivedBytes, totalBytes, (performance.now() - startTime) / 1000);
+			loading.setProgress('download', totalBytes ? receivedBytes / totalBytes : 0);
+			loading.showDownload(receivedBytes, totalBytes, (performance.now() - startTime) / 1000);
 		}
 
-		setLoadingProgress('download');
-		loadingMeta.textContent = `${totalBytes ? `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)}` : ntools.formatBytes(receivedBytes)} · ${t('map:downloadComplete')}`;
+		loading.setProgress('download');
+		loading.showDownloadDone(receivedBytes, totalBytes, t('map:downloadComplete'));
 
 		const nodesBuffer = new Uint8Array(receivedBytes);
 		let writeOffset = 0;
@@ -783,9 +745,9 @@ const downloadNodes = async region => {
 			writeOffset += chunk.length;
 		}
 
-		setLoadingStatus(t('map:unpacking'));
+		loading.setStatus(t('map:unpacking'));
 		const nodes = unpack(nodesBuffer);
-		setLoadingProgress('unpack');
+		loading.setProgress('unpack');
 
 		const presetsPromise = getPresets(abortController.signal);
 
@@ -797,8 +759,8 @@ const downloadNodes = async region => {
 
 			if (abortController.signal.aborted) throw new DOMException('Canceled by user', 'AbortError');
 
-			setLoadingStatus(t('map:processingNodes', { end, total: nodes.length }));
-			setLoadingProgress('process', end / nodes.length);
+			loading.setStatus(t('map:processingNodes', { end, total: nodes.length }));
+			loading.setProgress('process', end / nodes.length);
 			if (offset > 0) await new Promise(r => setTimeout(r, 0));
 
 			for (let i = offset; i < end; i++) {
@@ -822,17 +784,17 @@ const downloadNodes = async region => {
 
 		if (abortController.signal.aborted) throw new DOMException('Canceled by user', 'AbortError');
 
-		setLoadingStatus(t('map:fetchingPresets'));
-		setLoadingProgress('presets', 0);
+		loading.setStatus(t('map:fetchingPresets'));
+		loading.setProgress('presets', 0);
 		try {
 			await presetsPromise;
 		} catch (err) {
 			if (err.name === 'AbortError') throw err;
 			console.error('Failed to fetch radio presets:', err);
 		}
-		setLoadingProgress('presets');
+		loading.setProgress('presets');
 
-		setLoadingStatus(t('map:ready'));
+		loading.setStatus(t('map:ready'));
 
 		nodesCache[region] = { nodes, byType: index.byType, radioOptions: index.radioOptions, dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
@@ -847,7 +809,7 @@ const downloadNodes = async region => {
 	} finally {
 		if (currentDownloadAbort === abortController) {
 			currentDownloadAbort = null;
-			setLoading(false);
+			loading.setLoading(false);
 		}
 	}
 };
@@ -1060,50 +1022,13 @@ restoreFiltersBtn.addEventListener('click', async () => {
 	else await setRegion(region);
 });
 
-loadingCancelBtn.addEventListener('click', () => currentDownloadAbort?.abort());
-
-const confirmRegionWarning = () => new Promise(resolve => {
-	function cleanup(confirmed) {
-		regionWarningOverlay.hidden = true;
-		regionWarningConfirmBtn.removeEventListener('click', onConfirm);
-		regionWarningCancelBtn.removeEventListener('click', onCancel);
-		regionWarningOverlay.removeEventListener('click', onOverlayClick);
-		document.removeEventListener('keydown', onKeydown);
-		resolve(confirmed);
-	}
-
-	function onConfirm() { cleanup(true); }
-	function onCancel() { cleanup(false); }
-	function onOverlayClick(e) { if (e.target === regionWarningOverlay) cleanup(false); }
-	function onKeydown(e) { if (e.key === 'Escape') cleanup(false); }
-
-	regionWarningConfirmBtn.addEventListener('click', onConfirm);
-	regionWarningCancelBtn.addEventListener('click', onCancel);
-	regionWarningOverlay.addEventListener('click', onOverlayClick);
-	document.addEventListener('keydown', onKeydown);
-
-	regionWarningOverlay.hidden = false;
-	regionWarningCancelBtn.focus();
-});
-
-const getRegionDataSize = async region => {
-	try {
-		const res = await fetch(apiUrl(region), { method: 'HEAD' });
-		return Number(res.headers.get('Content-Length')) || 0;
-	} catch {
-		return 0;
-	}
-};
+loading.onCancel(() => currentDownloadAbort?.abort());
 
 regionToggle?.addEventListener('click', async () => {
 	const targetRegion = state.region === 'all' ? 'pl' : 'all';
 
 	if (targetRegion === 'all' && !nodesCache.all && !localStorage.getItem('regionWarningAcknowledged')) {
-		const size = await getRegionDataSize('all');
-		regionWarningSizeEl.textContent = size ? t('map:aboutSize', { size: ntools.formatBytes(size) }) : t('map:unknownSize');
-
-		const confirmed = await confirmRegionWarning();
-		if (!confirmed) return;
+		if (!await regionWarning.confirm('all')) return;
 
 		localStorage.setItem('regionWarningAcknowledged', '1');
 	}
