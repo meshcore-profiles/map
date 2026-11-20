@@ -10,7 +10,7 @@ export const global = rateLimit({
 	limit: 52,
 	standardHeaders: 'draft-7',
 	legacyHeaders: false,
-	store: redisStore('mcprof:ratelimit:map:'),
+	store: redisStore('mcprof-map:ratelimit:global:'),
 	handler: (req, res) => HttpError(res, 429),
 });
 
@@ -22,7 +22,7 @@ export const nodeDeletionAttempts = rateLimit({
 	standardHeaders: 'draft-7',
 	legacyHeaders: false,
 	requestPropertyName: 'nodeDeletionAttemptsLimit',
-	store: redisStore('mcprof:ratelimit:map:deletion:attempts:'),
+	store: redisStore('mcprof-map:ratelimit:deletion:attempts:'),
 	handler: deletionLimitHandler,
 });
 
@@ -33,7 +33,7 @@ export const nodeDeletion = rateLimit({
 	legacyHeaders: false,
 	skipFailedRequests: true,
 	requestPropertyName: 'nodeDeletionDailyLimit',
-	store: redisStore('mcprof:ratelimit:map:deletion:daily:'),
+	store: redisStore('mcprof-map:ratelimit:deletion:daily:'),
 	handler: deletionLimitHandler,
 });
 
@@ -45,6 +45,6 @@ export const testerSignup = rateLimit({
 	standardHeaders: 'draft-7',
 	legacyHeaders: false,
 	requestPropertyName: 'testerSignupLimit',
-	store: redisStore('mcprof:ratelimit:map:testers:'),
+	store: redisStore('mcprof-map:ratelimit:testers:'),
 	handler: testerSignupLimitHandler,
 });
