@@ -1,1 +1,1 @@
-process.loadEnvFile(`${import.meta.dirname}/.env`);
+process.loadEnvFile(new URL('.env', import.meta.url));
