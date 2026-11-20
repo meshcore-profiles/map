@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import HttpError from '../utils/httpError.js';
+import { MAX_EMBED_NODES } from '../../../packages/core/src/embed.js';
 
 const router = Router();
 
-const MAX_NODES = 24;
 const MAX_NAME_LENGTH = 64;
 const KEY_PATTERN = /^[0-9a-f]{64}$/;
 const KINDS = new Set(['repeater', 'roomServer']);
@@ -37,7 +37,7 @@ const parsePoints = raw => {
 
 		seen.add(k);
 		points.push({ k, n: item.n.trim().slice(0, MAX_NAME_LENGTH), t: item.t, a: item.a, o: item.o });
-		if (points.length >= MAX_NODES) break;
+		if (points.length >= MAX_EMBED_NODES) break;
 	}
 	return points;
 };

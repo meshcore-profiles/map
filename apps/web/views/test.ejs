@@ -343,7 +343,7 @@
 			const res = await fetch(path, { cache: 'no-store' });
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-			// Regex zamiast DOMParser: parsowanie SVG z atrybutem style łamie CSP (style-src bez unsafe-inline)
+			// Regex instead of DOMParser: parsing SVG with a style attribute breaks the CSP (style-src without unsafe-inline)
 			symbolIds = [...(await res.text()).matchAll(/<symbol\s[^>]*?\bid="([^"]+)"/g)].map(match => match[1]);
 		} catch (err) {
 			message(`Nie udało się wczytać ${path}: ${err.message}`);

@@ -29,7 +29,7 @@ const formatDistance = km => {
 	return `${(km < 10 ? decimal : whole).format(km)} km`;
 };
 
-// Minimalne drzewo rozpinające (Prim): n - 1 najkrótszych połączeń bez bałaganu na mapie
+// Minimum spanning tree (Prim): n - 1 shortest links, no clutter on the map
 const spanningLinks = nodes => {
 	if (nodes.length < 2) return [];
 
@@ -69,13 +69,13 @@ const map = L.map('map', {
 	...(cover && { dragging: false, touchZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false }),
 }).setView([points[0].a, points[0].o], 12);
 
-// Zoom kółkiem włącza się po kliknięciu w mapę, żeby nie blokować przewijania strony profilu
+// Wheel zoom turns on after a click on the map, so it does not block scrolling of the profile page
 if (!cover) {
 	map.on('focus', () => map.scrollWheelZoom.enable());
 	map.on('blur', () => map.scrollWheelZoom.disable());
 }
 map.attributionControl.setPrefix(false);
-// W trybie okładki dolna część jest przyciemniona gradientem strony, więc podziękowania lądują u góry
+// In cover mode the bottom part is darkened by the page gradient, so the attribution goes to the top
 if (cover) map.attributionControl.setPosition('topleft');
 if (!cover) L.control.zoom({ position: 'topright' }).addTo(map);
 

@@ -16,6 +16,7 @@ import { initRadioFilters } from './radio-filters.js';
 import { NODE_TYPE_ICON_NAMES } from '/core/colors.js';
 import { loadRadioFilters } from '/core/radio-filter-utils.js';
 import { buildFilterParams, parseSharedFilters } from '/core/filter-share.js';
+import { MAX_EMBED_NODES } from '/core/embed.js';
 import { initLegendPanel } from './legend.js';
 import { initStatsModal } from './stats.js';
 import { initChangelogModal } from './changelog.js';
@@ -1251,7 +1252,7 @@ downloadNodes(state.region).then(() => {
 	}
 
 	if (urlParams.nodes) {
-		previewKeys = new Set(urlParams.nodes.split(',').slice(0, 24));
+		previewKeys = new Set(urlParams.nodes.split(',').slice(0, MAX_EMBED_NODES));
 		runFilterPass();
 
 		const nodes = state.filteredNodes.filter(n => n.marker);

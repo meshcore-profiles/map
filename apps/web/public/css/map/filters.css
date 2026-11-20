@@ -544,7 +544,6 @@
 	gap: 8px;
 }
 
-/* Przyciski akcji poza stopką filtrów (panele narzędzi: teren, zasięg, trasa, pomiar). Stopka nadpisuje je własnymi regułami. */
 .apply-filters-btn, .clear-filters-btn {
 	flex: 1;
 	padding: 9px 12px;
