@@ -17,7 +17,7 @@
 	gap: 8px;
 	padding: 10px 18px 10px 12px;
 	border: 1px solid var(--border-strong);
-	max-width: min(640px, calc(100vw - 40px));
+	max-width: min(800px, calc(100vw - 40px));
 	border-radius: 22px;
 	background: var(--bg-panel);
 	color: var(--text);
@@ -60,6 +60,11 @@
 
 .toast-info .toast-icon {
 	color: var(--blue-bright);
+}
+
+.toast > span:not(.toast-icon) {
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 .toast-closable {
