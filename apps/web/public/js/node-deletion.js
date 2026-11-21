@@ -50,7 +50,6 @@ export const initNodeDeletionDialog = () => {
 	const verify = async (token, attempt) => {
 		if (attempt !== generation || request) return;
 		request = new AbortController();
-		setStatus(t('map:deletion.verifying'));
 		try {
 			const response = await fetch(window.MAP_CONFIG.nodeDeletionUrl, {
 				method: 'POST',
@@ -103,11 +102,9 @@ export const initNodeDeletionDialog = () => {
 		}
 
 		captcha.hidden = false;
-		setStatus(t('map:deletion.loading'));
 		try {
 			await loadTurnstile();
 			if (attempt !== generation) return;
-			setStatus(t('map:deletion.waiting'));
 			widgetId = window.turnstile.render(captcha, {
 				sitekey: window.MAP_CONFIG.turnstileSitekey,
 				action: 'node-deletion',

@@ -74,6 +74,14 @@
 		<circle cx="12" cy="17.3" r="0.9" fill="currentColor" stroke="none"/>
 	</symbol>
 
+	<symbol id="chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M14.5 5.5L8 12l6.5 6.5"/>
+	</symbol>
+
+	<symbol id="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M9.5 5.5L16 12l-6.5 6.5"/>
+	</symbol>
+
 	<symbol id="close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 		<path d="M5 5l14 14M19 5L5 19"/>
 	</symbol>

@@ -43,9 +43,6 @@
 		"no": "Nie",
 		"ownerOnly": "Tylko właściciel może zarządzać tym węzłem i zgłaszać jego usunięcie z mapy.",
 		"captchaPrompt": "Szybka weryfikacja, aby potwierdzić, że nie jesteś botem.",
-		"loading": "Wczytywanie Cloudflare Turnstile...",
-		"waiting": "Oczekiwanie na weryfikację...",
-		"verifying": "Weryfikowanie CAPTCHA...",
 		"ready": "Otwórz przygotowaną wiadomość e-mail, sprawdź poprawność jej treści, a następnie ją wyślij. Każdy wniosek jest rozpatrywany indywidualnie. Warto również podać powód usunięcia.",
 		"openEmail": "Otwórz wiadomość e-mail",
 		"retry": "Spróbuj ponownie",
@@ -69,7 +66,7 @@
 	"addContactLaunching": "Uruchamianie aplikacji MeshCore...",
 	"addContactErrorTitle": "Nie udało się dodać kontaktu",
 	"addContactErrorText": "Nie udało się otworzyć aplikacji MeshCore. Upewnij się, że masz zainstalowaną oficjalną aplikację MeshCore w wersji co najmniej 1.47.0 - wcześniejsze wersje nie obsługują protokołu meshcore://.",
-	"reportDeletion": "Zgłoś usunięcie węzła",
+	"reportDeletion": "Zgłoś usunięcie",
 	"infoStatus": "Aktualność",
 	"loadingAriaLabel": "Ładowanie węzłów",
 	"searchPlaceholder": "Szukaj węzłów...",
@@ -93,6 +90,47 @@
 	"highlightedNodes": "Wyświetlamy {{count}} {{unit}}",
 	"previewProfileNodes": "Węzły użytkownika {{owner}}: {{count}} (pozostałe są ukryte)",
 	"previewNodes": "Węzły: {{count}} (pozostałe są ukryte)",
+	"spotlight": {
+		"title": "Ten węzeł ma własną stronę w MeshCore Profiles",
+		"text": "Łatwy kontakt z operatorem, szczegóły instalacji, pełna specyfikacja i galeria zdjęć w jednym miejscu.",
+		"open": "Otwórz stronę węzła"
+	},
+	"ownerCard": {
+		"aria": "Karta właściciela tego węzła",
+		"operatorOf": "Właściciel tego węzła",
+		"viewProfile": "Zobacz profil",
+		"memberSince": "W sieci od {{date}}",
+		"model": "Urządzenie",
+		"mountedAt": "wys. {{height}} m",
+		"antenna": "Antena",
+		"antennaTypes": {
+			"omni": "Dookólna",
+			"dir": "Kierunkowa"
+		},
+		"txPower": "Moc nadawania",
+		"pathHash": "Hash ścieżki",
+		"pathHashSizes": {
+			"1": "1 bajt",
+			"2": "2 bajty",
+			"3": "3 bajty"
+		},
+		"openPhoto": "Otwórz zdjęcie {{n}} z {{total}}",
+		"prevPhoto": "Poprzednie zdjęcie",
+		"nextPhoto": "Następne zdjęcie",
+		"powerSource": "Zasilanie",
+		"power": {
+			"grid": "Sieć",
+			"solar": "Słoneczne",
+			"battery": "Bateria",
+			"poe": "PoE",
+			"other": "Inne"
+		},
+		"units": {
+			"repeater": ["repeater", "repeatery", "repeaterów"],
+			"roomServer": ["room server", "room servery", "room serverów"],
+			"companion": ["companion", "companiony", "companionów"]
+		}
+	},
 	"newNodeUnit": [
 		"nowy węzeł",
 		"nowe węzły",
@@ -143,8 +181,6 @@
 		"consent": "Zgadzam się na przetwarzanie mojego adresu e-mail w celu dodania mnie do testów zamkniętych i kontaktu w ich sprawie. Adres zostanie usunięty po zakończeniu testów. Mogę w każdej chwili poprosić o jego usunięcie.",
 		"submit": "Zapisz się",
 		"close": "Zamknij",
-		"loading": "Wczytywanie Cloudflare Turnstile...",
-		"waiting": "Oczekiwanie na weryfikację...",
 		"sending": "Zapisywanie, proszę czekać...",
 		"success": "Serdecznie dziękujemy! Twój adres został zapisany. Wkrótce się do Ciebie odezwiemy, oczekuj wiadomości e-mail.",
 		"errors": {

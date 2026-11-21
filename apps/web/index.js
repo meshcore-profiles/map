@@ -6,7 +6,7 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 // The version lives in the root package.json only (the shared global/ code reads it too).
 import pkg from '../../package.json' with { type: 'json' };
-import { parseAppVersion } from '../../packages/core/src/version.js';
+import { parseAppVersion } from '@meshcore-map/core/version';
 
 import MongooseConnection from '../../global/database/mongoose.js';
 import RedisClient from '../../global/services/redis.js';
@@ -19,6 +19,7 @@ import { detectLanguagePrefix, isLanguageAgnosticPath } from '../../global/utils
 import { SUPPORTED } from '../../global/services/i18n.js';
 import HttpError from './utils/httpError.js';
 import features from './config/features.js';
+import { PROFILES_ORIGIN, FLASHER_ORIGIN } from './config/profiles.js';
 import AppLinksRouter from './routes/AppLinks.js';
 import * as SITES from './config/sites.js';
 import IndexRouter from './routes/Index.js';
@@ -94,7 +95,7 @@ app.use(helmet({
 			scriptSrcAttr: ['\'none\''],
 			styleSrc: ['\'self\'', 'https://fonts.googleapis.com', (req, res) => `'nonce-${res.locals.cspNonce}'`],
 			fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
-			imgSrc: ['\'self\'', 'data:', 'blob:', 'https://meshcorepolska.org', ...TILE_HOSTS],
+			imgSrc: ['\'self\'', 'data:', 'blob:', 'https://meshcorepolska.org', PROFILES_ORIGIN, FLASHER_ORIGIN, ...TILE_HOSTS],
 			connectSrc: ['\'self\'', 'https://challenges.cloudflare.com', 'https://meshcorepolska.org', 'https://api.open-elevation.com', 'https://api.open-meteo.com', ...(process.env.SEFINEK_API ? [process.env.SEFINEK_API] : []), ...TILE_HOSTS],
 			workerSrc: ['\'self\'', 'blob:'],
 			childSrc: ['\'self\'', 'blob:'],

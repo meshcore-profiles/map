@@ -1,5 +1,5 @@
-import { SITES, GITHUB_URL } from '../../../packages/core/src/sites.js';
-import { DELETION_EMAIL } from '../../../packages/core/src/deletion.js';
+import { SITES, GITHUB_URL } from '@meshcore-map/core/sites';
+import { DELETION_EMAIL } from '@meshcore-map/core/deletion';
 const DISCORD_URL = 'https://meshcorepolska.org/discord';
 
 // Site data shared with the mobile app lives in packages/core/src/sites.js; this file adds what only the server and the views need.

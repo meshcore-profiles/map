@@ -48,3 +48,12 @@ export const testerSignup = rateLimit({
 	store: redisStore('mcprof-map:ratelimit:testers:'),
 	handler: testerSignupLimitHandler,
 });
+
+export const nodeProfile = rateLimit({
+	windowMs: 60 * 1000,
+	limit: 60,
+	standardHeaders: 'draft-7',
+	legacyHeaders: false,
+	store: redisStore('mcprof-map:ratelimit:node-profile:'),
+	handler: (req, res) => HttpError(res, 429),
+});

@@ -1,7 +1,7 @@
 import express from 'express';
 import * as limiter from '../middlewares/ratelimit.js';
 import verifyTurnstile from '../services/turnstile.js';
-import { buildDeletionMailUrl } from '../../../packages/core/src/deletion.js';
+import { buildDeletionMailUrl } from '@meshcore-map/core/deletion';
 
 const router = express.Router();
 

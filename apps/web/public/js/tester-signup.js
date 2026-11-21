@@ -126,11 +126,9 @@ export const initTesterSignup = () => {
 		}
 
 		captcha.hidden = false;
-		setStatus(t('map:testers.loading'));
 		try {
 			await loadTurnstile();
 			if (attempt !== generation) return;
-			setStatus(t('map:testers.waiting'));
 			widgetId = window.turnstile.render(captcha, {
 				sitekey: window.MAP_CONFIG.turnstileSitekey,
 				action: 'tester-signup',

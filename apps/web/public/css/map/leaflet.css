@@ -126,6 +126,10 @@
 	font-weight: 800;
 }
 
+.leaflet-popup {
+	cursor: default;
+}
+
 .leaflet-popup-content-wrapper {
 	border-radius: var(--radius);
 	background: var(--bg-panel);

@@ -2,6 +2,10 @@ import { Router } from 'express';
 import { getCachedNodes, getLastRefreshedAt, getStats, formatWarsawDate } from '../../../global/services/nodeCache.js';
 import getRadioPresets from '../services/radioPresets.js';
 import features from '../config/features.js';
+import { PROFILES_URL } from '../config/profiles.js';
+import HttpError from '../utils/httpError.js';
+import getNodeProfile from '../services/nodeProfile.js';
+import { nodeProfile as nodeProfileLimiter } from '../middlewares/ratelimit.js';
 import StatsDaily from '../../../global/database/models/statsDaily.model.js';
 
 const router = Router();
@@ -45,6 +49,16 @@ router.get('/app-config', (req, res) => {
 	res.set('Cache-Control', 'public, max-age=300');
 	res.json({ success: true, status: 200, message: 'OK', data: { features, sefinekApi: process.env.SEFINEK_API || null, bugsnagApiKey: process.env.BUGSNAG_API_KEY || null, basemaps: getBasemapConfig() } });
 });
+
+router.get('/node-profile/:publicKey', nodeProfileLimiter, handle(async (req, res) => {
+	const profile = await getNodeProfile(req.params.publicKey);
+	if (profile === undefined) return HttpError(res, 400);
+
+	res.set('Cache-Control', 'public, max-age=60');
+	if (!profile) return res.status(404).json({ success: false, status: 404, message: 'Not found' });
+
+	res.json({ success: true, status: 200, message: 'OK', data: { ...profile, profileUrl: PROFILES_URL } });
+}));
 
 router.get('/radio-presets', handle(async (req, res) => {
 	const presets = await getRadioPresets();

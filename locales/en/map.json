@@ -43,9 +43,6 @@
 		"no": "No",
 		"ownerOnly": "Only the owner can manage this node and request its removal from the map.",
 		"captchaPrompt": "A quick check to confirm you're not a bot.",
-		"loading": "Loading Cloudflare Turnstile...",
-		"waiting": "Waiting for verification...",
-		"verifying": "Verifying CAPTCHA...",
 		"ready": "Open the prepared email, check that its contents are correct, then send it. Each request is reviewed individually. It is also helpful to include the reason for removal.",
 		"openEmail": "Open email message",
 		"retry": "Try again",
@@ -93,6 +90,47 @@
 	"highlightedNodes": "Showing {{count}} {{unit}}",
 	"previewProfileNodes": "Nodes owned by {{owner}}: {{count}} (others are hidden)",
 	"previewNodes": "Nodes: {{count}} (others are hidden)",
+	"spotlight": {
+		"title": "This node has its own page on MeshCore Profiles",
+		"text": "Easy contact with the operator, installation details, full specs and a photo gallery in one place.",
+		"open": "Open node page"
+	},
+	"ownerCard": {
+		"aria": "Owner card of this node",
+		"operatorOf": "Owner of this node",
+		"viewProfile": "View profile",
+		"memberSince": "In the network since {{date}}",
+		"model": "Device",
+		"mountedAt": "{{height}} m high",
+		"antenna": "Antenna",
+		"antennaTypes": {
+			"omni": "Omnidirectional",
+			"dir": "Directional"
+		},
+		"txPower": "TX power",
+		"pathHash": "Path hash",
+		"pathHashSizes": {
+			"1": "1 byte",
+			"2": "2 bytes",
+			"3": "3 bytes"
+		},
+		"openPhoto": "Open photo {{n}} of {{total}}",
+		"prevPhoto": "Previous photo",
+		"nextPhoto": "Next photo",
+		"powerSource": "Power",
+		"power": {
+			"grid": "Mains",
+			"solar": "Solar",
+			"battery": "Battery",
+			"poe": "PoE",
+			"other": "Other"
+		},
+		"units": {
+			"repeater": ["repeater", "repeaters"],
+			"roomServer": ["room server", "room servers"],
+			"companion": ["companion", "companions"]
+		}
+	},
 	"newNodeUnit": [
 		"new node",
 		"new nodes"
@@ -142,8 +180,6 @@
 		"consent": "I agree to the processing of my email address to add me to the closed test and to contact me about it. The address will be deleted once testing ends. I can ask for its removal at any time.",
 		"submit": "Sign up",
 		"close": "Close",
-		"loading": "Loading Cloudflare Turnstile...",
-		"waiting": "Waiting for verification...",
 		"sending": "Saving, please wait...",
 		"success": "Thank you very much! Your address has been saved. We will get back to you soon, so keep an eye out for an e-mail.",
 		"errors": {

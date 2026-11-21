@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import HttpError from '../utils/httpError.js';
-import { MAX_EMBED_NODES } from '../../../packages/core/src/embed.js';
+import { MAX_EMBED_NODES } from '@meshcore-map/core/embed';
 
 const router = Router();
 

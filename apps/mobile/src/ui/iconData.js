@@ -15,6 +15,8 @@ export const ICONS = {
 	'link': {"viewBox":"0 0 24 24","nodes":[["Path",{"d":"M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"}],["Path",{"d":"M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"}]],"stroke":true,"strokeWidth":1.8},
 	'check': {"viewBox":"0 0 24 24","nodes":[["Path",{"d":"M4.5 12.5l5 5 10-10"}]],"stroke":true,"strokeWidth":2.2},
 	'warning': {"viewBox":"0 0 24 24","nodes":[["Path",{"d":"M12 3.5l9.5 16.5H2.5L12 3.5z"}],["Path",{"d":"M12 10v4.2"}],["Circle",{"cx":"12","cy":"17.3","r":"0.9","fill":"currentColor","stroke":"none"}]],"stroke":true,"strokeWidth":1.8},
+	'chevron-left': {"viewBox":"0 0 24 24","nodes":[["Path",{"d":"M14.5 5.5L8 12l6.5 6.5"}]],"stroke":true,"strokeWidth":1.8},
+	'chevron-right': {"viewBox":"0 0 24 24","nodes":[["Path",{"d":"M9.5 5.5L16 12l-6.5 6.5"}]],"stroke":true,"strokeWidth":1.8},
 	'close': {"viewBox":"0 0 24 24","nodes":[["Path",{"d":"M5 5l14 14M19 5L5 19"}]],"stroke":true,"strokeWidth":1.8},
 	'ruler': {"viewBox":"0 0 24 24","nodes":[["Path",{"d":"M3.5 15.5L15.5 3.5a1 1 0 0 1 1.4 0l3.6 3.6a1 1 0 0 1 0 1.4L8.5 20.5a1 1 0 0 1-1.4 0l-3.6-3.6a1 1 0 0 1 0-1.4z"}],["Path",{"d":"M14 6l2 2M11 9l2 2M8 12l2 2"}]],"stroke":true,"strokeWidth":1.8},
 	'wrench': {"viewBox":"0 0 24 24","nodes":[["Path",{"d":"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"}]],"stroke":true,"strokeWidth":1.8},

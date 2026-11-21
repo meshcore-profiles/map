@@ -27,6 +27,7 @@ import { initRouteTool } from './route.js';
 import { initTerrainTool } from './terrain.js';
 import { initCoverageTool } from './coverage.js';
 import { getNodePopupHTML, getShareUrl, timeAgo } from './node-popup.js';
+import { hydrateOwnerCard } from './owner-card.js';
 import { getPresets } from './radio-presets.js';
 import { escapeHtml } from './pathtools.js';
 import { initBasemapManager } from './basemap-manager.js';
@@ -126,11 +127,32 @@ const panPopupIntoView = popup => {
 	if (dx || dy) map.panBy([dx, dy]);
 };
 
+const POPUP_WIDTH = 430;
+const POPUP_WIDTH_WITH_OWNER = 880;
+const POPUP_VIEWPORT_GUTTER = 32;
+
+const setPopupWidth = (popup, width) => {
+	popup.options.minWidth = width;
+	popup.options.maxWidth = width;
+};
+
+const widenPopup = popup => {
+	setPopupWidth(popup, Math.min(POPUP_WIDTH_WITH_OWNER, window.innerWidth - POPUP_VIEWPORT_GUTTER));
+	popup._updateLayout();
+	popup._updatePosition();
+};
+
+map.on('popupclose', e => setPopupWidth(e.popup, POPUP_WIDTH));
+
 map.on('popupopen', e => {
 	requestAnimationFrame(() => {
 		const qrEl = e.popup.getElement()?.querySelector('.node-qr');
 		if (qrEl?.isConnected) renderQrCode(qrEl);
 		panPopupIntoView(e.popup);
+		hydrateOwnerCard(e.popup.getElement(), () => {
+			widenPopup(e.popup);
+			panPopupIntoView(e.popup);
+		});
 	});
 });
 
@@ -369,8 +391,16 @@ const buildViewQuery = ({ withFilters }) => {
 	return query.toString().replaceAll('%2C', ',');
 };
 
+let openedNode = null;
+
 const syncUrlParams = () => {
+	if (openedNode) return history.replaceState({}, '', getShareUrl(openedNode));
 	history.replaceState({}, '', `${location.pathname}?${buildViewQuery({ withFilters: filtersFromLink })}`);
+};
+
+const closeNodeUrl = () => {
+	openedNode = null;
+	syncUrlParams();
 };
 
 const ensurePopup = marker => {
@@ -378,21 +408,22 @@ const ensurePopup = marker => {
 
 	const node = markerToNode.get(marker);
 	if (node) {
-		marker.bindPopup(L.popup({ minWidth: 430, maxWidth: 430, autoPan: false, pane: 'nodePopupPane', content: () => getNodePopupHTML(node) }));
+		marker.bindPopup(L.popup({ minWidth: POPUP_WIDTH, maxWidth: POPUP_WIDTH, autoPan: false, pane: 'nodePopupPane', content: () => getNodePopupHTML(node) }));
 		marker._popupBound = true;
 	}
 };
 
-const nodeModal = initModal(null, 'node-overlay', { onDismiss: syncUrlParams });
+const nodeModal = initModal(null, 'node-overlay', { onDismiss: closeNodeUrl });
 nodeModalCloseBtn.addEventListener('click', () => {
 	nodeModal.close();
-	syncUrlParams();
+	closeNodeUrl();
 });
 
 const showNodeModal = node => {
 	nodePanelContent.innerHTML = getNodePopupHTML(node);
 	nodeModal.open();
 	renderQrCode(nodePanelContent.querySelector('.node-qr'));
+	hydrateOwnerCard(nodePanelContent);
 };
 
 const showNodeDetail = node => {
@@ -404,7 +435,8 @@ const showNodeDetail = node => {
 		node.marker.openPopup();
 	}
 
-	history.replaceState({}, '', getShareUrl(node));
+	openedNode = node;
+	syncUrlParams();
 };
 
 const attachClusterClickHandler = group => {
@@ -419,7 +451,7 @@ const attachClusterClickHandler = group => {
 };
 
 attachClusterClickHandler(markerClusterGroup);
-map.on('popupclose', syncUrlParams);
+map.on('popupclose', closeNodeUrl);
 
 map.on('click', e => {
 	if (activePicker?.onMap) activePicker.onMap(e.latlng);

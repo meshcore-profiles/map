@@ -5,6 +5,7 @@ import { radioValue } from '/core/radio-filter-utils.js';
 import { t, tRaw, plural } from './i18n.js';
 import { escapeHtml } from './pathtools.js';
 import { getPresetLabel } from './radio-presets.js';
+import { ownerCardPlaceholder } from './owner-card.js';
 
 // The HTML of a node's popup (and the mobile node panel): header with QR code, info table, actions. Copy buttons carry data-copy-value and are handled by map.js.
 
@@ -136,6 +137,8 @@ export const getNodePopupHTML = node => {
 	const canAddContact = CONTACT_ADDABLE_TYPES.includes(node.type);
 
 	return `
+		<div class="node-layout">
+		<div class="node-main">
 		<div class="node-header">
 			<div class="node-qr" data-qr-value="${escapeHtml(qrValue)}"></div>
 			<div class="node-header-info">
@@ -152,6 +155,7 @@ export const getNodePopupHTML = node => {
 			</div>
 		</div>
 		${getTable(node)}
+		<div class="node-spotlight-slot" hidden></div>
 		<div class="user-actions">
 			<div class="user-actions-left">
 				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}" title="${t('map:shareTitle')}">${t('common:share')}</button>
@@ -162,5 +166,8 @@ export const getNodePopupHTML = node => {
 				<button type="button" class="node-deletion-btn" data-delete-node="${escapeHtml(node.public_key)}" data-node-name="${escapeHtml(node.adv_name)}" title="${t('map:reportDeletionTitle')}">${t('map:reportDeletion')}</button>
 				${userActionAnchor}
 			</div>
+		</div>
+		</div>
+		${ownerCardPlaceholder(node.public_key)}
 		</div>`;
 };

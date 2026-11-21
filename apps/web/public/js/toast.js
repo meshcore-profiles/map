@@ -22,7 +22,6 @@ const createCloseButton = el => {
 	return btn;
 };
 
-// Every toast except "loading" (which the code dismisses itself) can be closed by hand.
 const renderToastContent = (el, message, status) => {
 	el.className = `toast toast-${status}`;
 	el.innerHTML = status === 'loading'
@@ -39,7 +38,6 @@ const scheduleDismiss = (el, duration) => {
 	el.dismissTimer = setTimeout(() => dismissToast(el), duration);
 };
 
-// The timer stops while the pointer or focus is on the toast, so a long message can be read and the close button reached.
 const PAUSE_RESUME_MS = 2000;
 const bindPause = el => {
 	const pause = () => clearTimeout(el.dismissTimer);
@@ -78,7 +76,6 @@ export const updateToast = (el, message, { duration = toastDuration(message), st
 	return el;
 };
 
-// A toast that stays until the user closes it.
 export const showActionToast = (message, { status = 'info', onClose } = {}) => {
 	const el = showToast(message, { duration: 0, status });
 	el.onClose = onClose;
