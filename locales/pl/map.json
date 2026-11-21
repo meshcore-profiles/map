@@ -117,6 +117,14 @@
 		"openPhoto": "Otwórz zdjęcie {{n}} z {{total}}",
 		"prevPhoto": "Poprzednie zdjęcie",
 		"nextPhoto": "Następne zdjęcie",
+		"gallery": "Galeria zdjęć",
+		"hints": {
+			"gain": "Zysk anteny",
+			"antennaType": "Typ anteny",
+			"height": "Wysokość montażu nad ziemią",
+			"solarPanel": "Moc panelu słonecznego",
+			"battery": "Pojemność akumulatora"
+		},
 		"powerSource": "Zasilanie",
 		"power": {
 			"grid": "Sieć",

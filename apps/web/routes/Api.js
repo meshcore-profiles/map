@@ -4,7 +4,7 @@ import getRadioPresets from '../services/radioPresets.js';
 import features from '../config/features.js';
 import { PROFILES_URL } from '../config/profiles.js';
 import HttpError from '../utils/httpError.js';
-import getNodeProfile from '../services/nodeProfile.js';
+import getNodeProfile, { getProfileKeys } from '../services/nodeProfile.js';
 import { nodeProfile as nodeProfileLimiter } from '../middlewares/ratelimit.js';
 import StatsDaily from '../../../global/database/models/statsDaily.model.js';
 
@@ -49,6 +49,11 @@ router.get('/app-config', (req, res) => {
 	res.set('Cache-Control', 'public, max-age=300');
 	res.json({ success: true, status: 200, message: 'OK', data: { features, sefinekApi: process.env.SEFINEK_API || null, bugsnagApiKey: process.env.BUGSNAG_API_KEY || null, basemaps: getBasemapConfig() } });
 });
+
+router.get('/node-profile-keys', nodeProfileLimiter, handle(async (req, res) => {
+	res.set('Cache-Control', 'public, max-age=300');
+	res.json({ success: true, status: 200, message: 'OK', data: [...await getProfileKeys()] });
+}));
 
 router.get('/node-profile/:publicKey', nodeProfileLimiter, handle(async (req, res) => {
 	const profile = await getNodeProfile(req.params.publicKey);

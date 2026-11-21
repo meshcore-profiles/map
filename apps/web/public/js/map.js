@@ -27,7 +27,7 @@ import { initRouteTool } from './route.js';
 import { initTerrainTool } from './terrain.js';
 import { initCoverageTool } from './coverage.js';
 import { getNodePopupHTML, getShareUrl, timeAgo } from './node-popup.js';
-import { hydrateOwnerCard } from './owner-card.js';
+import { hydrateOwnerCard, loadOwner, peekOwner } from './owner-card.js';
 import { getPresets } from './radio-presets.js';
 import { escapeHtml } from './pathtools.js';
 import { initBasemapManager } from './basemap-manager.js';
@@ -104,9 +104,11 @@ const renderQrCode = qrEl => {
 
 const statsBar = document.getElementById('stats-bar');
 const POPUP_VIEW_PADDING = 10;
+const POPUP_MARKER_CLEARANCE = 40;
+let centerNextPopup = false;
 
 // Leaflet's autoPan runs once on open and ignores the fixed stats bar, so the popup is panned into view manually after layout
-const panPopupIntoView = popup => {
+const panPopupIntoView = (popup, center = false) => {
 	const el = popup.getElement();
 	if (!el?.isConnected) return;
 
@@ -121,37 +123,55 @@ const panPopupIntoView = popup => {
 	let dy = 0;
 	if (rect.right > maxRight) dx = rect.right - maxRight;
 	if (rect.left - dx < minLeft) dx = rect.left - minLeft;
-	if (rect.bottom > maxBottom) dy = rect.bottom - maxBottom;
-	if (rect.top - dy < minTop) dy = rect.top - minTop;
+	if (center) {
+		const free = maxBottom - minTop;
+		const span = rect.height + POPUP_MARKER_CLEARANCE;
+		dy = rect.top - (minTop + Math.max(0, free - span) / 2);
+	} else {
+		if (rect.bottom > maxBottom) dy = rect.bottom - maxBottom;
+		if (rect.top - dy < minTop) dy = rect.top - minTop;
+	}
 
-	if (dx || dy) map.panBy([dx, dy]);
+	if (dx || dy) map.panBy([dx, dy], { animate: !center });
 };
 
 const POPUP_WIDTH = 430;
 const POPUP_WIDTH_WITH_OWNER = 880;
 const POPUP_VIEWPORT_GUTTER = 32;
 
+document.documentElement.style.setProperty('--node-main-width', `${POPUP_WIDTH}px`);
+
 const setPopupWidth = (popup, width) => {
 	popup.options.minWidth = width;
 	popup.options.maxWidth = width;
 };
 
-const widenPopup = popup => {
-	setPopupWidth(popup, Math.min(POPUP_WIDTH_WITH_OWNER, window.innerWidth - POPUP_VIEWPORT_GUTTER));
+const resizePopup = (popup, width) => {
+	setPopupWidth(popup, width);
 	popup._updateLayout();
 	popup._updatePosition();
 };
 
+const ownerPopupWidth = () => Math.min(POPUP_WIDTH_WITH_OWNER, window.innerWidth - POPUP_VIEWPORT_GUTTER);
+
+const widenPopup = popup => resizePopup(popup, ownerPopupWidth());
+
 map.on('popupclose', e => setPopupWidth(e.popup, POPUP_WIDTH));
 
 map.on('popupopen', e => {
+	const center = centerNextPopup;
+	centerNextPopup = false;
 	requestAnimationFrame(() => {
 		const qrEl = e.popup.getElement()?.querySelector('.node-qr');
 		if (qrEl?.isConnected) renderQrCode(qrEl);
-		panPopupIntoView(e.popup);
-		hydrateOwnerCard(e.popup.getElement(), () => {
-			widenPopup(e.popup);
-			panPopupIntoView(e.popup);
+		panPopupIntoView(e.popup, center);
+		hydrateOwnerCard(e.popup.getElement(), visible => {
+			if (visible) {
+				widenPopup(e.popup);
+			} else {
+				resizePopup(e.popup, POPUP_WIDTH);
+			}
+			panPopupIntoView(e.popup, center);
 		});
 	});
 });
@@ -409,6 +429,7 @@ const ensurePopup = marker => {
 	const node = markerToNode.get(marker);
 	if (node) {
 		marker.bindPopup(L.popup({ minWidth: POPUP_WIDTH, maxWidth: POPUP_WIDTH, autoPan: false, pane: 'nodePopupPane', content: () => getNodePopupHTML(node) }));
+		marker.off('click', marker._openPopup, marker);
 		marker._popupBound = true;
 	}
 };
@@ -426,17 +447,33 @@ const showNodeModal = node => {
 	hydrateOwnerCard(nodePanelContent);
 };
 
-const showNodeDetail = node => {
-	if (isMobileNodeView()) {
-		showNodeModal(node);
-	}
-	else {
-		ensurePopup(node.marker);
-		node.marker.openPopup();
-	}
+const OWNER_PRELOAD_MS = 600;
+let nodeOpenToken = 0;
 
+const waitForOwner = node => {
+	if (peekOwner(node.public_key) !== undefined) return null;
+	return Promise.race([loadOwner(node.public_key), new Promise(resolve => setTimeout(resolve, OWNER_PRELOAD_MS))]);
+};
+
+const showNodeDetail = async (node, { center = false } = {}) => {
+	const token = ++nodeOpenToken;
 	openedNode = node;
 	syncUrlParams();
+
+	await waitForOwner(node);
+	if (token !== nodeOpenToken || openedNode !== node) return;
+
+	if (isMobileNodeView()) {
+		showNodeModal(node);
+		return;
+	}
+
+	ensurePopup(node.marker);
+	const withOwner = Boolean(peekOwner(node.public_key));
+	setPopupWidth(node.marker.getPopup(), withOwner ? ownerPopupWidth() : POPUP_WIDTH);
+	centerNextPopup = center;
+	node.marker.openPopup();
+	centerNextPopup = false;
 };
 
 const attachClusterClickHandler = group => {
@@ -516,18 +553,9 @@ function showNode(node) {
 		if (highlightToast) dismissToast(highlightToast);
 	}
 
-	const zoom = 19;
-	const targetLatLng = node.marker.getLatLng();
+	map.setView(node.marker.getLatLng(), 19, { animate: false });
 
-	if (isMobileNodeView()) {
-		map.setView(targetLatLng, zoom, { animate: false });
-	}
-	else {
-		const targetPoint = map.project(targetLatLng, zoom).subtract([0, 140]);
-		map.setView(map.unproject(targetPoint, zoom), zoom, { animate: false });
-	}
-
-	showNodeDetail(node);
+	showNodeDetail(node, { center: true });
 	state.search = '';
 	searchInput.value = '';
 	renderSearchResults();

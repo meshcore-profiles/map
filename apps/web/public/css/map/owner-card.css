@@ -10,24 +10,10 @@
 	background:
 		radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--owner-accent) 24%, transparent), transparent 62%),
 		var(--chip-bg);
-	animation: owner-card-in 0.35s var(--ease) both;
 }
 
 .owner-card[hidden] {
 	display: none;
-}
-
-@keyframes owner-card-in {
-	from {
-		transform: translateY(-6px);
-		opacity: 0;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.owner-card {
-		animation: none;
-	}
 }
 
 .owner-card__eyebrow {
@@ -47,6 +33,43 @@
 	gap: 12px;
 	color: inherit;
 	text-decoration: none;
+}
+
+.owner-card__chevron {
+	flex-shrink: 0;
+	margin-left: auto;
+	color: var(--text-muted);
+	transition: transform 0.2s var(--ease), color 0.15s ease;
+}
+
+.owner-card__main:hover .owner-card__chevron {
+	transform: translateX(3px);
+	color: var(--owner-accent);
+}
+
+.owner-card.is-loading {
+	min-height: 220px;
+}
+
+.owner-card.is-loading::after {
+	content: '';
+	position: absolute;
+	inset: 40px 0 0 0;
+	background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 8%, transparent), transparent) 0 0 / 200% 100%;
+	animation: owner-card-shimmer 1.2s linear infinite;
+	pointer-events: none;
+}
+
+@keyframes owner-card-shimmer {
+	to {
+		background-position: -200% 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.owner-card.is-loading::after {
+		animation: none;
+	}
 }
 
 .owner-avatar {
@@ -84,8 +107,9 @@
 
 .owner-name {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 6px;
+	gap: 4px 8px;
 	min-width: 0;
 }
 
@@ -99,7 +123,7 @@
 	white-space: nowrap;
 }
 
-.leaflet-popup-content a.owner-card__main, .leaflet-popup-content a.owner-card__main:hover, .leaflet-popup-content a.owner-card__main:active {
+a.owner-card__main, a.owner-card__main:hover, a.owner-card__main:active, .leaflet-popup-content a.owner-card__main, .leaflet-popup-content a.owner-card__main:hover, .leaflet-popup-content a.owner-card__main:active {
 	color: inherit;
 	text-decoration: none;
 }
@@ -121,20 +145,19 @@
 .owner-chips {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: center;
-	gap: 6px;
-	margin-top: 14px;
+	gap: 4px;
 }
 
 .owner-chip {
-	padding: 3px 10px;
+	padding: 1px 8px;
 	border: 1px solid var(--border);
 	border-radius: 999px;
 	background: var(--chip-bg);
 	color: var(--text-muted);
-	font-size: 13px;
+	font-size: 12px;
 	font-weight: 600;
-	line-height: 1.4;
+	line-height: 1.5;
+	white-space: nowrap;
 }
 
 .owner-chip b {
@@ -150,12 +173,12 @@
 	font-size: 13px;
 }
 
-.leaflet-popup-content a.owner-site {
+a.owner-site, .leaflet-popup-content a.owner-site {
 	color: var(--blue-bright);
 	text-decoration: none;
 }
 
-.leaflet-popup-content a.owner-site:hover {
+a.owner-site:hover, .leaflet-popup-content a.owner-site:hover {
 	color: var(--blue-light);
 	text-decoration: underline;
 }
@@ -199,11 +222,7 @@
 	justify-content: center;
 	aspect-ratio: 1;
 	box-sizing: border-box;
-	padding: 10px;
 	overflow: hidden;
-	border: 1px solid var(--border);
-	border-radius: var(--radius-sm);
-	background: var(--chip-bg);
 }
 
 .owner-board img {
@@ -314,22 +333,11 @@
 	font-size: 14px;
 	line-height: 1.5;
 	overflow-wrap: anywhere;
-}
-
-.owner-card__foot {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: flex-end;
-	align-items: center;
-	gap: 10px 15px;
-	margin-top: auto;
-	padding-top: 12px;
-	border-top: 1px solid var(--border);
-	font-size: 14px;
-}
-
-.owner-card > :nth-last-child(2) {
-	margin-bottom: 15px;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 4;
+	line-clamp: 4;
+	overflow: hidden;
 }
 
 .owner-since {
@@ -346,7 +354,7 @@
 
 .node-main {
 	display: flex;
-	flex: 0 0 430px;
+	flex: 0 0 var(--node-main-width);
 	flex-direction: column;
 	min-width: 0;
 }
@@ -360,20 +368,21 @@
 }
 
 .node-spotlight-slot {
+	--owner-accent: var(--red);
 	margin-bottom: 15px;
 }
 
-.leaflet-popup-content a.node-spotlight {
+a.node-spotlight, .leaflet-popup-content a.node-spotlight {
 	display: flex;
 	position: relative;
 	flex-direction: column;
 	overflow: hidden;
 	gap: 2px;
 	padding: 14px 16px 11px;
-	border: 1px solid var(--border-strong);
+	border: 1px solid color-mix(in srgb, var(--owner-accent) 38%, var(--border));
 	border-radius: var(--radius);
 	background:
-		radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--blue) 16%, transparent), transparent 60%),
+		radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--owner-accent) 24%, transparent), transparent 62%),
 		var(--chip-bg);
 	color: var(--text);
 	text-decoration: none;
@@ -383,15 +392,15 @@
 .node-spotlight::before {
 	position: absolute;
 	inset: 0;
-	background: radial-gradient(90% 140% at 100% 100%, color-mix(in srgb, var(--blue) 28%, transparent), transparent 70%);
+	background: radial-gradient(90% 140% at 100% 100%, color-mix(in srgb, var(--owner-accent) 22%, transparent), transparent 70%);
 	content: '';
 	opacity: 0;
 	transition: opacity 0.25s ease;
 	pointer-events: none;
 }
 
-.leaflet-popup-content a.node-spotlight:hover {
-	border-color: var(--blue-bright);
+a.node-spotlight:hover, .leaflet-popup-content a.node-spotlight:hover {
+	border-color: color-mix(in srgb, var(--owner-accent) 70%, var(--border));
 	color: var(--text);
 	text-decoration: none;
 }
@@ -439,7 +448,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.leaflet-popup-content a.node-spotlight, .node-spotlight::before, .node-spotlight__cta .icon {
+	.node-spotlight, .node-spotlight::before, .node-spotlight__cta .icon {
 		transition: none;
 	}
 }
@@ -447,12 +456,17 @@
 .node-layout > .owner-card {
 	flex: 1 1 0;
 	min-width: 0;
-	margin: 0 0 0 16px;
-	padding: 0 0 0 16px;
-	border: none;
-	border-left: 1px solid var(--border-strong);
-	border-radius: 0;
-	background: none;
+}
+
+@media (min-width: 701px) {
+	.node-layout > .owner-card {
+		margin: 0 0 0 16px;
+		padding: 0 0 0 16px;
+		border: none;
+		border-left: 1px solid var(--border-strong);
+		border-radius: 0;
+		background: none;
+	}
 }
 
 @media (max-width: 700px) {
@@ -464,15 +478,18 @@
 		flex: none;
 	}
 
+	.node-main .node-header {
+		padding-right: 36px;
+	}
+
 	.node-layout > .owner-card {
-		order: -1;
-		margin: 0 0 16px;
-		padding: 12px 14px 10px;
-		border: 1px solid color-mix(in srgb, var(--owner-accent) 38%, var(--border));
-		border-radius: var(--radius);
-		background:
-			radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--owner-accent) 24%, transparent), transparent 62%),
-			var(--chip-bg);
+		flex: none;
+		margin-top: 16px;
+	}
+
+	.owner-card__eyebrow {
+		padding-right: 0;
+		text-align: center;
 	}
 }
 

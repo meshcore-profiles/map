@@ -5,7 +5,7 @@ import { radioValue } from '/core/radio-filter-utils.js';
 import { t, tRaw, plural } from './i18n.js';
 import { escapeHtml } from './pathtools.js';
 import { getPresetLabel } from './radio-presets.js';
-import { ownerCardPlaceholder } from './owner-card.js';
+import { ownerCardPlaceholder, spotlightPlaceholder } from './owner-card.js';
 
 // The HTML of a node's popup (and the mobile node panel): header with QR code, info table, actions. Copy buttons carry data-copy-value and are handled by map.js.
 
@@ -155,7 +155,7 @@ export const getNodePopupHTML = node => {
 			</div>
 		</div>
 		${getTable(node)}
-		<div class="node-spotlight-slot" hidden></div>
+		${spotlightPlaceholder(node.public_key)}
 		<div class="user-actions">
 			<div class="user-actions-left">
 				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}" title="${t('map:shareTitle')}">${t('common:share')}</button>

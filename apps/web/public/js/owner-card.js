@@ -7,12 +7,43 @@ const POWER_KEYS = ['grid', 'solar', 'battery', 'poe', 'other'];
 const ANTENNA_TYPES = ['omni', 'dir'];
 const PATH_HASH_SIZES = [1, 2, 3];
 
-const cache = new Map();
+const CACHE_TTL = 5 * 60 * 1000;
 
-const fetchProfile = key => {
-	if (cache.has(key)) return cache.get(key);
+const profiles = new Map();
+let keys = null;
+let keysRequest = null;
+let keysLoadedAt = 0;
 
-	const request = fetch(`/api/v1/node-profile/${key}`)
+const isFresh = loadedAt => Date.now() - loadedAt < CACHE_TTL;
+
+const loadKeys = () => {
+	if (keysRequest && !isFresh(keysLoadedAt)) keysRequest = null;
+
+	keysRequest ??= fetch('/api/v1/node-profile-keys')
+		.then(res => {
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			return res.json();
+		})
+		.then(json => {
+			keys = new Set(json.data);
+			keysLoadedAt = Date.now();
+			return keys;
+		})
+		.catch(err => {
+			keysRequest = null;
+			console.error('Failed to load the profile list:', err);
+			return null;
+		});
+
+	return keysRequest;
+};
+
+const loadProfile = key => {
+	const cached = profiles.get(key);
+	if (cached && isFresh(cached.loadedAt)) return cached.promise;
+
+	const entry = { loadedAt: Date.now(), settled: false, value: null };
+	entry.promise = fetch(`/api/v1/node-profile/${key}`)
 		.then(res => {
 			if (res.status === 404) return null;
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -20,13 +51,32 @@ const fetchProfile = key => {
 		})
 		.then(json => json?.data ?? null)
 		.catch(err => {
-			cache.delete(key);
+			profiles.delete(key);
 			console.error('Failed to load the node profile:', err);
 			return null;
+		})
+		.then(value => {
+			entry.value = value;
+			entry.settled = true;
+			return value;
 		});
 
-	cache.set(key, request);
-	return request;
+	profiles.set(key, entry);
+	return entry.promise;
+};
+
+export const peekOwner = rawKey => {
+	const key = rawKey.toLowerCase();
+	if (keys && isFresh(keysLoadedAt) && !keys.has(key)) return null;
+
+	const entry = profiles.get(key);
+	return entry?.settled && isFresh(entry.loadedAt) ? entry.value : undefined;
+};
+
+export const loadOwner = async rawKey => {
+	const key = rawKey.toLowerCase();
+	const known = await loadKeys();
+	return known && !known.has(key) ? null : loadProfile(key);
 };
 
 const assetUrl = (base, path) => (typeof path === 'string' && (/^\/(?!\/)/).test(path) ? `${base}${encodeURI(path)}` : null);
@@ -50,19 +100,21 @@ const thousands = value => Number(value).toLocaleString(window.MAP_CONFIG.langua
 
 const joinParts = parts => parts.filter(Boolean).join(' · ');
 
+const hint = (text, key) => ({ text, title: t(`map:ownerCard.hints.${key}`) });
+
 const has = value => value != null && value !== '';
 
 const buildDetails = node => {
 	const antennaTags = [
-		has(node.gain) ? `${node.gain} dBi` : null,
-		ANTENNA_TYPES.includes(node.antennaType) ? joinParts([t(`map:ownerCard.antennaTypes.${node.antennaType}`), has(node.heading) ? `${node.heading}°` : null]) : null,
+		has(node.gain) ? hint(`${node.gain} dBi`, 'gain') : null,
+		ANTENNA_TYPES.includes(node.antennaType) ? hint(joinParts([t(`map:ownerCard.antennaTypes.${node.antennaType}`), has(node.heading) ? `${node.heading}°` : null]), 'antennaType') : null,
 	];
 	const deviceTags = [
-		has(node.height) ? t('map:ownerCard.mountedAt', { height: node.height }) : null,
+		has(node.height) ? hint(t('map:ownerCard.mountedAt', { height: node.height }), 'height') : null,
 		PATH_HASH_SIZES.includes(node.pathHash) ? { text: t(`map:ownerCard.pathHashSizes.${node.pathHash}`), title: t('map:ownerCard.pathHash') } : null,
 	];
 	const powerSource = POWER_KEYS.includes(node.powerSource) ? t(`map:ownerCard.power.${node.powerSource}`) : node.power;
-	const powerTags = [has(node.solarPanel) ? `${node.solarPanel} W` : null, has(node.battery) ? `${thousands(node.battery)} mAh` : null];
+	const powerTags = [has(node.solarPanel) ? hint(`${node.solarPanel} W`, 'solarPanel') : null, has(node.battery) ? hint(`${thousands(node.battery)} mAh`, 'battery') : null];
 
 	return {
 		device: detailRow(t('map:ownerCard.model'), node.model, deviceTags),
@@ -92,11 +144,12 @@ const buildSpotlight = ({ node, owner, profileUrl }) => {
 		</a>`;
 };
 
+const photoUrls = ({ node, profileUrl }) => node.photos.map(photo => assetUrl(profileUrl, photo.path)).filter(Boolean);
+
 const buildCard = ({ owner, node, profileUrl }) => {
 	const profileHref = `${profileUrl}/profile/${encodeURIComponent(owner.slug)}`;
-	const nodeHref = `${profileHref}${node.path}`;
 	const avatar = assetUrl(profileUrl, owner.avatar);
-	const photos = node.photos.map(photo => assetUrl(profileUrl, photo.path)).filter(Boolean);
+	const photos = photoUrls({ node, profileUrl });
 	const place = [owner.city, owner.country].filter(Boolean).join(', ');
 	const since = owner.memberSince ? formatMemberSince(owner.memberSince) : null;
 	const { device, power } = buildDetails(node);
@@ -111,7 +164,6 @@ const buildCard = ({ owner, node, profileUrl }) => {
 	const websites = owner.websites.map(domain => `<a class="owner-site" href="https://${escapeHtml(domain)}" target="_blank" rel="noopener noreferrer nofollow">${escapeHtml(domain)}</a>`).join('');
 
 	return {
-		photos,
 		html: `
 		<div class="owner-card__eyebrow">${t('map:ownerCard.operatorOf')}</div>
 		<a class="owner-card__main" href="${escapeHtml(profileHref)}" target="_blank" rel="noopener" title="${t('map:ownerCard.viewProfile')}">
@@ -119,12 +171,12 @@ const buildCard = ({ owner, node, profileUrl }) => {
 			<span class="owner-id">
 				<span class="owner-name">
 					<span class="owner-name__text">${escapeHtml(owner.nick)}</span>
+					${chips ? `<span class="owner-chips">${chips}</span>` : ''}
 				</span>
-				<span class="owner-sub">@${escapeHtml(owner.slug)}${place ? ` · ${escapeHtml(place)}` : ''}</span>
+				${place ? `<span class="owner-sub">${escapeHtml(place)}</span>` : ''}
 				${since ? `<span class="owner-since">${escapeHtml(t('map:ownerCard.memberSince', { date: since }))}</span>` : ''}
 			</span>
 		</a>
-		${chips ? `<div class="owner-chips">${chips}</div>` : ''}
 		${websites ? `<div class="owner-sites">${websites}</div>` : ''}
 		${device || power || photos.length || withBoard || node.note ? `
 		<div class="owner-node">
@@ -132,37 +184,87 @@ const buildCard = ({ owner, node, profileUrl }) => {
 			${power ? `<dl class="owner-node__details">${power}</dl>` : ''}` : `${buildGallery(photos, node.name)}
 			${device || power ? `<dl class="owner-node__details">${device}${power}</dl>` : ''}`}
 			${node.note ? `<p class="owner-note">${escapeHtml(node.note)}</p>` : ''}
-		</div>` : ''}
-		<div class="owner-card__foot">
-			<a class="action-link-btn" href="${escapeHtml(profileHref)}" target="_blank" rel="noopener">${t('map:ownerCard.viewProfile')}</a>
-			<a class="action-link-btn" href="${escapeHtml(nodeHref)}" target="_blank" rel="noopener">${t('map:spotlight.open')}</a>
-		</div>`,
+		</div>` : ''}`,
 	};
 };
 
-export const ownerCardPlaceholder = publicKey => `<section class="owner-card" data-owner-key="${escapeHtml(publicKey)}" aria-label="${t('map:ownerCard.aria')}" hidden></section>`;
+const accentOf = data => (COLOR_REGEX.test(data.owner.accent) ? data.owner.accent : null);
+
+const accentAttr = data => {
+	const accent = accentOf(data);
+	return accent ? ` data-accent="${accent}"` : '';
+};
+
+const applyAccent = (root, data) => {
+	const accent = accentOf(data);
+	if (!accent) return;
+
+	for (const el of root.querySelectorAll('.owner-card, .node-spotlight-slot')) el.style.setProperty('--owner-accent', accent);
+};
+
+export const ownerCardPlaceholder = publicKey => {
+	const key = escapeHtml(publicKey);
+	const data = peekOwner(publicKey);
+	if (!data) return `<section class="owner-card" data-owner-key="${key}" aria-label="${t('map:ownerCard.aria')}" hidden></section>`;
+
+	return `<section class="owner-card" data-owner-key="${key}" data-ready aria-label="${t('map:ownerCard.aria')}"${accentAttr(data)}>${buildCard(data).html}</section>`;
+};
+
+export const spotlightPlaceholder = publicKey => {
+	const data = peekOwner(publicKey);
+	return data ? `<div class="node-spotlight-slot"${accentAttr(data)}>${buildSpotlight(data)}</div>` : '<div class="node-spotlight-slot" hidden></div>';
+};
+
+const bindGallery = (slot, data) => {
+	if (slot.dataset.bound) return;
+	slot.dataset.bound = 'true';
+
+	const photos = photoUrls(data);
+	slot.addEventListener('click', e => {
+		const button = e.target.closest('[data-photo]');
+		if (button) openLightbox(photos, Number(button.dataset.photo), button);
+	});
+};
 
 export const hydrateOwnerCard = async (root, onChange) => {
 	const slot = root?.querySelector('.owner-card[data-owner-key]');
 	if (!slot) return;
 
-	const data = await fetchProfile(slot.dataset.ownerKey.toLowerCase());
-	if (!data || !slot.isConnected) return;
+	const publicKey = slot.dataset.ownerKey;
+	const ready = peekOwner(publicKey);
+	if (ready) {
+		bindGallery(slot, ready);
+		applyAccent(root, ready);
+		if (slot.dataset.ready) return;
+	} else if (ready === null) {
+		return;
+	}
 
-	const accent = COLOR_REGEX.test(data.owner.accent) ? data.owner.accent : null;
-	if (accent) slot.style.setProperty('--owner-accent', accent);
-	const { html, photos } = buildCard(data);
-	slot.innerHTML = html;
-	slot.addEventListener('click', e => {
-		const button = e.target.closest('[data-photo]');
-		if (button) openLightbox(photos, Number(button.dataset.photo), button);
-	});
+	slot.classList.add('is-loading');
+	slot.setAttribute('aria-busy', 'true');
 	slot.hidden = false;
+	onChange?.(true);
+
+	const data = ready ?? await loadOwner(publicKey);
+	if (!slot.isConnected) return;
+
+	slot.classList.remove('is-loading');
+	slot.removeAttribute('aria-busy');
+
+	if (!data) {
+		slot.hidden = true;
+		onChange?.(false);
+		return;
+	}
+
+	slot.innerHTML = buildCard(data).html;
+	bindGallery(slot, data);
 
 	const spotlight = root.querySelector('.node-spotlight-slot');
 	if (spotlight) {
 		spotlight.innerHTML = buildSpotlight(data);
 		spotlight.hidden = false;
 	}
-	onChange?.();
+	applyAccent(root, data);
+	onChange?.(true);
 };

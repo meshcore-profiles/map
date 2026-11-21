@@ -117,6 +117,14 @@
 		"openPhoto": "Open photo {{n}} of {{total}}",
 		"prevPhoto": "Previous photo",
 		"nextPhoto": "Next photo",
+		"gallery": "Photo gallery",
+		"hints": {
+			"gain": "Antenna gain",
+			"antennaType": "Antenna type",
+			"height": "Mounting height above ground",
+			"solarPanel": "Solar panel power",
+			"battery": "Battery capacity"
+		},
 		"powerSource": "Power",
 		"power": {
 			"grid": "Mains",
