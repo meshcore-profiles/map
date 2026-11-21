@@ -491,6 +491,29 @@ a.node-spotlight:hover, .leaflet-popup-content a.node-spotlight:hover {
 		padding-right: 0;
 		text-align: center;
 	}
+
+	.owner-node__details div {
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	.owner-node__details dt {
+		width: auto;
+		line-height: 16px;
+	}
+
+	.node-spotlight__text {
+		display: none;
+	}
+
+	#node-panel .modal-close-btn {
+		border-radius: 50%;
+		background: var(--bg-panel-solid);
+	}
+
+	#node-panel-content {
+		padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+	}
 }
 
 .lightbox {
@@ -514,7 +537,7 @@ a.node-spotlight:hover, .leaflet-popup-content a.node-spotlight:hover {
 
 .lightbox__img {
 	max-width: min(92vw, 1400px);
-	max-height: 86vh;
+	max-height: 86dvh;
 	border-radius: var(--radius-sm);
 	box-shadow: 0 20px 60px rgb(0 0 0 / 0.6);
 	object-fit: contain;
@@ -544,8 +567,8 @@ a.node-spotlight:hover, .leaflet-popup-content a.node-spotlight:hover {
 }
 
 .lightbox__close {
-	top: 16px;
-	right: 16px;
+	top: calc(16px + env(safe-area-inset-top, 0px));
+	right: calc(16px + env(safe-area-inset-right, 0px));
 	width: 40px;
 	height: 40px;
 }
@@ -577,7 +600,7 @@ a.node-spotlight:hover, .leaflet-popup-content a.node-spotlight:hover {
 
 .lightbox__counter {
 	position: absolute;
-	bottom: 18px;
+	bottom: calc(18px + env(safe-area-inset-bottom, 0px));
 	left: 50%;
 	transform: translateX(-50%);
 	padding: 3px 12px;
@@ -591,5 +614,23 @@ a.node-spotlight:hover, .leaflet-popup-content a.node-spotlight:hover {
 	.lightbox, .owner-gallery img {
 		animation: none;
 		transition: none;
+	}
+}
+
+@media (pointer: coarse) {
+	.owner-gallery button, .owner-card__main, .node-spotlight, .copy-icon-btn, .copy-link-btn, .action-link-btn, .node-deletion-btn, .owner-tag[title], .param-chip[title] {
+		touch-action: manipulation;
+	}
+
+	.copy-icon-btn {
+		width: 32px;
+		height: 32px;
+		margin: -6px;
+	}
+
+	.user-actions .copy-link-btn, .user-actions .action-link-btn, .user-actions .node-deletion-btn {
+		display: inline-flex;
+		align-items: center;
+		min-height: 40px;
 	}
 }

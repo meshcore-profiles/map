@@ -7,6 +7,7 @@ import { t, tRaw, plural } from './i18n.js';
 import { initApiKeySettings } from './api-keys.js';
 import { initModal } from './modal.js';
 import { initAppBanner } from './app-banner.js';
+import { initTouchHints } from './touch-hints.js';
 import { initDataSettings } from './settings-data.js';
 import { initSettingsTabs } from './settings-tabs.js';
 import { initMapLanguageSetting, readFlag, readSavedView, saveView, writeFlag } from './preferences.js';
@@ -207,6 +208,7 @@ const elevationSourceSelect = document.getElementById('setting-elevation-source'
 const elevationSourceDesc = document.getElementById('setting-elevation-desc');
 const coverageStyleSelect = document.getElementById('setting-coverage-style');
 if (window.MAP_CONFIG.features?.appBanner) initAppBanner();
+initTouchHints();
 const settingsTabs = initSettingsTabs(document.getElementById('settings-tabs'));
 initBasemapManager({
 	map,
