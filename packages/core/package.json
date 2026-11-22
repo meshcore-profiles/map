@@ -6,6 +6,9 @@
   "exports": {
     "./*": "./src/*.js"
   },
+  "directories": {
+    "test": "test"
+  },
   "scripts": {
     "test": "node --test test/"
   }
