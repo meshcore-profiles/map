@@ -10,6 +10,7 @@
     "msgpackr-extract@3.0.7": true
   },
   "dependencies": {
+    "@sefinek/email-validator": "^3.0.0",
     "axios": "^1.21.1",
     "cors": "^2.8.6",
     "ejs": "^7.0.2",

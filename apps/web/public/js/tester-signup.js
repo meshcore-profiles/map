@@ -76,11 +76,11 @@ export const initTesterSignup = () => {
 		},
 	});
 
-	const showError = (key, message) => {
+	const showError = (key, message, kind = 'error') => {
 		clearChallenge();
 		submit.disabled = false;
 		setStatus('');
-		showToast(message || t(`map:testers.errors.${key}`), { status: 'error' });
+		showToast(message || t(`map:testers.errors.${key}`), { status: kind });
 	};
 
 	const send = async (token, attempt) => {
@@ -97,7 +97,7 @@ export const initTesterSignup = () => {
 			const data = await response.json().catch(() => ({}));
 			if (attempt !== generation) return;
 			if (!response.ok || !data.success) {
-				showError('request', typeof data.message === 'string' ? data.message : null);
+				showError('request', typeof data.message === 'string' ? data.message : null, response.status >= 500 ? 'error' : 'warning');
 				return;
 			}
 
@@ -136,9 +136,9 @@ export const initTesterSignup = () => {
 				theme: 'dark',
 				size: captcha.clientWidth < 300 ? 'compact' : 'normal',
 				callback: token => void send(token, attempt),
-				'error-callback': () => { if (attempt === generation) showError('captcha'); },
-				'expired-callback': () => { if (attempt === generation) showError('expired'); },
-				'timeout-callback': () => { if (attempt === generation) showError('expired'); },
+				'error-callback': () => { if (attempt === generation) showError('captcha', null, 'warning'); },
+				'expired-callback': () => { if (attempt === generation) showError('expired', null, 'warning'); },
+				'timeout-callback': () => { if (attempt === generation) showError('expired', null, 'warning'); },
 			});
 		} catch {
 			if (attempt === generation) showError('load');

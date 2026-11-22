@@ -193,6 +193,7 @@
 		"errors": {
 			"unavailable": "Sign-ups are temporarily unavailable. Please try again later.",
 			"invalidRequest": "Enter a valid email address and tick the consent box.",
+			"invalidDomain": "The domain of this email address does not accept mail. Check that the address is correct.",
 			"captcha": "Cloudflare Turnstile verification failed. Please try again.",
 			"expired": "Verification expired. Please try again.",
 			"load": "Could not load Cloudflare Turnstile. Check your connection and content blocker settings, then try again.",

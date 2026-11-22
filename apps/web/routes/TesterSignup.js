@@ -1,10 +1,12 @@
 import express from 'express';
+import emailValidator from '@sefinek/email-validator';
+import verifyMx from '@sefinek/email-validator/mx';
 import * as limiter from '../middlewares/ratelimit.js';
 import verifyTurnstile from '../services/turnstile.js';
 import TesterSignup from '../models/testerSignup.model.js';
 
 const router = express.Router();
-const EMAIL_REGEX = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
+const MX_OPTIONS = { validateSyntax: false, timeout: 2500, tries: 2, failOpen: true };
 
 router.use('/tester-signup', (req, res, next) => {
 	res.set('Cache-Control', 'no-store');
@@ -18,12 +20,16 @@ router.post('/tester-signup', limiter.testerSignup, express.json({ limit: '4kb' 
 
 	const { email, consent, token, language } = req.body || {};
 	const normalized = typeof email === 'string' ? email.trim().toLowerCase() : '';
-	if (consent !== true || normalized.length > 254 || !EMAIL_REGEX.test(normalized)) {
+	if (consent !== true || normalized.length > 254 || !emailValidator(normalized)) {
 		return res.status(400).json({ success: false, status: 400, message: req.t('map:testers.errors.invalidRequest') });
 	}
 
 	if (!(await verifyTurnstile(token, req.ip, req.hostname, { action: 'tester-signup' }))) {
 		return res.status(400).json({ success: false, status: 400, message: req.t('map:testers.errors.captcha') });
+	}
+
+	if (!(await verifyMx(normalized, MX_OPTIONS))) {
+		return res.status(400).json({ success: false, status: 400, message: req.t('map:testers.errors.invalidDomain') });
 	}
 
 	try {

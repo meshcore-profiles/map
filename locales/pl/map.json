@@ -194,6 +194,7 @@
 		"errors": {
 			"unavailable": "Zapisy są chwilowo niedostępne. Spróbuj ponownie później.",
 			"invalidRequest": "Podaj poprawny adres e-mail i zaznacz zgodę.",
+			"invalidDomain": "Domena tego adresu e-mail nie przyjmuje poczty. Sprawdź, czy adres jest poprawny.",
 			"captcha": "Weryfikacja Cloudflare Turnstile nie powiodła się. Spróbuj ponownie.",
 			"expired": "Weryfikacja wygasła. Spróbuj ponownie.",
 			"load": "Nie udało się wczytać Cloudflare Turnstile. Sprawdź połączenie i ustawienia blokowania treści, a następnie spróbuj ponownie.",
