@@ -9,6 +9,7 @@ if (process.env.NODE_ENV !== 'production') router.get('/test', (req, res) => res
 router.get('/robots.txt', (req, res) => {
 	res.type('text/plain').send([
 		'User-agent: *',
+		'Disallow: /api/',
 		'Disallow: /cdn-cgi',
 		'Disallow: /cdn-cgi/',
 		'Disallow: /.well-known',
@@ -20,10 +21,15 @@ router.get('/robots.txt', (req, res) => {
 });
 
 router.get('/sitemap.xml', (req, res) => {
+	const { domain, defaultLanguage } = req.site;
+	const lastmod = req.app.locals.releaseDate;
+	const href = code => `https://${domain}${langPath(code, '/', defaultLanguage)}`;
 	const urls = LANGUAGES.map(({ code }) => `\t<url>
-\t\t<loc>https://${req.site.domain}${langPath(code, '/', req.site.defaultLanguage)}</loc>
+\t\t<loc>${href(code)}</loc>${lastmod ? `\n\t\t<lastmod>${lastmod}</lastmod>` : ''}
 \t</url>`).join('\n');
 
+	// The browser's built-in XML viewer needs inline script and style, which the global CSP blocks
+	res.removeHeader('Content-Security-Policy');
 	res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 ${urls}
@@ -38,7 +44,7 @@ router.get('/manifest.webmanifest', (req, res) => {
 	res.type('application/manifest+json').json({
 		name: req.t('meta:title', { brand: shortName }),
 		short_name: shortName,
-		description: req.t('meta:description'),
+		description: req.t('meta:description', { context: site.region }),
 		lang: site.defaultLanguage,
 		start_url: '/',
 		display: 'standalone',

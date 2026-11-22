@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "android": "expo run:android",
-    "ios": "expo run:ios",
-    "start": "expo start --dev-client",
+    "badges": "node scripts/generate-badges.mjs",
     "icons": "node scripts/generate-icons.mjs",
-    "badges": "node scripts/generate-badges.mjs"
+    "ios": "expo run:ios",
+    "start": "expo start --dev-client"
   },
   "dependencies": {
     "@bugsnag/expo": "^58.0.1",

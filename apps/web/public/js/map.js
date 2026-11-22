@@ -1126,6 +1126,17 @@ langToggle?.addEventListener('click', () => {
 	if (!langMenu.hidden) positionDropdown(langMenu, langToggle, { fullWidthOnMobile: false });
 });
 
+// The links are plain paths for crawlers; a normal click goes through ?setlang= so the choice is stored in the cookie.
+langMenu?.addEventListener('click', e => {
+	const link = e.target.closest('a[data-setlang]');
+	if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+	e.preventDefault();
+	const url = new URL(link.href);
+	url.search = location.search;
+	url.searchParams.set('setlang', link.dataset.setlang);
+	location.assign(url);
+});
+
 langMenu?.addEventListener('keydown', e => {
 	if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
 		e.preventDefault();

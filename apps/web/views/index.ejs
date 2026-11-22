@@ -1,11 +1,7 @@
 <!DOCTYPE html>
-<% const _switchUrl = code => {
-	const base = langPath(code, '/');
-	const qs = locals.currentQuery ? `${locals.currentQuery}&setlang=${code}` : `setlang=${code}`;
-	return `${base}${base.includes('?') ? '&' : '?'}${qs}`;
-};
-const _curMeta = languages.find(l => l.code === languageCode) || languages[0];
-const _titleBrand = site.shortName || site.brandName; %>
+<% const _curMeta = languages.find(l => l.code === languageCode) || languages[0];
+const _titleBrand = site.shortName || site.brandName;
+const _description = t('meta:description', { context: site.region }); %>
 <html lang="<%= _curMeta.htmlLang %>" data-theme="<%= site.theme %>">
 <head>
 	<meta charset="UTF-8">
@@ -13,7 +9,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<title><%= t('meta:title', { brand: _titleBrand }) %></title>
 
 	<!-- Primary meta -->
-	<meta name="description" content="<%= t('meta:description') %>">
+	<meta name="description" content="<%= _description %>">
 	<meta name="keywords" content="<%= t('meta:keywords') %>">
 	<link rel="canonical" href="<%= domain + lp('/') %>">
 	<% languages.forEach(l => { %><link rel="alternate" hreflang="<%= l.code %>" href="<%= domain + langPath(l.code, '/') %>">
@@ -26,7 +22,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<meta property="og:locale" content="<%= _curMeta.ogLocale %>">
 	<% languages.forEach(l => { if (l.code !== languageCode) { %><meta property="og:locale:alternate" content="<%= l.ogLocale %>"><% } }); %>
 	<meta property="og:title" content="<%= t('meta:title', { brand: _titleBrand }) %>">
-	<meta property="og:description" content="<%= t('meta:description') %>">
+	<meta property="og:description" content="<%= _description %>">
 	<meta property="og:url" content="<%= domain + lp('/') %>">
 	<meta property="og:image" content="<%= site.ogImage %>">
 	<meta property="og:image:width" content="1200">
@@ -36,7 +32,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<!-- Twitter / X Card -->
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:title" content="<%= t('meta:title', { brand: _titleBrand }) %>">
-	<meta name="twitter:description" content="<%= t('meta:description') %>">
+	<meta name="twitter:description" content="<%= _description %>">
 	<meta name="twitter:image" content="<%= site.ogImage %>">
 	<meta name="twitter:image:alt" content="<%= t('meta:ogImageAlt', { brand: site.brandName }) %>">
 
@@ -54,7 +50,6 @@ const _titleBrand = site.shortName || site.brandName; %>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link rel="preconnect" href="https://cdn.sefinek.net">
-	<link rel="preconnect" href="https://cdn.sefinek.net" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
 	<link rel="stylesheet" href="/vendor/markercluster/MarkerCluster.css">
@@ -77,7 +72,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 					'@type': 'WebApplication',
 					'@id': `${domain}/#webapp`,
 					name: t('meta:webAppName', { brand: _titleBrand }),
-					description: t('meta:description'),
+					description: _description,
 					url: domain + lp('/'),
 					applicationCategory: 'UtilitiesApplication',
 					operatingSystem: 'Any',
@@ -91,18 +86,11 @@ const _titleBrand = site.shortName || site.brandName; %>
 					inLanguage: _curMeta.ogLocale.replace('_', '-'),
 					publisher: { '@id': `${site.brandUrl}#organization` },
 				},
-				{
-					'@type': 'BreadcrumbList',
-					itemListElement: [
-						{ '@type': 'ListItem', position: 1, name: t('meta:webAppName', { brand: _titleBrand }), item: domain + lp('/') },
-					],
-				},
 			],
 		}) %>
 	</script>
 </head>
 <body>
-<h1 class="sr-only"><%= t('meta:heading', { brand: _titleBrand }) %></h1>
 <main id="map"></main>
 <div id="loading-overlay" role="status" aria-live="polite" aria-label="<%= t('map:loadingAriaLabel') %>" hidden>
 	<div id="loading-card">
@@ -117,7 +105,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 <header id="stats-bar">
 	<a id="brand" href="<%= site.brandUrl %>" target="_blank" rel="noopener" title="<%= site.brandName %>">
 		<% if (site.logo) { %><img src="<%= site.logo %>" alt="" width="34" height="34"><% } %>
-		<span id="brand-name"><%- site.brandNameHtml %></span>
+		<h1 id="brand-name"><%- site.brandNameHtml %></h1>
 	</a>
 	<span id="stats-divider"></span>
 	<span id="stats-counts"></span>
@@ -222,7 +210,10 @@ const _titleBrand = site.shortName || site.brandName; %>
 		<div class="filter-section">
 			<h3><%= t('filters:mapTitle') %></h3>
 			<div class="field-group">
-				<label for="clustering-zoom"><%= t('filters:clusteringZoom') %> <output id="clustering-zoom-value" for="clustering-zoom">11</output></label>
+				<div class="field-head">
+					<label for="clustering-zoom"><%= t('filters:clusteringZoom') %></label>
+					<output id="clustering-zoom-value" for="clustering-zoom">11</output>
+				</div>
 				<input type="range" id="clustering-zoom" min="10" max="17" value="11">
 			</div>
 		</div>
@@ -241,7 +232,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 <ul id="basemap-menu" class="dropdown-menu" hidden></ul>
 <% if (site.languageSwitcher === 'dropdown') { %>
 	<ul id="lang-menu" class="dropdown-menu" aria-label="<%= t('common:langLabel') %>" hidden>
-		<% languages.forEach(l => { %><li><a href="<%= site.crossLinks?.[l.code] || _switchUrl(l.code) %>" lang="<%= l.code %>" <%- l.code === languageCode ? 'class="active" aria-current="true"' : '' %>><%= l.name %></a></li><% }); %>
+		<% languages.forEach(l => { %><li><a href="<%= site.crossLinks?.[l.code] || langPath(l.code, '/') %>" lang="<%= l.code %>" <%- site.crossLinks?.[l.code] ? '' : `data-setlang="${l.code}" ` %><%- l.code === languageCode ? 'class="active" aria-current="true"' : '' %>><%= l.name %></a></li><% }); %>
 	</ul>
 <% } %>
 
@@ -353,7 +344,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 			</div>
 		</form>
 	</div>
-	<div id="tester-lightbox" tabindex="-1" role="dialog" aria-modal="true" hidden><img alt=""></div>
+	<div id="tester-lightbox" tabindex="-1" role="dialog" aria-modal="true" hidden></div>
 </div>
 <% } %>
 
@@ -530,7 +521,7 @@ const _titleBrand = site.shortName || site.brandName; %>
 			<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#close"></use></svg>
 		</button>
 		<section id="legend-plans" aria-labelledby="legend-plans-title">
-			<div class="modal-title" id="legend-plans-title"><%= t('legend:plansTitle') %></div>
+			<h3 class="modal-title" id="legend-plans-title"><%= t('legend:plansTitle') %></h3>
 			<p><%- t('legend:plansIntro') %></p>
 			<ul>
 				<li><%= t('legend:plansBullet1') %></li>

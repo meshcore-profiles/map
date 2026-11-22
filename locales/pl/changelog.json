@@ -1,6 +1,17 @@
 {
 	"entries": [
 		{
+			"version": "0.15.1",
+			"date": "22.11.2026",
+			"changes": [
+				"Poprawki SEO: nazwa serwisu w pasku nawigacji jest teraz głównym nagłówkiem strony, a każdy serwis ma własny opis.",
+				"Mapa witryny zawiera datę ostatniej modyfikacji, a robots.txt wyklucza API z indeksowania.",
+				"Linki do zmiany języka są teraz zwykłymi adresami, które mogą śledzić wyszukiwarki.",
+				"Przygotowania mapy pod meshcoreprofiles.com.",
+				"Różne poprawki błędów."
+			]
+		},
+		{
 			"version": "0.15.0",
 			"date": "17.11.2026",
 			"changes": [

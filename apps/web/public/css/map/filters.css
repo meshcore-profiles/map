@@ -373,6 +373,22 @@
 	font-size: 14px;
 }
 
+#node-filter .field-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+#node-filter .field-head > label {
+	color: var(--text);
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
 #clustering-zoom-value {
 	padding: 1px 8px;
 	border-radius: 999px;

@@ -1,6 +1,17 @@
 {
 	"entries": [
 		{
+			"version": "0.15.1",
+			"date": "2026-11-22",
+			"changes": [
+				"SEO improvements: the site name in the navigation bar is now the page's main heading, and each site has its own description.",
+				"The sitemap now includes the last modification date, and robots.txt excludes the API from indexing.",
+				"Language links are now plain addresses that search engines can follow.",
+				"Preparations of the map for meshcoreprofiles.com.",
+				"Various bug fixes."
+			]
+		},
+		{
 			"version": "0.15.0",
 			"date": "2026-11-17",
 			"changes": [

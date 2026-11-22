@@ -39,7 +39,9 @@ export const initTesterSignup = () => {
 	let request;
 	let generation = 0;
 	const lightbox = el('lightbox');
-	const lightboxImage = lightbox.querySelector('img');
+	const lightboxImage = document.createElement('img');
+	lightboxImage.alt = '';
+	lightbox.append(lightboxImage);
 	let lastShot;
 
 	const setStatus = message => {

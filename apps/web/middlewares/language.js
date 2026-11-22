@@ -17,7 +17,6 @@ const applyLocals = (req, res, next) => {
 	res.locals.langPath = (lang, to) => langPath(lang, to, req.site.defaultLanguage);
 	res.locals.lp = to => langPath(lng, to, req.site.defaultLanguage);
 	res.locals.i18nBundle = resources[lng];
-	res.locals.currentQuery = req.url.includes('?') ? req.url.slice(req.url.indexOf('?') + 1) : '';
 
 	next();
 };

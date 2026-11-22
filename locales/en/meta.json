@@ -1,7 +1,7 @@
 {
 	"title": "{{brand}} Node Map",
-	"heading": "Interactive {{brand}} network map",
-	"description": "An interactive map of MeshCore network nodes in Poland and around the world. Explore the locations of companions, repeaters, room servers and sensors.",
+	"description_pl": "Interactive map of MeshCore nodes in Poland: repeaters, room servers, companions and sensors. Radio filters, distance and route tools, terrain profiles and coverage.",
+	"description_all": "Worldwide map of MeshCore nodes: repeaters, room servers, companions and sensors. Search by name or key, filter by radio settings, check terrain and coverage.",
 	"keywords": "meshcore, meshcore map, meshcore node map, map, mesh, lora, meshcore nodes, meshcore repeater",
 	"ogImageAlt": "{{brand}}: a mesh network community",
 	"webAppName": "{{brand}} Map"
