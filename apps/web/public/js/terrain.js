@@ -246,7 +246,7 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 
 	analyzeBtn.addEventListener('click', async () => {
 		if (!points.a || !points.b) {
-			showToast(t('terrain:selectBothPoints'), { status: 'error' });
+			showToast(t('terrain:selectBothPoints'), { status: 'warning' });
 			return;
 		}
 
@@ -256,7 +256,7 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 		const heightB = Number(heightBInput.value) || 0;
 		const total = haversineDistance(points.a, points.b);
 		if (total < 10) {
-			showToast(t('terrain:pointsTooClose'), { status: 'error' });
+			showToast(t('terrain:pointsTooClose'), { status: 'warning' });
 			return;
 		}
 

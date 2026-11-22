@@ -150,7 +150,7 @@ export const initTesterSignup = () => {
 		if (submit.disabled) return;
 		const emailOk = email.value.trim() && email.checkValidity();
 		if (!emailOk || !consent.checked) {
-			showToast(t('map:testers.errors.invalidRequest'), { status: 'error' });
+			showToast(t('map:testers.errors.invalidRequest'), { status: 'warning' });
 			(emailOk ? consent : email).focus();
 			return;
 		}

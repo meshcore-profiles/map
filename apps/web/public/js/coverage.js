@@ -435,7 +435,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 	computeBtn.addEventListener('click', async () => {
 		if (!origin) {
-			showToast(t('coverage:selectPoint'), { status: 'error' });
+			showToast(t('coverage:selectPoint'), { status: 'warning' });
 			return;
 		}
 
@@ -443,7 +443,7 @@ export const initCoverageTool = ({ map, setPicker, getNodes, showToast, getEleva
 
 		const freqMHz = Number(freqInput.value);
 		if (!freqMHz || freqMHz <= 0) {
-			showToast(t('coverage:invalidFrequency'), { status: 'error' });
+			showToast(t('coverage:invalidFrequency'), { status: 'warning' });
 			return;
 		}
 
