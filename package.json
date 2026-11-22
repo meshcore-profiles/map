@@ -31,7 +31,7 @@
     "pull": "git pull origin main && git submodule update --init",
     "start": "npm start -w apps/web",
     "test": "npm test -w packages/core",
-    "update": "npm run pull && npm ci --omit=dev -w apps/web && pm2 restart mcmap"
+    "update": "npm run pull && npm ci --omit=dev -w apps/web -w packages/core && pm2 restart mcmap"
   },
   "allowScripts": {
     "@bugsnag/cli@3.10.7": true,
