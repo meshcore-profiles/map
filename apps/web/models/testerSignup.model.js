@@ -5,6 +5,7 @@ const TesterSignupSchema = new Schema({
 	language: { type: String, enum: ['pl', 'en'], default: 'pl' },
 	consentAt: { type: Date, required: true },
 	notifiedAt: { type: Date, default: null },
+	threadMessageId: { type: String, default: null },
 }, { timestamps: true, versionKey: false });
 
 export default model('TesterSignup', TesterSignupSchema);
