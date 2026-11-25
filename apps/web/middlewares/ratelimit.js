@@ -37,18 +37,6 @@ export const nodeDeletion = rateLimit({
 	handler: deletionLimitHandler,
 });
 
-const testerSignupLimitHandler = (req, res) => res.status(429).json({ success: false, status: 429, message: req.t('map:testers.errors.rateLimited') });
-
-export const testerSignup = rateLimit({
-	windowMs: 60 * 60 * 1000,
-	limit: 5,
-	standardHeaders: 'draft-7',
-	legacyHeaders: false,
-	requestPropertyName: 'testerSignupLimit',
-	store: redisStore('mcprof-map:ratelimit:testers:'),
-	handler: testerSignupLimitHandler,
-});
-
 export const nodeProfile = rateLimit({
 	windowMs: 60 * 1000,
 	limit: 60,

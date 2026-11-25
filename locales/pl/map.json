@@ -172,36 +172,11 @@
 		"open": "Otwórz w aplikacji",
 		"dismiss": "Nie teraz"
 	},
-	"testers": {
-		"banner": {
-			"title": "Zaproszenie do testów aplikacji",
-			"text": "Wkrótce kończymy nabór do zamkniętych testów aplikacji MeshCore Map na Androida! Jeśli chcesz pomóc nam ją dopracować, dołącz do grona testerów.",
-			"join": "Chcę pomóc",
-			"dismiss": "Nie teraz"
-		},
-		"title": "Zostań testerem aplikacji",
-		"intro": "Pracujemy nad aplikacją MeshCore Map na Androida z natywną mapą. Działa też offline: zapisane dane węzłów i wcześniej przeglądane fragmenty mapy są dostępne bez internetu. Do tego dochodzi analiza terenu i zasięgu oraz pomiar tras. Zanim aplikacja trafi do Google Play, Google wymaga zamkniętego testu z udziałem co najmniej 12 osób przez 14 dni.",
-		"howTitle": "Jak to wygląda",
-		"how": "Zapisz się adresem e-mail powiązanym z kontem Google, którego używasz w sklepie Play. Dodamy Cię do listy testerów i wyślemy link do instalacji. Test trwa 14 dni i wystarczy zostać w nim przez ten czas oraz od czasu do czasu otworzyć aplikację. Będziemy wdzięczni za każdą opinię: jeśli coś nie działa albo masz pomysł na usprawnienie, napisz do nas.",
-		"screenshots": "Zrzuty ekranu aplikacji",
-		"emailLabel": "Adres e-mail konta Google",
-		"emailPlaceholder": "twoj.adres@gmail.com",
-		"consent": "Zgadzam się na przetwarzanie mojego adresu e-mail w celu dodania mnie do testów zamkniętych i kontaktu w ich sprawie. Adres zostanie usunięty po zakończeniu testów. Mogę w każdej chwili poprosić o jego usunięcie.",
-		"submit": "Zapisz się",
-		"close": "Zamknij",
-		"sending": "Zapisywanie, proszę czekać...",
-		"success": "Serdecznie dziękujemy! Twój adres został zapisany. Wkrótce się do Ciebie odezwiemy, oczekuj wiadomości e-mail.",
-		"errors": {
-			"unavailable": "Zapisy są chwilowo niedostępne. Spróbuj ponownie później.",
-			"invalidRequest": "Podaj poprawny adres e-mail i zaznacz zgodę.",
-			"invalidDomain": "Domena tego adresu e-mail nie przyjmuje poczty. Sprawdź, czy adres jest poprawny.",
-			"captcha": "Weryfikacja Cloudflare Turnstile nie powiodła się. Spróbuj ponownie.",
-			"expired": "Weryfikacja wygasła. Spróbuj ponownie.",
-			"load": "Nie udało się wczytać Cloudflare Turnstile. Sprawdź połączenie i ustawienia blokowania treści, a następnie spróbuj ponownie.",
-			"request": "Nie udało się zapisać zgłoszenia. Spróbuj ponownie.",
-			"rateLimited": "Zbyt wiele prób. Spróbuj ponownie później."
-		},
-		"zoom": "Powiększ zrzut ekranu"
+	"telemavixBanner": {
+		"title": "Zamknięte testy Telemavix GPS",
+		"text": "Zapisz trasę GPS i dane z czujników telefonu, a potem dodaj mapę i prędkościomierz do filmu w Telemavix Studio. Masz zgodną kamerę DJI Osmo Action? Telemavix GPS na Androidzie może też służyć jako pilot GPS przez Bluetooth.",
+		"join": "Zapisz się do testów",
+		"dismiss": "Nie teraz"
 	},
 	"basemapCategories": {
 		"maps": "Mapy",

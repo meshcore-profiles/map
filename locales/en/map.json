@@ -171,36 +171,11 @@
 		"open": "Open in app",
 		"dismiss": "Not now"
 	},
-	"testers": {
-		"banner": {
-			"title": "Invitation to test the app",
-			"text": "We will soon close sign-ups for the closed test of the MeshCore Map Android app! If you would like to help us polish it, join our testers.",
-			"join": "I want to help",
-			"dismiss": "Not now"
-		},
-		"title": "Become an app tester",
-		"intro": "We are working on the MeshCore Map Android app with a native map. It also works offline: saved node data and previously viewed parts of the map are available without internet. It also includes terrain and coverage analysis and route measuring. Before the app can be published on Google Play, Google requires a closed test with at least 12 people for 14 days.",
-		"howTitle": "How it works",
-		"how": "Sign up with the email address of the Google account you use in the Play Store. We will add you to the tester list and send you an install link. The test lasts 14 days; all you need to do is stay in it and open the app from time to time. Feedback is welcome: if something does not work or you have an idea, let us know.",
-		"screenshots": "App screenshots",
-		"emailLabel": "Google account email",
-		"emailPlaceholder": "your.address@gmail.com",
-		"consent": "I agree to the processing of my email address to add me to the closed test and to contact me about it. The address will be deleted once testing ends. I can ask for its removal at any time.",
-		"submit": "Sign up",
-		"close": "Close",
-		"sending": "Saving, please wait...",
-		"success": "Thank you very much! Your address has been saved. We will get back to you soon, so keep an eye out for an e-mail.",
-		"errors": {
-			"unavailable": "Sign-ups are temporarily unavailable. Please try again later.",
-			"invalidRequest": "Enter a valid email address and tick the consent box.",
-			"invalidDomain": "The domain of this email address does not accept mail. Check that the address is correct.",
-			"captcha": "Cloudflare Turnstile verification failed. Please try again.",
-			"expired": "Verification expired. Please try again.",
-			"load": "Could not load Cloudflare Turnstile. Check your connection and content blocker settings, then try again.",
-			"request": "Could not save your sign-up. Please try again.",
-			"rateLimited": "Too many attempts. Please try again later."
-		},
-		"zoom": "Enlarge screenshot"
+	"telemavixBanner": {
+		"title": "Telemavix GPS closed alpha",
+		"text": "Record your GPS track and phone sensor data, then add a map and speedometer to your video in Telemavix Studio. Have a compatible DJI Osmo Action camera? Telemavix GPS for Android can also act as a Bluetooth GPS remote.",
+		"join": "Sign up for testing",
+		"dismiss": "Not now"
 	},
 	"basemapCategories": {
 		"maps": "Maps",

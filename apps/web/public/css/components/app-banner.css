@@ -1,5 +1,5 @@
 #app-banner,
-#tester-banner {
+#telemavix-banner:not([hidden]) {
 	position: fixed;
 	right: 12px;
 	bottom: calc(12px + env(safe-area-inset-bottom));
@@ -20,8 +20,8 @@
 	animation: app-banner-in 0.3s var(--ease);
 }
 
-#tester-banner {
-	max-width: 720px;
+#telemavix-banner:not([hidden]) {
+	max-width: 900px;
 }
 
 @keyframes app-banner-in {
@@ -46,6 +46,16 @@
 
 .app-banner-text span {
 	color: var(--text-muted);
+}
+
+#telemavix-banner .app-banner-text {
+	gap: 0;
+	font-size: 16px;
+}
+
+#telemavix-banner .app-banner-text strong {
+	font-size: 20px;
+	line-height: 1.25;
 }
 
 .app-banner-actions {

@@ -6,13 +6,12 @@ import { collectFilteredNodes as collectFilteredNodesCore, createNodeIndex, coun
 import { t, tRaw, plural } from './i18n.js';
 import { initApiKeySettings } from './api-keys.js';
 import { initModal } from './modal.js';
-import { initAppBanner } from './app-banner.js';
+import { initMeshCoreMapBanner, initTelemavixBanner } from './app-banner.js';
 import { initTouchHints } from './touch-hints.js';
 import { initDataSettings } from './settings-data.js';
 import { initSettingsTabs } from './settings-tabs.js';
 import { initMapLanguageSetting, readFlag, readSavedView, saveView, writeFlag } from './preferences.js';
 import { initNodeDeletionDialog } from './node-deletion.js';
-import { initTesterSignup } from './tester-signup.js';
 import { initRadioFilters } from './radio-filters.js';
 import { NODE_TYPE_ICON_NAMES } from '/core/colors.js';
 import { loadRadioFilters } from '/core/radio-filter-utils.js';
@@ -196,7 +195,6 @@ const regionWarning = initRegionWarning({ apiUrl });
 const contactErrorTextEl = document.getElementById('contact-error-text');
 const contactErrorModal = initModal(null, 'contact-error-overlay', { closeOnOutsideClick: true });
 initNodeDeletionDialog();
-initTesterSignup();
 const statsCounts = document.getElementById('stats-counts');
 const regionToggle = document.getElementById('region-toggle');
 const regionToggleLabel = document.getElementById('region-toggle-label');
@@ -207,7 +205,8 @@ const closeFiltersOnApplyCheckbox = document.getElementById('setting-close-filte
 const elevationSourceSelect = document.getElementById('setting-elevation-source');
 const elevationSourceDesc = document.getElementById('setting-elevation-desc');
 const coverageStyleSelect = document.getElementById('setting-coverage-style');
-if (window.MAP_CONFIG.features?.appBanner) initAppBanner();
+if (window.MAP_CONFIG.features?.appBanner) initMeshCoreMapBanner();
+initTelemavixBanner();
 initTouchHints();
 const settingsTabs = initSettingsTabs(document.getElementById('settings-tabs'));
 initBasemapManager({

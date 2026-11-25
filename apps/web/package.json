@@ -18,14 +18,14 @@
     "express-rate-limit": "^8.7.5",
     "express-timeout-handler": "^2.2.2",
     "helmet": "^8.3.0",
-    "i18next": "^27.2.3",
-    "i18next-http-middleware": "^3.11.0",
-    "mongoose": "^9.12.3",
+    "i18next": "^27.2.8",
+    "i18next-http-middleware": "^3.11.1",
+    "mongoose": "^9.13.1",
     "morgan": "^1.12.1",
     "msgpackr": "^2.1.4",
     "nodemailer": "^10.6.1",
     "rate-limit-redis": "^6.0.2",
-    "redis": "^6.3.1"
+    "redis": "^6.4.0"
   },
   "engines": {
     "node": ">=26.0.0"

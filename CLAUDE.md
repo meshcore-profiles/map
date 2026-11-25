@@ -35,7 +35,7 @@ Comments are in English everywhere (backend, `public/`, `packages/core`, `apps/m
 - `routes/Index.js` renders the map and generates `robots.txt`, `sitemap.xml` (one URL per language) and `manifest.webmanifest` from `req.site`. `/test` (icon/toast preview) exists only outside production.
 - `routes/AppLinks.js` serves Android App Links at `/.well-known/assetlinks.json` for both hosts before site and language handling. The package name and release fingerprint (`extra.androidCertSha256`) come from `apps/mobile/app.json`. `ANDROID_PLAY_CERT_SHA256` accepts additional Play App Signing fingerprints separated by commas.
 - `routes/Embed.js` renders `/embed` from the validated node list in the `data` query parameter. `lang` can select the language. `EMBED_PARENTS` controls which origins may frame it and defaults to `https://meshcoreprofiles.com`.
-- `routes/TesterSignup.js` serves `POST /api/v1/tester-signup` on the Polish site when Turnstile is configured. It validates consent and the email address, then records the signup in MongoDB. `tools/export-testers.js` exports the registrations and `tools/notify-testers.js` previews notifications by default. Sending mail requires `--send` and explicit user authorization.
+- Both sites link to the Telemavix GPS closed alpha signup on sefinek.net. `tools/export-testers.js` and `tools/notify-testers.js` work with existing MeshCore Map registrations. Sending mail requires `--send` and explicit user authorization.
 - `utils/httpError.js`: `HttpError(res, status, err)` logs and ends with just the status, no body; used by routes and the global error/404 handler.
 - Node reading layer is `global/services/nodeCache.js` (no local `services/nodes.js`).
 

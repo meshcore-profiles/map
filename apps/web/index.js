@@ -25,7 +25,6 @@ import * as SITES from './config/sites.js';
 import IndexRouter from './routes/Index.js';
 import APIRouter from './routes/Api.js';
 import NodeDeletionRouter from './routes/NodeDeletion.js';
-import TesterSignupRouter from './routes/TesterSignup.js';
 import EmbedRouter from './routes/Embed.js';
 
 const { version } = pkg;
@@ -141,7 +140,6 @@ app.use(IndexRouter);
 app.use(EmbedRouter);
 app.use('/api/v1', APIRouter);
 app.use('/api/v1', NodeDeletionRouter);
-app.use('/api/v1', TesterSignupRouter);
 
 
 // Error handling
