@@ -2,14 +2,16 @@ import '../loadEnv.js';
 import path from 'node:path';
 import { writeFile } from 'node:fs/promises';
 
+const EXPORT_FILENAME = 'mcmap-testers.csv';
+
 const args = process.argv.slice(2);
 if (args.length > 1 || args.some(arg => arg.startsWith('-'))) {
 	const help = args.length === 1 && args[0] === '--help';
-	console[help ? 'log' : 'error']('Usage: node scripts/export-testers.js [output.csv]');
+	console[help ? 'log' : 'error'](`Usage: node scripts/export-testers.js [output.csv] (default: scripts/${EXPORT_FILENAME})`);
 	process.exit(help ? 0 : 1);
 }
 
-const outputPath = args.length ? path.resolve(args[0]) : path.join(import.meta.dirname, 'testers.csv');
+const outputPath = args.length ? path.resolve(args[0]) : path.join(import.meta.dirname, EXPORT_FILENAME);
 
 
 import connection from '../global/database/mongoose.js';

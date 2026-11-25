@@ -1,6 +1,6 @@
 node_modules
 .env
-/scripts/testers.csv
+/scripts/mcmap-testers.csv
 .expo
 apps/mobile/dist
 apps/mobile/android
