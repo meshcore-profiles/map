@@ -52,7 +52,7 @@ ${telemavixUrl}
 
 Dziękujemy za poświęcony czas!
 
-Życzymy miłej niedzieli,
+Życzymy miłego dnia,
 Zespół MeshCore Polska`;
 
 const MESSAGE = {
