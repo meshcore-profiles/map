@@ -23,15 +23,16 @@ test('basemap catalog without keys defaults to the keyless OpenStreetMap', () =>
 	assert.deepEqual(catalog.listed.find(item => item.name === OPENFREEMAP_NAME), { name: OPENFREEMAP_NAME, group: 'vector', category: 'maps', disabled: false, reason: null, isDefault: false });
 });
 
-test('the default is the first available map by priority: Esri, CARTO Dark, OpenStreetMap, OpenFreeMap', () => {
+test('the default is the first available map by priority: Esri, MapTiler Hybrid, CARTO Dark, OpenStreetMap, OpenFreeMap', () => {
 	const all = createBasemapCatalog({ esriApiKey: ' abc ', maptilerApiKey: 'm&t', cartoApiKey: 'ct', maptilerHybridMapId: 'id', mapLanguage: 'pl' });
 	assert.equal(all.defaultName, ESRI_HYBRID_NAME);
-	assert.deepEqual(all.fallbackChain, [ESRI_HYBRID_NAME, CARTO_DARK_NAME, OPENSTREETMAP_NAME, OPENFREEMAP_NAME]);
+	assert.deepEqual(all.fallbackChain, [ESRI_HYBRID_NAME, MAPTILER_HYBRID_NAME, CARTO_DARK_NAME, OPENSTREETMAP_NAME, OPENFREEMAP_NAME]);
 	assert.match(all.byName(ESRI_HYBRID_NAME).url, /language=pl&token=abc$/);
 	assert.match(all.byName(MAPTILER_HYBRID_NAME).url, /maps\/id\/style\.json\?key=m%26t$/);
 
 	assert.equal(createBasemapCatalog({ cartoApiKey: 'abcdefgh' }).defaultName, CARTO_DARK_NAME);
-	assert.equal(createBasemapCatalog({ maptilerApiKey: 'abcdefgh' }).defaultName, OPENSTREETMAP_NAME);
+	assert.equal(createBasemapCatalog({ maptilerApiKey: 'abcdefgh' }).defaultName, MAPTILER_HYBRID_NAME);
+	assert.equal(createBasemapCatalog({ maptilerApiKey: 'abcdefgh', cartoApiKey: 'abcdefgh', cachesTiles: true }).defaultName, MAPTILER_HYBRID_NAME);
 	assert.equal(createBasemapCatalog({ esriApiKey: 'abcdefgh', cartoApiKey: 'abcdefgh', cachesTiles: true }).defaultName, CARTO_DARK_NAME);
 });
 

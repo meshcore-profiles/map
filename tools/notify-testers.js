@@ -1,32 +1,19 @@
-import '../loadEnv.js';
+import { randomUUID } from 'node:crypto';
+import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
+import { parseArgs } from 'node:util';
+import emailValidator from '@sefinek/email-validator';
+import { createConnection } from 'mongoose';
 import nodemailer from 'nodemailer';
-import { readFile } from 'node:fs/promises';
-import { setTimeout as sleep } from 'node:timers/promises';
-
-import connection from '../global/database/mongoose.js';
 import TesterSignup from '../apps/web/models/testerSignup.model.js';
 
-const DELAY_MS = 1000;
-
-const args = process.argv.slice(2);
-const send = args.includes('--send');
-const limitIndex = args.indexOf('--limit');
-const limit = limitIndex === -1 ? 0 : Number.parseInt(args[limitIndex + 1], 10);
-if (limitIndex !== -1 && !(limit > 0)) {
-	console.error('--limit needs a positive number.');
-	process.exit(1);
-}
-const replyIndex = args.indexOf('--reply');
-const replyFile = replyIndex === -1 ? null : args[replyIndex + 1];
-if (replyIndex !== -1 && (!replyFile || replyFile.startsWith('--'))) {
-	console.error('--reply needs a path to a text file with the message body.');
-	process.exit(1);
-}
+const DEFAULT_LANGUAGE = 'pl';
+const DEFAULT_FROM_NAME = '';
+const MESSAGE_ID_DOMAIN = 'meshcorepolska.org';
 const installUrl = 'https://play.google.com/store/apps/details?id=com.sefinek.meshcoremap';
 const telemavixUrl = 'https://sefinek.net/pl/projects/telemavix';
 const privacyUrl = 'https://sefinek.net/pl/projects/meshcore/map/mobile-app/privacy-policy';
-const escapeHtml = text => text.replace(/[&<>"']/g, char => `&#${char.charCodeAt(0)};`);
-const toHtml = text => text.split('\n\n').map(paragraph => `<p>${escapeHtml(paragraph).replace(/https?:\/\/[^\s<]*[^\s<.,;:!?)]/g, url => `<a href="${url}">${url}</a>`).replace(/\n/g, '<br>')}</p>`).join('\n');
 const SUBJECT = 'MeshCore Map na Androida: zaproszenie do zamkniętych testów';
 const MESSAGE_TEXT = `Cześć!
 
@@ -54,104 +41,192 @@ Dziękujemy za poświęcony czas!
 
 Życzymy miłego dnia,
 Zespół MeshCore Polska`;
+const invitation = { subject: SUBJECT, text: MESSAGE_TEXT };
+const INVITATIONS = { pl: invitation, en: invitation };
 
-const MESSAGE = {
-	subject: SUBJECT,
-	text: MESSAGE_TEXT,
-	html: toHtml(MESSAGE_TEXT),
+const EXPORT_FILENAME = 'mcmap-testers.csv';
+
+const HELP = `Usage: node tools/notify-testers.js [options]
+  --send               Send email. By default, list the selected recipients.
+  --limit N            Process at most N recipients, oldest signups first.
+  --recipients FILE    Restrict to addresses in a CSV with one email per line.
+  --export [FILE]      Export tester addresses regardless of invitation status (default: tools/${EXPORT_FILENAME}).
+  --reply FILE         Send UTF-8 text as a reply in each invitation thread.
+  --help               Show this help.`;
+
+const escapeHtml = text => text.replace(/[&<>"']/g, char => `&#${char.charCodeAt(0)};`);
+const toHtml = text => {
+	const html = text.split(/(https?:\/\/[^\s<>"']+)/u).map((part, index) => {
+		const escaped = escapeHtml(part);
+		return index % 2 ? `<a href="${escaped}">${escaped}</a>` : escaped;
+	}).join('');
+	return `<p>${html.replace(/\r?\n(\r?\n)?/gu, (_, paragraphBreak) => paragraphBreak ? '</p>\n<p>' : '<br>')}</p>`;
 };
-const resolveSender = () => {
-	const configured = process.env.MAILER_FROM?.trim();
-	if (!configured) return process.env.MAILER_AUTH_USER;
 
-	return configured.includes('@') ? configured : { name: configured, address: process.env.MAILER_AUTH_USER };
+const requiredEnv = (...names) => {
+	const missing = names.filter(name => !process.env[name]);
+	if (missing.length) throw new Error(`Missing configuration: ${missing.join(', ')}`);
 };
 
-const createTransporter = () => {
-	const missing = ['MAILER_HOST', 'MAILER_PORT', 'MAILER_AUTH_USER', 'MAILER_AUTH_PASSWD'].filter(name => !process.env[name]);
-	if (missing.length) throw new Error(`Missing in .env: ${missing.join(', ')}`);
+const recipientLanguage = language => language === 'pl' || language === 'en' ? language : DEFAULT_LANGUAGE;
+
+const sendMessages = async (signups, recipients, reply) => {
+	requiredEnv('MAILER_HOST', 'MAILER_PORT', 'MAILER_AUTH_USER', 'MAILER_AUTH_PASSWD');
 	const port = Number(process.env.MAILER_PORT);
-
-	return nodemailer.createTransport({
+	if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid MAILER_PORT.');
+	const user = process.env.MAILER_AUTH_USER;
+	const configuredFrom = process.env.MAILER_FROM?.trim();
+	const from = configuredFrom?.includes('@') ? configuredFrom : { name: configuredFrom || DEFAULT_FROM_NAME, address: user };
+	const transporter = nodemailer.createTransport({
 		host: process.env.MAILER_HOST,
 		port,
 		secure: port === 465,
-		auth: { user: process.env.MAILER_AUTH_USER, pass: process.env.MAILER_AUTH_PASSWD },
+		requireTLS: port !== 465,
+		auth: { user, pass: process.env.MAILER_AUTH_PASSWD },
 	});
-};
-
-const buildReplyMessage = async () => {
-	const text = (await readFile(replyFile, 'utf8')).trim();
-	if (!text) throw new Error(`${replyFile} is empty.`);
-
-	return {
-		subject: `Re: ${SUBJECT}`,
-		text,
-		html: toHtml(text),
-	};
-};
-
-const main = async () => {
-	await connection.asPromise();
-
-	const reply = replyFile ? await buildReplyMessage() : null;
-	const filter = reply ? { threadMessageId: { $ne: null } } : { notifiedAt: null };
-	const query = TesterSignup.find(filter).sort({ createdAt: 1 }).lean();
-	if (limit) query.limit(limit);
-	const recipients = await query;
-
-	console.log(reply
-		? `${recipients.length} ${recipients.length === 1 ? 'person' : 'people'} with a thread to reply in.`
-		: `${recipients.length} ${recipients.length === 1 ? 'person' : 'people'} not written to yet.`);
-	if (!send) {
-		for (const { email } of recipients) console.log(`  ${email}`);
-		console.log(reply ? 'Nothing was sent. Run with --send to send the reply in each thread.' : 'Nothing was sent. Run with --send to send the mail and mark them.');
-		return 0;
-	}
-	if (!recipients.length) return 0;
-
-	const transporter = createTransporter();
 	await transporter.verify();
 
-	const from = resolveSender();
 	let sent = 0;
 	let failed = 0;
-
+	const isReply = reply !== null;
 	for (const [index, recipient] of recipients.entries()) {
-		if (index > 0) await sleep(DELAY_MS);
-
-		try {
-			const headers = reply ? { inReplyTo: recipient.threadMessageId, references: recipient.threadMessageId } : {};
-			const info = await transporter.sendMail({ from, to: recipient.email, ...(reply || MESSAGE), ...headers });
-			if (!info.accepted?.length) throw new Error(`rejected by the server: ${info.response}`);
-
-			sent++;
-			console.log(`[${index + 1}/${recipients.length}] sent to ${recipient.email} (from ${info.envelope.from}, ${info.response}, ${info.messageId})`);
-
-			if (!reply) {
-				try {
-					await TesterSignup.updateOne({ _id: recipient._id }, { $set: { notifiedAt: new Date(), threadMessageId: info.messageId } });
-				} catch (err) {
-					failed++;
-					console.error(`MAIL WAS SENT but marking ${recipient.email} failed (it would get a duplicate on the next run; set notifiedAt and threadMessageId=${info.messageId} manually): ${err.message}`);
-				}
+		if (index > 0) await delay(1000);
+		const { _id, email, language, threadMessageId } = recipient;
+		const log = `[${index + 1}/${recipients.length}] ${email}`;
+		const invitation = INVITATIONS[recipientLanguage(language)];
+		const text = reply ?? invitation.text;
+		const messageId = `<${randomUUID()}@${MESSAGE_ID_DOMAIN}>`;
+		const claim = { _id, notificationClaim: messageId };
+		if (!isReply) {
+			const { modifiedCount } = await signups.updateOne({ _id, notifiedAt: null, notificationClaim: null },
+				{ $set: { notificationClaim: messageId } });
+			if (!modifiedCount) {
+				console.log(`${log}: already sent or claimed.`);
+				continue;
 			}
+		}
+
+		let info;
+		try {
+			info = await transporter.sendMail({
+				from, to: { address: email }, messageId, text, html: toHtml(text),
+				subject: isReply ? `Re: ${invitation.subject}` : invitation.subject,
+				...(isReply && { inReplyTo: threadMessageId, references: threadMessageId }),
+			});
+			if (info.accepted?.length !== 1) throw new Error('SMTP did not confirm acceptance.');
 		} catch (err) {
 			failed++;
-			console.error(`[${index + 1}/${recipients.length}] FAILED for ${recipient.email}: ${err.message}`);
+			console.error(`${log}: ${err.message} (${messageId})`);
+			if (!isReply && err.responseCode >= 400 && err.responseCode < 600) {
+				await signups.updateOne(claim, { $unset: { notificationClaim: '' } });
+			} else if (!isReply) {
+				console.error(`${log}: delivery uncertain. The invitation is held for review.`);
+			}
+			continue;
 		}
+
+		sent++;
+		if (!isReply) {
+			try {
+				const { modifiedCount } = await signups.updateOne(claim, {
+					$set: { notifiedAt: new Date(), threadMessageId: info.messageId },
+					$unset: { notificationClaim: '' },
+					$currentDate: { updatedAt: true },
+				});
+				if (!modifiedCount) throw new Error('The signup no longer has the expected claim.');
+			} catch (err) {
+				failed++;
+				console.error(`${log}: SMTP accepted ${info.messageId}, but MongoDB could not record it: ${err.message}`);
+				continue;
+			}
+		}
+		console.log(`${log}: accepted by SMTP (${info.messageId}).`);
 	}
 
-	console.log(`Done: ${sent} sent, ${failed} failed (failed ones stay unmarked and will be retried on the next run).`);
+	console.log(`${sent} accepted by SMTP, ${failed} errors.`);
 	return failed ? 1 : 0;
 };
 
-main()
-	.then(code => {
-		process.exitCode = code;
-	})
-	.catch(err => {
-		console.error(err);
-		process.exitCode = 1;
-	})
-	.finally(() => connection.close());
+const main = async () => {
+	const args = process.argv.slice(2);
+	const exportIndex = args.indexOf('--export');
+	if (exportIndex !== -1 && (args[exportIndex + 1] ?? '--').startsWith('-')) {
+		args[exportIndex] = `--export=${join(import.meta.dirname, EXPORT_FILENAME)}`;
+	}
+	const { values: options } = parseArgs({
+		args,
+		options: {
+			send: { type: 'boolean' },
+			limit: { type: 'string' },
+			recipients: { type: 'string' },
+			export: { type: 'string' },
+			reply: { type: 'string' },
+			help: { type: 'boolean' },
+		},
+	});
+	if (options.help) {
+		console.log(HELP);
+		return 0;
+	}
+
+	const limit = Number(options.limit ?? 0);
+	if (options.limit !== undefined && (!(/^\d+$/u).test(options.limit) || !Number.isSafeInteger(limit) || limit < 1)) {
+		throw new Error('--limit requires a positive integer.');
+	}
+	if (options.export !== undefined && (options.send || options.reply !== undefined || options.recipients !== undefined)) {
+		throw new Error('--export cannot be combined with --send, --reply or --recipients.');
+	}
+	const reply = options.reply === undefined ? null : (await readFile(options.reply, 'utf8')).trim();
+	if (reply === '') throw new Error('The reply file is empty.');
+	const emails = options.recipients === undefined ? null : [...new Set((await readFile(options.recipients, 'utf8'))
+		.split(/\r?\n/u).map(line => line.trim().toLowerCase()).filter(Boolean))];
+	if (emails && (!emails.length || emails.some(email => !emailValidator(email)))) {
+		throw new Error('The recipients CSV must contain one valid email address per line, with no header.');
+	}
+
+	try {
+		process.loadEnvFile(join(import.meta.dirname, '..', '.env'));
+	} catch (err) {
+		if (err.code !== 'ENOENT') throw err;
+	}
+	requiredEnv('MONGODB_URL');
+	const connection = createConnection(process.env.MONGODB_URL, { serverSelectionTimeoutMS: 5000 });
+	try {
+		await connection.asPromise();
+		const signups = connection.db.collection(TesterSignup.collection.name);
+		const filter = {};
+		if (options.export === undefined) {
+			if (reply === null) Object.assign(filter, { notifiedAt: null, notificationClaim: null });
+			else filter.threadMessageId = { $type: 'string', $ne: '' };
+		}
+		if (emails) filter.email = { $in: emails };
+		const recipients = await signups.find(filter, { projection: { email: 1, language: 1, threadMessageId: 1 } })
+			.sort({ createdAt: 1, _id: 1 }).limit(limit).toArray();
+		if (recipients.some(({ email }) => typeof email !== 'string' || !emailValidator(email))) {
+			throw new Error('Invalid address in the signup list.');
+		}
+		console.log(`${recipients.length} recipient(s) selected.`);
+		if (options.export !== undefined) {
+			const addresses = new Set(recipients.map(({ email }) => email.toLowerCase()));
+			const csv = [...addresses].map(email => `${email}\r\n`).join('');
+			await writeFile(options.export, csv, { encoding: 'utf8', flag: 'wx' });
+			console.log(`Exported to ${options.export}.`);
+		} else if (!options.send) {
+			for (const { email, language } of recipients) console.log(`  ${email} (${recipientLanguage(language)})`);
+			console.log('Preview only. Add --send to deliver.');
+		} else if (recipients.length) {
+			const exitCode = await sendMessages(signups, recipients, reply);
+			return exitCode;
+		}
+		return 0;
+	} finally {
+		await connection.close();
+	}
+};
+
+main().then(code => {
+	process.exitCode = code;
+}).catch(err => {
+	console.error(err.message);
+	process.exitCode = 1;
+});

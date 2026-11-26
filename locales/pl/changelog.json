@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.15.2",
+			"date": "26.11.2026",
+			"changes": [
+				"Dodano MapTiler Hybrid do kolejności domyślnych map zapasowych: Esri Hybrid, MapTiler Hybrid, CartoDB Dark, OpenStreetMap, OpenFreeMap.",
+				"Naprawiono problem, przez który mapa MapTiler Hybrid nie działała.",
+				"Zaktualizowano zależności."
+			]
+		},
+		{
 			"version": "0.15.1",
 			"date": "22.11.2026",
 			"changes": [

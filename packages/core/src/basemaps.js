@@ -66,7 +66,7 @@ const DEFINITIONS = [
 // The order of preference: the first available map is the default, and a map that fails is replaced by the next one. The keyed maps come first and
 // the keyless ones last (OpenStreetMap: allowed for interactive viewing with an identifying User-Agent; OpenFreeMap: free, no key, apps allowed),
 // so a rejected key or an exhausted quota never leaves the map empty.
-const PRIORITY_ORDER = [ESRI_HYBRID_NAME, CARTO_DARK_NAME, OPENSTREETMAP_NAME, OPENFREEMAP_NAME];
+const PRIORITY_ORDER = [ESRI_HYBRID_NAME, MAPTILER_HYBRID_NAME, CARTO_DARK_NAME, OPENSTREETMAP_NAME, OPENFREEMAP_NAME];
 
 // options: { esriApiKey, cartoApiKey, maptilerApiKey, maptilerHybridMapId, mapLanguage, cachesTiles }. Maps whose key is missing are left out of "basemaps",
 // and so are those that forbid caching when the client caches tiles (cachesTiles).

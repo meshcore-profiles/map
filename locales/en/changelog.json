@@ -1,6 +1,15 @@
 {
 	"entries": [
 		{
+			"version": "0.15.2",
+			"date": "2026-11-26",
+			"changes": [
+				"Added MapTiler Hybrid to the default map fallback order: Esri Hybrid, MapTiler Hybrid, CartoDB Dark, OpenStreetMap, OpenFreeMap.",
+				"Fixed an issue that prevented the MapTiler Hybrid map from working.",
+				"Updated dependencies."
+			]
+		},
+		{
 			"version": "0.15.1",
 			"date": "2026-11-22",
 			"changes": [
