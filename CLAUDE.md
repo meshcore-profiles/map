@@ -6,8 +6,6 @@ One codebase serves two sites, chosen by request host (`apps/web/config/sites.js
 - `mapa.meshcorepolska.org` - Polish, default region `pl`.
 - `map.meshcoreprofiles.com` - global, default region `all`, default language English.
 
-Write comments in English; translate older Polish ones in `apps/web/public` when touching the code around them.
-
 ## Layout and commands
 
 - npm workspaces, Node.js 26+. Web paths below are relative to `apps/web`; `apps/`, `packages/`, `global/`, `locales/` and `tools/` are relative to the repo root.
