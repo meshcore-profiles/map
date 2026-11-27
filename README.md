@@ -4,7 +4,7 @@ Interactive map of MeshCore network nodes. A single codebase serves two public s
 - [mapa.meshcorepolska.org](https://mapa.meshcorepolska.org) - Polish version, shows only nodes from Poland by default.
 - [map.meshcoreprofiles.com](https://map.meshcoreprofiles.com) - global version (MeshCore Map), shows nodes from the whole world by default, interface defaults to English.
 
-The project consists of a frontend (HTML, CSS, ESM) and a backend (Node.js CJS).
+The project consists of a frontend (HTML, CSS, ESM) and a backend (Node.js, ESM).
 The backend fetches node data from the public `map.meshcore.io` API and keeps it in the process memory and in Redis, while daily network stats snapshots are stored in MongoDB.
 
 ## Highlights

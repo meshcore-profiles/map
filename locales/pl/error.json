@@ -1,5 +1,40 @@
 {
 	"nodesNotAvailable": "Dane węzłów nie są jeszcze dostępne. Spróbuj ponownie.",
 	"radioPresetsNotAvailable": "Presety radiowe nie są jeszcze dostępne. Spróbuj ponownie.",
-	"internalServerError": "Wystąpił wewnętrzny błąd serwera. Spróbuj ponownie."
+	"internalServerError": "Wystąpił wewnętrzny błąd serwera. Spróbuj ponownie.",
+	"backToMap": "Wróć do mapy",
+	"http": {
+		"400": {
+			"title": "Nieprawidłowe żądanie",
+			"message": "Serwer nie może przetworzyć tego żądania. Sprawdź adres i spróbuj ponownie."
+		},
+		"403": {
+			"title": "Brak dostępu",
+			"message": "Nie masz uprawnień do wyświetlenia tej strony."
+		},
+		"404": {
+			"title": "Nie znaleziono strony",
+			"message": "Strona pod tym adresem nie istnieje."
+		},
+		"413": {
+			"title": "Zbyt duże żądanie",
+			"message": "Przesłane dane są za duże."
+		},
+		"429": {
+			"title": "Zbyt wiele żądań",
+			"message": "Odczekaj chwilę i spróbuj ponownie."
+		},
+		"500": {
+			"title": "Błąd serwera",
+			"message": "Wystąpił wewnętrzny błąd serwera. Zgłoś ten problem."
+		},
+		"503": {
+			"title": "Usługa niedostępna",
+			"message": "Serwer nie może teraz obsłużyć żądania. Spróbuj ponownie za chwilę."
+		},
+		"default": {
+			"title": "Coś poszło nie tak",
+			"message": "Nie udało się obsłużyć żądania. Spróbuj ponownie."
+		}
+	}
 }

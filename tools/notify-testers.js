@@ -41,8 +41,8 @@ Dziękujemy za poświęcony czas!
 
 Życzymy miłego dnia,
 Zespół MeshCore Polska`;
-const invitation = { subject: SUBJECT, text: MESSAGE_TEXT };
-const INVITATIONS = { pl: invitation, en: invitation };
+const defaultInvitation = { subject: SUBJECT, text: MESSAGE_TEXT };
+const INVITATIONS = { pl: defaultInvitation, en: defaultInvitation };
 
 const EXPORT_FILENAME = 'mcmap-testers.csv';
 

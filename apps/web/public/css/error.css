@@ -1,0 +1,29 @@
+#error {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 6px;
+	min-height: 100%;
+	padding: 24px;
+	text-align: center;
+}
+
+#error h1, #error p {
+	margin: 0;
+}
+
+#error p {
+	color: var(--text-muted);
+}
+
+#error .btn {
+	margin-top: 20px;
+}
+
+#error #error__code {
+	color: var(--red-bright);
+	font-family: var(--font-mono);
+	font-size: 56px;
+	font-weight: 600;
+}

@@ -144,7 +144,7 @@ app.use('/api/v1', NodeDeletionRouter);
 
 // Error handling
 app.use((req, res) => HttpError(res, 404));
-app.use((err, req, res, _next) => HttpError(res, 500, err));
+app.use((err, req, res, _next) => HttpError(res, err.status >= 400 && err.status < 600 ? err.status : 500, err));
 
 
 // Start the server

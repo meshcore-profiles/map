@@ -1,5 +1,40 @@
 {
 	"nodesNotAvailable": "Node data is not available yet. Please try again.",
 	"radioPresetsNotAvailable": "Radio presets are not available yet. Please try again.",
-	"internalServerError": "An internal server error occurred. Please try again."
+	"internalServerError": "An internal server error occurred. Please try again.",
+	"backToMap": "Back to the map",
+	"http": {
+		"400": {
+			"title": "Bad request",
+			"message": "The server cannot process this request. Check the address and try again."
+		},
+		"403": {
+			"title": "Access denied",
+			"message": "You do not have permission to view this page."
+		},
+		"404": {
+			"title": "Page not found",
+			"message": "There is no page at this address."
+		},
+		"413": {
+			"title": "Request too large",
+			"message": "The data you sent is too large."
+		},
+		"429": {
+			"title": "Too many requests",
+			"message": "Wait a moment and try again."
+		},
+		"500": {
+			"title": "Server error",
+			"message": "An internal server error occurred. Please report this problem."
+		},
+		"503": {
+			"title": "Service unavailable",
+			"message": "The server cannot handle the request right now. Try again in a moment."
+		},
+		"default": {
+			"title": "Something went wrong",
+			"message": "The request could not be handled. Please try again."
+		}
+	}
 }
