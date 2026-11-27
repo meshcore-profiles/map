@@ -6,9 +6,6 @@
   "scripts": {
     "start": "node ."
   },
-  "allowScripts": {
-    "msgpackr-extract@3.0.7": true
-  },
   "dependencies": {
     "@sefinek/email-validator": "^3.0.0",
     "axios": "^1.21.1",
