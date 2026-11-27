@@ -4,5 +4,6 @@
 	"description_all": "Mapa węzłów MeshCore z całego świata: repeatery, room serwery, companiony i czujniki. Szukaj po nazwie i kluczu, filtruj po parametrach radiowych, sprawdź zasięg.",
 	"keywords": "meshcore, mapa meshcore, meshcore polska, map, mesh, lora, węzły meshcore, repeater meshcore",
 	"ogImageAlt": "{{brand}}: społeczność sieci mesh",
-	"webAppName": "Mapa {{brand}}"
+	"webAppName": "Mapa {{brand}}",
+	"headingSuffix": "mapa węzłów"
 }

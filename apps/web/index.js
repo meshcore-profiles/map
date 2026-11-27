@@ -18,6 +18,8 @@ import languageNegotiation from './middlewares/languageNegotiation.js';
 import { detectLanguagePrefix, isLanguageAgnosticPath } from '../../global/utils/languageResolver.js';
 import { SUPPORTED } from '../../global/services/i18n.js';
 import HttpError from './utils/httpError.js';
+import buildSeo from './utils/seo.js';
+import noindex from '../../global/middlewares/noindex.js';
 import features from './config/features.js';
 import { PROFILES_ORIGIN, FLASHER_ORIGIN } from './config/profiles.js';
 import AppLinksRouter from './routes/AppLinks.js';
@@ -52,6 +54,7 @@ const release = parseAppVersion(version);
 app.locals.v = release.version;
 app.locals.releaseDate = release.date;
 app.locals.features = features;
+app.locals.buildSeo = buildSeo;
 
 // Safe origins allowed to read this app's resources cross-origin (e.g. the flasher app loading static JS)
 const SAFE_ORIGINS = [
@@ -131,6 +134,7 @@ app.use((req, res, next) => {
 app.use(languageNegotiation);
 app.use(language);
 app.use(logger);
+app.use('/api', noindex);
 if (isProd) app.use(limiter.global);
 app.use(timeout());
 

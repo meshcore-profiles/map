@@ -1,5 +1,6 @@
 import { SITES, GITHUB_URL } from '@meshcore-map/core/sites';
 import { DELETION_EMAIL } from '@meshcore-map/core/deletion';
+import { ORGANIZATIONS } from '../../../global/utils/seo.js';
 const DISCORD_URL = 'https://meshcorepolska.org/discord';
 
 // Site data shared with the mobile app lives in packages/core/src/sites.js; this file adds what only the server and the views need.
@@ -21,7 +22,8 @@ const poland = {
 	domain: 'mapa.meshcorepolska.org',
 	telemavixPromo: true,
 	deletionEmail: DELETION_EMAIL,
-	ogImage: 'https://meshcorepolska.org/images/brand/banner-og.jpg',
+	organization: ORGANIZATIONS.pl,
+	currency: 'PLN',
 	favicon: 'https://meshcorepolska.org/favicon.ico',
 	icon512: 'https://meshcorepolska.org/images/brand/logo-3-512.jpg',
 	appleIcon: 'https://meshcorepolska.org/images/brand/logo-3-180.jpg',
@@ -40,7 +42,8 @@ const global = {
 	deletionEmail: DELETION_EMAIL,
 	crossLinks: { pl: 'https://mapa.meshcorepolska.org' },
 	shortName: 'MeshCore',
-	ogImage: 'https://meshcoreprofiles.com/images/banner.png',
+	organization: ORGANIZATIONS.global,
+	currency: 'USD',
 	favicon: '/favicon.ico',
 	faviconSvg: '/favicon.svg',
 	icon512: '/images/icon-512.png',

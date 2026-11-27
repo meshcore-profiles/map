@@ -1,40 +1,13 @@
 <!DOCTYPE html>
 <% const _curMeta = languages.find(l => l.code === languageCode) || languages[0];
 const _titleBrand = site.shortName || site.brandName;
-const _description = t('meta:description', { context: site.region }); %>
+const seo = buildSeo(locals); %>
 <html lang="<%= _curMeta.htmlLang %>" data-theme="<%= site.theme %>">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title><%= t('meta:title', { brand: _titleBrand }) %></title>
-
-	<!-- Primary meta -->
-	<meta name="description" content="<%= _description %>">
-	<meta name="keywords" content="<%= t('meta:keywords') %>">
-	<link rel="canonical" href="<%= domain + lp('/') %>">
-	<% languages.forEach(l => { %><link rel="alternate" hreflang="<%= l.code %>" href="<%= domain + langPath(l.code, '/') %>">
-	<% }); %><link rel="alternate" hreflang="x-default" href="<%= domain + langPath(defaultLanguage, '/') %>">
+	<%- include('../../../global/views/seo-head.ejs', { seo }) %>
 	<meta name="theme-color" content="<%= site.themeColor %>">
-
-	<!-- Open Graph -->
-	<meta property="og:type" content="website">
-	<meta property="og:site_name" content="<%= site.brandName %>">
-	<meta property="og:locale" content="<%= _curMeta.ogLocale %>">
-	<% languages.forEach(l => { if (l.code !== languageCode) { %><meta property="og:locale:alternate" content="<%= l.ogLocale %>"><% } }); %>
-	<meta property="og:title" content="<%= t('meta:title', { brand: _titleBrand }) %>">
-	<meta property="og:description" content="<%= _description %>">
-	<meta property="og:url" content="<%= domain + lp('/') %>">
-	<meta property="og:image" content="<%= site.ogImage %>">
-	<meta property="og:image:width" content="1200">
-	<meta property="og:image:height" content="675">
-	<meta property="og:image:alt" content="<%= t('meta:ogImageAlt', { brand: site.brandName }) %>">
-
-	<!-- Twitter / X Card -->
-	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:title" content="<%= t('meta:title', { brand: _titleBrand }) %>">
-	<meta name="twitter:description" content="<%= _description %>">
-	<meta name="twitter:image" content="<%= site.ogImage %>">
-	<meta name="twitter:image:alt" content="<%= t('meta:ogImageAlt', { brand: site.brandName }) %>">
 
 	<!-- JavaScript -->
 	<script src="https://cdn.sefinek.net/js/progressbar.js" defer></script>
@@ -55,40 +28,6 @@ const _description = t('meta:description', { context: site.region }); %>
 	<link rel="stylesheet" href="/vendor/markercluster/MarkerCluster.css">
 	<link rel="stylesheet" href="/vendor/markercluster/MarkerCluster.Default.css">
 	<%- include('partials/stylesheets.ejs', { theme: site.theme }) %>
-
-	<!-- schema.org -->
-	<script type="application/ld+json" nonce="<%= cspNonce %>">
-	<%- JSON.stringify({
-			'@context': 'https://schema.org',
-			'@graph': [
-				{
-					'@type': 'Organization',
-					'@id': `${site.brandUrl}#organization`,
-					name: site.brandName,
-					url: site.brandUrl,
-					sameAs: ['https://github.com/meshcore-profiles', site.discordUrl],
-				},
-				{
-					'@type': 'WebApplication',
-					'@id': `${domain}/#webapp`,
-					name: t('meta:webAppName', { brand: _titleBrand }),
-					description: _description,
-					url: domain + lp('/'),
-					applicationCategory: 'UtilitiesApplication',
-					operatingSystem: 'Any',
-					isPartOf: { '@id': `${domain}/#website` },
-				},
-				{
-					'@type': 'WebSite',
-					'@id': `${domain}/#website`,
-					name: t('meta:webAppName', { brand: _titleBrand }),
-					url: domain + lp('/'),
-					inLanguage: _curMeta.ogLocale.replace('_', '-'),
-					publisher: { '@id': `${site.brandUrl}#organization` },
-				},
-			],
-		}) %>
-	</script>
 </head>
 <body>
 <main id="map"></main>
@@ -105,7 +44,7 @@ const _description = t('meta:description', { context: site.region }); %>
 <header id="stats-bar">
 	<a id="brand" href="<%= site.brandUrl %>" target="_blank" rel="noopener" title="<%= site.brandName %>">
 		<% if (site.logo) { %><img src="<%= site.logo %>" alt="" width="34" height="34"><% } %>
-		<h1 id="brand-name"><%- site.brandNameHtml %></h1>
+		<h1 id="brand-name"><%- site.brandNameHtml %><span class="brand-name-suffix"> - <%= t('meta:headingSuffix') %></span></h1>
 	</a>
 	<span id="stats-divider"></span>
 	<span id="stats-counts"></span>

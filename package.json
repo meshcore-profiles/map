@@ -22,7 +22,7 @@
     "badges": "npm run badges -w apps/mobile",
     "icons": "npm run icons -w apps/mobile",
     "lint": "eslint .",
-    "m": "ncu -u --workspaces --root && npm install && npm update",
+    "m": "ncu -u --workspaces --root --reject \"react,react-native,react-native-svg,react-native-safe-area-context,expo,expo-*\" && npm install && npm update && npm run mobile:check",
     "mobile": "npm start -w apps/mobile",
     "mobile:android": "npm run android -w apps/mobile",
     "mobile:check": "npm exec -w apps/mobile -- expo install --check",
@@ -32,6 +32,9 @@
     "start": "npm start -w apps/web",
     "test": "npm test -w packages/core",
     "update": "npm run pull && npm ci --omit=dev -w apps/web -w packages/core && pm2 restart mcmap"
+  },
+  "overrides": {
+    "react": "19.3.0"
   },
   "allowScripts": {
     "@bugsnag/cli@3.10.7": true,

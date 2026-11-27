@@ -25,6 +25,7 @@ Shared verbatim by every MeshCore backend repo (`cronjobs`, `meshcoreprofiles.co
 ## Backend
 
 - Middleware order in `index.js` matters: site resolution and the language prefix come before `languageNegotiation`, which must run before `language`.
+- SEO is shared by all MeshCore sites and lives in `global`: `utils/seo.js` (`createSeo`, `ORGANIZATIONS`: the only place for organization data and JSON-LD), `views/seo-head.ejs` (the only set of title/meta/canonical/OG/Twitter/JSON-LD tags), `utils/sitemap.js`, `utils/robots.js`, `middlewares/noindex.js` (all of `/api`), plus the `middlewares/timeout.js` and `middlewares/rateLimit.js` factories. Never rebuild any of this locally. Here `apps/web/utils/seo.js` only adapts view locals. `robots.txt` (`routes/Index.js`) allows crawlers only the endpoints needed to render the map (`/api/v1/nodes`, `/api/v1/radio-presets`); a new endpoint required at startup needs its own `allow` entry.
 - The frontend never calls the upstream radio presets API directly; `/api/v1/radio-presets` reads what `cronjobs` stores in Redis.
 - `/api/v1/repeater-stats` has CORS `*` and is used by meshcorepolska.org.
 - The app builds the node deletion `mailto:` itself (`packages/core/src/deletion.js`), without the Turnstile captcha used on the web. The recipient is re-checked in `public/js/node-deletion.js`.

@@ -1,41 +1,23 @@
 import { Router } from 'express';
 import { LANGUAGES, langPath } from '../../../global/utils/languageResolver.js';
+import { createSitemap } from '../../../global/utils/sitemap.js';
+import { createRobots } from '../../../global/utils/robots.js';
 
 const router = Router();
 
 router.get('/', (req, res) => res.render('index.ejs'));
 if (process.env.NODE_ENV !== 'production') router.get('/test', (req, res) => res.render('test.ejs'));
 
-router.get('/robots.txt', (req, res) => {
-	res.type('text/plain').send([
-		'User-agent: *',
-		'Disallow: /api/',
-		'Disallow: /cdn-cgi',
-		'Disallow: /cdn-cgi/',
-		'Disallow: /.well-known',
-		'Disallow: /.well-known/',
-		'',
-		`Sitemap: https://${req.site.domain}/sitemap.xml`,
-		'',
-	].join('\n'));
-});
+router.get('/robots.txt', createRobots({ allow: ['/api/v1/nodes', '/api/v1/radio-presets'], disallow: ['/api/'] }));
 
-router.get('/sitemap.xml', (req, res) => {
-	const { domain, defaultLanguage } = req.site;
-	const lastmod = req.app.locals.releaseDate;
-	const href = code => `https://${domain}${langPath(code, '/', defaultLanguage)}`;
-	const urls = LANGUAGES.map(({ code }) => `\t<url>
-\t\t<loc>${href(code)}</loc>${lastmod ? `\n\t\t<lastmod>${lastmod}</lastmod>` : ''}
-\t</url>`).join('\n');
+router.get('/sitemap.xml', createSitemap((domain, req) => {
+	const { defaultLanguage } = req.site;
+	const href = code => langPath(code, '/', defaultLanguage);
+	const alternates = [...LANGUAGES.map(({ code }) => [code, code]), ['x-default', defaultLanguage]]
+		.map(([hreflang, code]) => ({ hreflang, href: href(code) }));
 
-	// The browser's built-in XML viewer needs inline script and style, which the global CSP blocks
-	res.removeHeader('Content-Security-Policy');
-	res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-${urls}
-</urlset>
-`);
-});
+	return LANGUAGES.map(({ code }) => ({ loc: href(code), lastmod: req.app.locals.releaseDate, alternates }));
+}));
 
 router.get('/manifest.webmanifest', (req, res) => {
 	const { site } = res.locals;

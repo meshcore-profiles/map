@@ -4,5 +4,6 @@
 	"description_all": "Worldwide map of MeshCore nodes: repeaters, room servers, companions and sensors. Search by name or key, filter by radio settings, check terrain and coverage.",
 	"keywords": "meshcore, meshcore map, meshcore node map, map, mesh, lora, meshcore nodes, meshcore repeater",
 	"ogImageAlt": "{{brand}}: a mesh network community",
-	"webAppName": "{{brand}} Map"
+	"webAppName": "{{brand}} Map",
+	"headingSuffix": "node map"
 }
