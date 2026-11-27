@@ -2,8 +2,9 @@
 	"entries": [
 		{
 			"version": "0.15.2",
-			"date": "26.11.2026",
+			"date": "27.11.2026",
 			"changes": [
+				"Dodano komunikat, gdy udostępniony węzeł został usunięty z mapy lub nie można go znaleźć.",
 				"Dodano MapTiler Hybrid do kolejności domyślnych map zapasowych: Esri Hybrid, MapTiler Hybrid, CartoDB Dark, OpenStreetMap, OpenFreeMap.",
 				"Naprawiono problem, przez który mapa MapTiler Hybrid nie działała.",
 				"Zaktualizowano zależności."

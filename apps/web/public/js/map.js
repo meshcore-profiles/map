@@ -1248,7 +1248,7 @@ map.on('moveend', () => {
 
 updateRegionToggleUI();
 
-downloadNodes(state.region).then(() => {
+downloadNodes(state.region).then(loaded => {
 	applyFilters({ silent: true });
 
 	if (sharedFilters) showToast(t('filters:sharedApplied'), { status: 'info' });
@@ -1256,6 +1256,7 @@ downloadNodes(state.region).then(() => {
 	if (urlParams.node) {
 		const node = state.nodes.find(n => n.public_key === urlParams.node);
 		if (node) showNode(node);
+		else if (loaded) showToast(t(state.region === 'all' ? 'map:linkedNodeRemoved' : 'map:linkedNodeNotInPoland'), { status: 'warning' });
 	}
 
 	if (urlParams.nodes) {

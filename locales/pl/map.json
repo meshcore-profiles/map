@@ -145,6 +145,8 @@
 		"nowych węzłów"
 	],
 	"noNodesInPeriod": "Brak węzłów w wybranym okresie.",
+	"linkedNodeRemoved": "Ten węzeł już nie istnieje. Został usunięty z mapy.",
+	"linkedNodeNotInPoland": "Nie znaleziono węzła. Mógł zostać usunięty z mapy lub znajduje się poza Polską.",
 	"showPolandOnly": "Pokaż tylko polskie węzły",
 	"showAllWorld": "Pokaż wszystkie węzły na świecie",
 	"allNodesLabel": "Wszystkie węzły",

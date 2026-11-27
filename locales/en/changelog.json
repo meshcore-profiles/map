@@ -2,8 +2,9 @@
 	"entries": [
 		{
 			"version": "0.15.2",
-			"date": "2026-11-26",
+			"date": "2026-11-27",
 			"changes": [
+				"Added a message shown when a shared node has been removed from the map or cannot be found.",
 				"Added MapTiler Hybrid to the default map fallback order: Esri Hybrid, MapTiler Hybrid, CartoDB Dark, OpenStreetMap, OpenFreeMap.",
 				"Fixed an issue that prevented the MapTiler Hybrid map from working.",
 				"Updated dependencies."

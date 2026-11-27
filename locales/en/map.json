@@ -144,6 +144,8 @@
 		"new nodes"
 	],
 	"noNodesInPeriod": "No nodes in the selected period.",
+	"linkedNodeRemoved": "This node no longer exists. It has been removed from the map.",
+	"linkedNodeNotInPoland": "Node not found. It may have been removed from the map or be located outside Poland.",
 	"showPolandOnly": "Show only Polish nodes",
 	"showAllWorld": "Show all nodes worldwide",
 	"allNodesLabel": "All nodes",
