@@ -14,6 +14,7 @@ One codebase serves two sites, chosen by request host (`apps/web/config/sites.js
 - The web release version (`x.y.z+YYYYMMDD`) lives in the root `package.json`, the app's in `apps/mobile/app.json`.
 - `.env` sits in the repo root and is documented in `.env.example`. Scripts reading environment variables import `loadEnv.js` first.
 - Production: PM2 process `mcmap` (`ecosystem.config.js`), deployed with `npm run update`.
+- `npm run indexnow` (manual, after a deploy) submits the sitemaps of both domains to IndexNow with the key file `apps/web/public/<key>.txt`; it calls an external service, so it needs explicit user authorization.
 - `tools/notify-testers.js` sends mail only with `--send`, which needs explicit user authorization.
 
 ## `global` submodule

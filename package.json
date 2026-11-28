@@ -21,6 +21,7 @@
   "scripts": {
     "badges": "npm run badges -w apps/mobile",
     "icons": "npm run icons -w apps/mobile",
+    "indexnow": "cd apps/web && node ../../global/IndexNow.js map.meshcoreprofiles.com mapa.meshcorepolska.org",
     "lint": "eslint .",
     "m": "ncu -u --workspaces --root --reject \"react,react-native,react-native-svg,react-native-safe-area-context,expo,expo-*\" && npm install && npm update && npm run mobile:check",
     "mobile": "npm start -w apps/mobile",
